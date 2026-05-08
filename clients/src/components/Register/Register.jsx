@@ -28,7 +28,7 @@ function Register() {
     console.log(data)
   }
   const password = () => {
-    if (showPass == true) {
+    if (showPass === true) {
       setShowPass(false)
     }
     else {
@@ -36,7 +36,7 @@ function Register() {
     }
   }
   const cpassword = () => {
-    if (showCpass == true) {
+    if (showCpass === true) {
       setShowCpass(false)
     }
     else {
@@ -63,7 +63,7 @@ function Register() {
   return (
     <>
 
-      <div className='register-page' style={{ "transition": "0.6s", display: loading ? "none" : "block" }} onClick={registerpageClick}>
+      <div className='register-page' style={{ transition: "0.6s", display: loading ? "none" : "block" }} onClick={registerpageClick}>
 
         <form className='container register-card' method='post'>
           <h2 className='welcome text-center'>Sign Up</h2>
@@ -96,7 +96,7 @@ function Register() {
             {/* <input className='mt-3 tick rTick' type="checkbox" onClick={cpassword} /><span className='rText pb-5'>Show Password</span> */}
             <button type='button' onClick={cpassword} className='pos text-center'>{showCpass ? "Hide" : "Show"}</button>
           </div>
-          <div class="alert alert-danger" style={{ display: errorExist ? "block" : "none" }} role="alert">
+          <div className="alert alert-danger" style={{ display: errorExist ? "block" : "none" }} role="alert">
             {response || clientsRespone}
           </div>
           <Link style={{ display: loading ? "none" : "" }} to="/register">

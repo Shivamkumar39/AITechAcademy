@@ -341,7 +341,7 @@ function Profile() {
                       <h2 style={{ fontSize: "20px" }} className='right-blog-title profile-title  mb-2'>{e.title}</h2>
                       <div className='minor-info pt-2'>
                         <div className='publishdate'>
-                          <img className='author-image' src={e.authorImage} alt='' />
+                          <img className='author-image' src={e.authorImage} alt={e.authorName || 'Author'} />
                           &nbsp;{e.authorName}
                           &nbsp;
                         </div>

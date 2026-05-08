@@ -63,12 +63,12 @@ function Bookmark() {
       </div>
       {
         bookmarks.length === 0 ? <div className='no-results'>
-          <img className='' src={noResults} />
+          <img className='' src={noResults} alt='No bookmarks found' />
           <h3 className='featured'>&nbsp;No&nbsp;<span className='backgroundColor'>&nbsp;Bookmarks&nbsp;</span></h3>
 
         </div> :
 
-          <div style={{ display: loading ? "none" : "" }} sty className='container mt-5'>
+          <div style={{ display: loading ? "none" : "" }} className='container mt-5'>
             <h3 className='featured'><span className='backgroundColor'>&nbsp;Reading </span>&nbsp;List</h3>
             {
 
@@ -78,7 +78,7 @@ function Bookmark() {
                     <a href={`/blog/${e._id}`}>
 
                       <div style={{ marginRight: "0", paddingRight: "0" }} className='blog-card'>
-                        <img className='recent-blog-img' src={e.image} alt='' />
+                        <img className='recent-blog-img' src={e.image} alt={e.title || 'Blog post'} />
                         <div className='blogInfo'>
 
                           <span className='category'>{e.category}</span>
@@ -86,7 +86,7 @@ function Bookmark() {
                           <h3 className='right-blog-title mt-2'>{e.title}</h3>
                           <a style={{ textDecoration: "none" }} href={`/profile/${e.authorid}`}>
                             <div className='minor-info'>
-                              <img className='author-image' src={e.authorImage} alt='' />
+                              <img className='author-image' src={e.authorImage} alt={e.authorName || 'Author'} />
                               <span className='publishdate'>&nbsp;&nbsp;{e.authorName}</span>
                               &nbsp;
                               <div className='icons-flex'> &nbsp;<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 small-icons">

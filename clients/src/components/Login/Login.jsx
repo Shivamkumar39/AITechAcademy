@@ -7,7 +7,7 @@ import { loginUser } from '../../apis/users'
 import Stack from '@mui/material/Stack';
 import LinearProgress from '@mui/material/LinearProgress';
 
-import axios, { Axios } from 'axios'
+import axios from 'axios'
 const defaultData = {
   email: "",
   password: ""
@@ -17,16 +17,15 @@ function Login() {
   const [response, setResponse] = useState("")
   const [errorExist, setErrorExits] = useState(false)
   const [spinner, setSpiner] = useState(false)
+  const [showPass, setShowPass] = useState(false)
   const password = () => {
-    if (showPass == true) {
+    if (showPass === true) {
       setShowPass(false)
     }
     else {
       setShowPass(true)
     }
   }
-  //  
-  const [showPass, setShowPass] = useState(false)
   const [userData, setUserData] = useState(defaultData)
   const [loading, setLoading] = useState(false)
   const change = (e) => {
@@ -68,7 +67,7 @@ function Login() {
             <input onChange={change} value={userData.password} name='password' type={showPass ? "text" : "password"} className="form-control" id="exampleInputPassword" aria-describedby="emailHelp" />
             <input className='mt-3 tick' type="checkbox" onClick={password} />Show Password
           </div>
-          <div class="alert alert-danger" style={{ "display": errorExist ? "block" : "none" }} role="alert">
+          <div className="alert alert-danger" style={{ display: errorExist ? "block" : "none" }} role="alert">
             {response}
           </div>
           <Link style={{ display: loading ? "none" : "" }} to="/login">

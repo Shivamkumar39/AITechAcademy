@@ -35,7 +35,7 @@ function Tag() {
         <h3 style={{ display: blogs.length === 0 ? "none" : "block" }} className='featured mt-5 tagHeader'>&nbsp;Result For&nbsp;<span className='backgroundColor'>&nbsp;{id}&nbsp;</span></h3>
         {
           blogs.length === 0 ? <div className='no-results'>
-            <img className='' src={noResults} />
+            <img className='' src={noResults} alt='No results found' />
             <h3 className='featured'>&nbsp;No&nbsp;<span className='backgroundColor'>&nbsp;Results&nbsp;</span></h3>
 
           </div> :

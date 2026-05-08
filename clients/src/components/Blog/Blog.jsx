@@ -152,7 +152,7 @@ function Blog() {
 
                 <div className='minor-info single-info'>
                   <a href={`/profile/${blog.authorid}`}>
-                    <img className='author-image single-blog-author' src={blog.authorImage} alt='okay' onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/80?text=User"; e.currentTarget.alt = 'okay' }} />
+                    <img className='author-image single-blog-author' src={blog.authorImage} alt={blog.authorName || 'Author image'} onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/80?text=User"; e.currentTarget.alt = blog.authorName || 'Author image' }} />
 
                   </a>
 
@@ -196,7 +196,7 @@ function Blog() {
               />
               <div className='single-blog-container'>
                 <h3 className='single-blog-title'>{blog.title}</h3>
-                <img className='single-blog-image' src={blog.image} alt="okay" onError={(e) => { e.currentTarget.src = FALLBACK_BLOG_IMAGE; e.currentTarget.alt = 'okay' }} />
+                <img className='single-blog-image' src={blog.image} alt={blog.title || 'Blog image'} onError={(e) => { e.currentTarget.src = FALLBACK_BLOG_IMAGE; e.currentTarget.alt = blog.title || 'Blog image' }} />
                 <div className='description-area' dangerouslySetInnerHTML={{ __html: blog.description }}>
 
                 </div>
@@ -253,12 +253,12 @@ function Blog() {
                           <React.Fragment key={e._id}>
                             <Link style={{ textDecoration: "none" }} to={`/blog/${e._id}`} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                               <div className='blog-card'>
-                                <img className='recent-blog-img' src={e.image} alt='okay' onError={(ev) => { ev.currentTarget.src = FALLBACK_BLOG_IMAGE; ev.currentTarget.alt = 'okay' }} />
+                                <img className='recent-blog-img' src={e.image} alt={e.title || 'Blog post'} onError={(ev) => { ev.currentTarget.src = FALLBACK_BLOG_IMAGE; ev.currentTarget.alt = e.title || 'Blog post' }} />
                                 <div className='blogInfo'>
                                   <span className='category'>{e.category}</span>
                                   <h3 className='right-blog-title mt-2'>{e.title}</h3>
                                   <div className='minor-info'>
-                                    <img className='author-image' src={e.authorImage || "https://via.placeholder.com/40?text=User"} alt='okay' onError={(ev) => { ev.currentTarget.src = "https://via.placeholder.com/40?text=User"; ev.currentTarget.alt = 'okay' }} />
+                                    <img className='author-image' src={e.authorImage || "https://via.placeholder.com/40?text=User"} alt={e.authorName || 'Author image'} onError={(ev) => { ev.currentTarget.src = "https://via.placeholder.com/40?text=User"; ev.currentTarget.alt = e.authorName || 'Author image' }} />
                                     <span className='publishdate'>&nbsp;&nbsp;{e.authorName || 'shivam_kushwaha'}</span>
                                     &nbsp;
                                     <div className='icons-flex'> &nbsp;<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 small-icons">
