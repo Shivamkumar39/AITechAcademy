@@ -186,7 +186,7 @@ function Profile() {
                         <div style={{ display: followingSpinner ? "none" : "block" }} className='main-container'>
                           <div className='following-container'>
                             <div className='imageFlex'>
-                              <img className='followingProfile' src={e.profilePic != null ? e.profilePic : defaultprofile} alt="" />
+                              <img className='followingProfile' src={e.profilePic != null ? e.profilePic : defaultprofile} alt={e.username} />
                               <div className='fflex'>
                                 <p className='fUsername'>{e.username}</p>
                                 <p className='fullName'>{e.fullname}</p>
@@ -264,7 +264,7 @@ function Profile() {
           {/* <lottie-player src="https://lottie.host/ab4067ea-52f5-4650-a706-985b58653932/KQJxSKXJu7.json" background="transparent" speed="1" style={{ width: "100px", height: "100px" }} loop autoplay></lottie-player> */}
           {/* <lottie-player src="https://assets5.lottiefiles.com/packages/lf20_a2chheio.json" background="transparent" speed="1" style={{ width: "140px", height: "140px" }} loop autoplay></lottie-player> */}
           {/* <lottie-player src="https://assets1.lottiefiles.com/packages/lf20_GppSUv.json" background="transparent" speed="1" style={{ width: "250px", height: "250px" }} loop autoplay></lottie-player> */}
-          <img style={{ width: "200px", height: "200px" }} src={loadingAnimation} alt="" />
+          <img style={{ width: "200px", height: "200px" }} src={loadingAnimation} alt="Loading animation" />
 
 
 
@@ -274,7 +274,7 @@ function Profile() {
       <div style={{ display: loading ? "none" : "block" }} className='profile-container'>
         <div className='profile-section'>
           <button style={{ userSelect: "none" }}>
-            <img className='profile-image' src={user.profilePic ? user.profilePic : defaultprofile} alt="" />
+            <img className='profile-image' src={user.profilePic ? user.profilePic : defaultprofile} alt={user.username} />
 
           </button>
           <div className='profile-info'>
@@ -336,7 +336,7 @@ function Profile() {
                   <a href={`/blog/${e._id}`}>
 
                     <div className='blog my-blog-single'>
-                      <img className='blog-image' src={e.image} alt="" />
+                      <img className='blog-image' src={e.image} alt={e.title} />
                       <p className='category my-blog-category'>{e.category}</p>
                       <h2 style={{ fontSize: "20px" }} className='right-blog-title profile-title  mb-2'>{e.title}</h2>
                       <div className='minor-info pt-2'>

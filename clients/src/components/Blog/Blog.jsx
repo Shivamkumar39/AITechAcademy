@@ -21,7 +21,7 @@ function PopularAuthors(props) {
     <>
 
       <div className='profile mb-5'>
-        <img className='top-author' src={props.popularAuthorImg} alt="" />
+        <img className='top-author' src={props.popularAuthorImg} alt={props.popularAuthorName} />
         <div className='author-info'>
           <h4 className='authorName'>{props.popularAuthorName}</h4>
           <h5 className='designation'>{props.popularAuthorDesignation}</h5>

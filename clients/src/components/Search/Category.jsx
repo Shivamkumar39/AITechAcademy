@@ -31,7 +31,7 @@ function Category(props) {
                     <span className='category'>{e.category}</span>
                     <h3 className='right-blog-title mt-2'>{e.title}</h3>
                     <div className='minor-info'>
-                      <img className='author-image' src={e.authorImage} alt='' />
+                      <img className='author-image' src={e.authorImage} alt={e.authorName} />
                       <span className='publishdate'>&nbsp;&nbsp;{e.authorName}</span>
                       &nbsp;
                       <div className='icons-flex'> &nbsp;<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 small-icons">

@@ -32,7 +32,7 @@ function Author(props) {
                 <div className='following-container mt-3'>
 
                   <div className='imageFlex'>
-                    <img className='searchProfile' src={e.profilePic} />
+                    <img className='searchProfile' src={e.profilePic} alt={e.username} />
                     <div className='fflex'>
                       <p className='searchUsername'>{e.username}</p>
                       <p className='searchFullname'>{e.fullname}</p>

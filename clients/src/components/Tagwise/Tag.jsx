@@ -27,7 +27,7 @@ function Tag() {
       <div style={{ display: loading ? "block" : "none" }} className='loading-animation'>
         <div className='loading-div'>
           {/* <lottie-player src="https://assets1.lottiefiles.com/packages/lf20_GppSUv.json" background="transparent" speed="1" style={{ width: "250px", height: "250px" }} loop autoplay></lottie-player> */}
-          <img style={{ width: "200px", height: "200px" }} src={loadingAnimation} alt="" />
+          <img style={{ width: "200px", height: "200px" }} src={loadingAnimation} alt="Loading animation" />
 
         </div>
       </div>
@@ -48,7 +48,7 @@ function Tag() {
                   <a href={`/blog/${e._id}`}>
 
                     <div style={{ marginRight: "0", paddingRight: "0" }} className='blog-card'>
-                      <img className='recent-blog-img' src={e.image} alt='' />
+                      <img className='recent-blog-img' src={e.image} alt={e.title} />
                       <div className='blogInfo'>
 
                         <span className='category'>{e.category}</span>
@@ -56,7 +56,7 @@ function Tag() {
                         <h3 className='right-blog-title mt-2'>{e.title}</h3>
                         <a style={{ textDecoration: "none" }} href={`/profile/${e.authorid}`}>
                           <div className='minor-info'>
-                            <img className='author-image' src={e.authorImage} alt='' />
+                            <img className='author-image' src={e.authorImage} alt={e.authorName} />
                             <span className='publishdate'>&nbsp;&nbsp;{e.authorName}</span>
                             &nbsp;
                             <div className='icons-flex'> &nbsp;<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 small-icons">

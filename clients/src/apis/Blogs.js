@@ -4,28 +4,28 @@ export const postBlog=async(body, token)=>{
   try {
     return await axios.post(`${url}/addBlog`, body, { headers: { Authorization: token } })
   } catch (error) {
-    console.log("error in post blog api", error)
+    // Error in post blog api
   }
 }
 export const getAdminBlogs = async (token) => {
   try {
     return await axios.get(`${url}/admin/blogs`, { headers: { Authorization: token } })
   } catch (error) {
-    console.log("error in admin blogs api", error)
+    // Error in admin blogs api
   }
 }
 export const getAdminStats = async (token) => {
   try {
     return await axios.get(`${url}/admin/stats`, { headers: { Authorization: token } })
   } catch (error) {
-    console.log("error in admin stats api", error)
+    // Error in admin stats api
   }
 }
 export const getSiteStats = async () => {
   try {
     return await axios.get(`${url}/site-stats`)
   } catch (error) {
-    console.log("error in site stats api", error)
+    // Error in site stats api
   }
 }
 export const trackSiteVisit = async () => {
@@ -44,56 +44,56 @@ export const trackSiteVisit = async () => {
       window.dispatchEvent(new CustomEvent("site-visit-updated", { detail: { increment: 1 } }))
     }
   } catch (error) {
-    console.log("error in site visit api", error)
+    // Error in site visit api
   }
 }
 export const deleteBlogById = async (id, token) => {
   try {
     return await axios.delete(`${url}/delete/blog/${id}`, { headers: { Authorization: token } })
   } catch (error) {
-    console.log("error in delete blog api", error)
+    // Error in delete blog api
   }
 }
 export const updateBlogById = async (id, body, token) => {
   try {
     return await axios.patch(`${url}/update/blog/${id}`, body, { headers: { Authorization: token } })
   } catch (error) {
-    console.log("error in update blog api", error)
+    // Error in update blog api
   }
 }
 export const getAllBlogs=async()=>{
   try {
   return await axios.get(`${url}/blogs`)
   } catch (error) {
-    console.log(error)
+    // Error
   }
 }
 export const getBlogById=async(id)=>{
   try {
     return await axios.get(`${url}/blog/${id}`)
   } catch (error) {
-    console.log(error)
+    // Error
   }
 }
 export const getAuthorBlogs=async(id)=>{
   try {
     return await axios.get(`${url}/blogsByAuthorId/${id}`)
   } catch (error) {
-    console.log(error)
+    // Error
   }
 }
 export const blogByTag=async(id)=>{
   try {
     return await axios.get(`${url}/tag/${id}`)
   } catch (error) {
-    console.log("error in blog by tag api")
+    // Error in blog by tag api
   }
 }
 export const categoryCount=async()=>{
   try {
     return await axios.get(`${url}/categorycount`)
   } catch (error) {
-    console.log("error in categorycount api")
+    // Error in categorycount api
   }
 }
 export const searchBlog=async(value)=>{

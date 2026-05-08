@@ -65,7 +65,7 @@ function EditProfile() {
       <div style={{ display: loading ? "block" : "none" }} className='loading-animation'>
         <div className='loading-div'>
 
-          <img style={{ width: "200px", height: "200px" }} src={loadingAnimation} alt="" />
+          <img style={{ width: "200px", height: "200px" }} src={loadingAnimation} alt="Loading animation" />
 
         </div>
       </div>
@@ -79,7 +79,7 @@ function EditProfile() {
               <div style={{ backgroundColor: "#313638", color: "white" }} class="card-header">Profile Picture</div>
               <div class="card-body text-center">
                 <div className='profile-pic-div'>
-                  <img style={{ objectFit: "cover" }} class="img-account-profile  mb-2" src={data.profilePic} alt="" />
+                  <img style={{ objectFit: "cover" }} class="img-account-profile  mb-2" src={data.profilePic} alt="Profile picture" />
                   <div class="small font-italic text-muted mb-4">JPG or PNG no larger than 5 MB</div>
                 </div>
                 <div className='upload-btn-div'>
