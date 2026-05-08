@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const secretKey = process.env.JWT_SECRET || "qwertyuiopasdfghjklzxcvbnmqwerty";
-const Users = require("../models/user.js");
+const Users = require("../models/User.js");
 const authentication = async (req, res, next) => {
   try {
     let token = req.headers.authorization;

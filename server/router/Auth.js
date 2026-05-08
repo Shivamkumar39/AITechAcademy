@@ -2,7 +2,7 @@ const express=require("express")
 const router=express.Router()
 const bcrypt=require('bcryptjs')
 const cookie=require('cookie-parser')
-const Users=require("../models/user.js")
+const Users=require("../models/User.js")
 const authentication=require("../middleware/Auth.js")
 
 router.post('/register',async(req,res)=>{

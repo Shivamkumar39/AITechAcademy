@@ -55,9 +55,8 @@ app.use((err, req, res, next) => {
   return res.status(500).json({ error: "Something went wrong. Please try again later." })
 })
 
-mongoConnection()
-
-const startServer = (port, retries = 10) => {
+const startServer = async (port, retries = 10) => {
+  await mongoConnection()
   const server = app.listen(port, () => {
     console.log(`Listening at Port ${port}`)
   })
