@@ -1,0 +1,42 @@
+import React from "react";
+import { Helmet } from "react-helmet-async";
+
+const SITE_NAME = "AITECHACADEMY";
+const DEFAULT_IMAGE =
+  "https://img.freepik.com/premium-vector/funny-brain-like-lamp-vector-illustration-cartoon-brain-has-idea_562381-56.jpg?w=2000";
+
+function Seo({
+  title = "AITECHACADEMY - Latest AI Tools, Education & Technology Updates",
+  description = "Get daily updates about AI tools, education, technology, coding, startups, inventions, and future innovations on AITECHACADEMY.",
+  path = "/",
+  type = "website",
+  image = DEFAULT_IMAGE,
+  keywords = "AI tools, education, coding, startups, technology news, future tech, innovations, AITECHACADEMY, Shivam Kushwaha",
+}) {
+  const siteUrl = (process.env.REACT_APP_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+  const canonicalUrl = `${siteUrl}${path}`;
+
+  return (
+    <Helmet>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta name="keywords" content={keywords} />
+      <meta name="robots" content="index,follow,max-image-preview:large" />
+      <link rel="canonical" href={canonicalUrl} />
+
+      <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:type" content={type} />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:url" content={canonicalUrl} />
+      <meta property="og:image" content={image} />
+
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={image} />
+    </Helmet>
+  );
+}
+
+export default Seo;

@@ -1,0 +1,38 @@
+.legal-page {
+  max-width: 980px;
+  margin: 2rem auto 3rem;
+  padding: 0 1rem;
+}
+
+.legal-card {
+  background: #fff;
+  border: 1px solid #e6ecec;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.legal-title {
+  font-size: 2rem;
+  color: #123633;
+  margin-bottom: 0.6rem;
+}
+
+.legal-subtitle {
+  color: #4f6462;
+  margin-bottom: 1.2rem;
+}
+
+.legal-section {
+  margin-bottom: 1rem;
+}
+
+.legal-section h2 {
+  font-size: 1.15rem;
+  color: #184744;
+  margin-bottom: 0.35rem;
+}
+
+.legal-section p {
+  color: #334645;
+  line-height: 1.65;
+}
