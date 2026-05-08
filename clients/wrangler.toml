@@ -1,0 +1,5 @@
+name = "ai-tech-academy"
+compatibility_date = "2026-05-08"
+
+[site]
+bucket = "./build"
