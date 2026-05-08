@@ -233,6 +233,18 @@
   align-items: stretch;
 }
 
+.blog-card.no-image {
+  min-height: auto;
+}
+
+.blog-card.no-image .blogInfo {
+  width: 100%;
+}
+
+.blog-card.no-image .recent-blog-img {
+  display: none;
+}
+
 .recent-blog-img {
   width: 34%;
   height: 100%;

@@ -29,11 +29,13 @@ function FeaturedBlogs({ blogs }) {
           <Link to={`/tag/${blog.category}`} className='category'>{blog.category}</Link>
           <Link to={`/blog/${blog._id}`}>
             <h2 className='title mt-2 mb-4'>{blog.title}</h2>
-            <img className='blog-image' src={blog.image} alt={blog.title || 'Blog image'} onError={(e) => { e.currentTarget.src = FALLBACK_BLOG_IMAGE }} />
+            {blog.image ? (
+              <img className='blog-image' src={blog.image} alt={blog.title || 'Blog image'} onError={(e) => { e.currentTarget.src = FALLBACK_BLOG_IMAGE }} />
+            ) : null}
           </Link>
           <div className='minor-info mt-3'>
             <Link style={{ textDecoration: 'none' }} to={`/profile/${blog.authorid}`}>
-            <img className='author-image' src={blog.authorImage} alt={blog.authorName || 'Author'} onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/80?text=User" }} />
+              <img className='author-image' src={blog.authorImage} alt={blog.authorName || 'Author'} onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/80?text=User" }} />
             </Link>
             <span className='publishdate'>{blog.authorName || 'Anonymous'}</span>
             <span className='publishdate'>| {blog.publishDate}</span>
@@ -136,7 +138,7 @@ export function RightSection({ catCount }) {
         <div className='for-add'>
           <h6 className='adTitle'>Want To Collaborate Or Suggest Something?</h6>
           <p className='adDescription'>If someone discovers any bugs or technical concerns, please notify me.</p>
-          <Link to='/profile/6356398360be867515164b63'><button className='adBtn'>Connect</button></Link>
+          <Link to='/contact-us'><button className='adBtn'>Contact</button></Link>
         </div>
       </div>
 
@@ -144,10 +146,19 @@ export function RightSection({ catCount }) {
         <h3 className='featured mt-5'><span className='backgroundColor'>&nbsp;Categories&nbsp;</span></h3>
         <table className='table table-borderless mt-4'>
           <tbody>
-            <tr className='border'><th className='categorie-title'>Technology</th><td className='text-right categorie-result'>{catCount?.technology || 0}</td></tr>
-            <tr className='border'><th className='categorie-title'>Fashion</th><td className='text-right categorie-result'>{catCount?.fashion || 0}</td></tr>
-            <tr className='border'><th className='categorie-title'>Javascript</th><td className='text-right categorie-result'>{catCount?.javascript || 0}</td></tr>
-            <tr className='border'><th className='categorie-title'>Business</th><td className='text-right categorie-result'>{catCount?.business || 0}</td></tr>
+            {Object.entries(catCount || {}).length > 0 ? (
+              Object.entries(catCount).map(([category, count]) => (
+                <tr key={category} className='border'>
+                  <th className='categorie-title'>{category}</th>
+                  <td className='text-right categorie-result'>{count || 0}</td>
+                </tr>
+              ))
+            ) : (
+              <tr className='border'>
+                <td className='categorie-title'>No categories found</td>
+                <td className='text-right categorie-result'>0</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -273,10 +284,12 @@ function Home() {
           <div className='recent-blogs'>
             {allBlogs.slice(0, 10).map((e, index) => (
               <React.Fragment key={e._id}>
-                <article className='blog-card'>
-                  <Link to={`/blog/${e._id}`}>
-                    <img className='recent-blog-img' src={e.image} alt={e.title || 'Blog'} onError={(event) => { event.currentTarget.src = FALLBACK_BLOG_IMAGE }} />
-                  </Link>
+                <article className={`blog-card${e.image ? '' : ' no-image'}`}>
+                  {e.image ? (
+                    <Link to={`/blog/${e._id}`}>
+                      <img className='recent-blog-img' src={e.image} alt={e.title || 'Blog'} onError={(event) => { event.currentTarget.src = FALLBACK_BLOG_IMAGE }} />
+                    </Link>
+                  ) : null}
                   <div className='blogInfo'>
                     <Link to={`/tag/${e.category}`} className='category'>{e.category}</Link>
                     <Link to={`/blog/${e._id}`} style={{ textDecoration: 'none' }}>

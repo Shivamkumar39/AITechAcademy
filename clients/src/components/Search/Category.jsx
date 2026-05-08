@@ -25,8 +25,8 @@ function Category(props) {
           return (
             <>
               <a href={`/blog/${e._id}`}>
-                <div className='blog-card mt-4'>
-                  <img className='recent-blog-img' src={e.image} alt='' />
+                <div className={`blog-card mt-4${e.image ? '' : ' no-image'}`}>
+                  {e.image ? <img className='recent-blog-img' src={e.image} alt='' /> : null}
                   <div className='blogInfo'>
                     <span className='category'>{e.category}</span>
                     <h3 className='right-blog-title mt-2'>{e.title}</h3>
