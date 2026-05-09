@@ -150,10 +150,14 @@ router.get("/admin/stats", authentication, async (req, res) => {
     const totalViews = await Blog.aggregate([
       { $group: { _id: null, views: { $sum: "$views" } } },
     ]);
+    const siteStats = await SiteStats.findOne({ key: "global" });
+    const blogViews = totalViews[0]?.views || 0;
+    const visits = siteStats?.totalVisits || BASE_VISITS;
+    
     res.json({
       totalBlogs,
       totalUsers,
-      totalViews: totalViews[0]?.views || 0,
+      totalViews: blogViews + visits,
     });
   } catch (error) {
     console.log(error);
@@ -168,7 +172,9 @@ router.get("/site-stats", async (req, res) => {
     if (!site) {
       site = await SiteStats.create({ key: "global", totalVisits: BASE_VISITS });
     }
-    res.json({ totalViews: totalViews[0]?.views || 0, totalVisits: site?.totalVisits || 0 });
+    const blogViews = totalViews[0]?.views || 0;
+    const visits = site?.totalVisits || BASE_VISITS;
+    res.json({ totalViews: blogViews + visits, totalVisits: visits });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to fetch site stats" });
@@ -203,6 +209,7 @@ router.patch("/site-settings", authentication, async (req, res) => {
       youtube: String(req.body.youtube || "").trim(),
       github: String(req.body.github || "").trim(),
       adsenseEnabled: Boolean(req.body.adsenseEnabled),
+      adsenseTestMode: Boolean(req.body.adsenseTestMode),
       adsensePublisherId: String(req.body.adsensePublisherId || "").trim(),
       adsenseBannerSlot: String(req.body.adsenseBannerSlot || "").trim(),
       adsenseSidebarSlot: String(req.body.adsenseSidebarSlot || "").trim(),

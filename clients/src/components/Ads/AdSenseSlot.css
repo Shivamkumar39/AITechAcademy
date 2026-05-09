@@ -1,44 +1,38 @@
+/* =============================================
+   AdSense Slot Wrapper (Production Mode)
+   ============================================= */
 .adsense-slot-wrapper {
   position: relative;
   width: 100%;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin: 1.5rem 0;
-}
-
-.adsense-slot-wrapper:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
-}
-
-.adsense-slot-wrapper::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 45%);
-  z-index: 1;
+  margin: 1rem 0;
+  box-sizing: border-box;
 }
 
 .adsense-slot-ins {
   display: block !important;
-  min-height: 100px;
+  min-height: 90px;
   width: 100% !important;
   position: relative;
   z-index: 2;
+  box-sizing: border-box;
 }
 
+/* =============================================
+   Skeleton Loading Animation
+   ============================================= */
 .adsense-slot-skeleton {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   padding: 1.25rem;
-  min-height: 100px;
-  border-radius: 16px;
+  min-height: 90px;
+  border-radius: 12px;
   background: linear-gradient(135deg, #f8fffe 0%, #f2fbfa 100%);
   overflow: hidden;
 }
@@ -62,12 +56,12 @@
 
 .adsense-slot-skeleton-top {
   width: 65%;
-  height: 18px;
+  height: 16px;
 }
 
 .adsense-slot-skeleton-line {
   width: 100%;
-  height: 12px;
+  height: 10px;
 }
 
 .adsense-slot-skeleton-line.short {
@@ -79,66 +73,167 @@
   100% { transform: translateX(100%); }
 }
 
+/* =============================================
+   Fallback (when ads are disabled)
+   ============================================= */
 .adsense-slot-fallback {
-  min-height: 100px;
+  min-height: 80px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.25rem;
-  border-radius: 16px;
-  border: 2px dashed rgba(48, 87, 84, 0.25);
+  padding: 1rem;
+  border-radius: 12px;
+  border: 2px dashed rgba(48, 87, 84, 0.2);
   background: linear-gradient(135deg, rgba(242, 251, 250, 0.9) 0%, rgba(232, 242, 242, 0.8) 100%);
   color: #305754;
-  box-shadow: inset 0 0 0 1px rgba(48, 87, 84, 0.08);
   text-align: center;
   font-weight: 600;
-  font-size: 14px;
-  transition: all 0.3s ease;
+  font-size: 13px;
+  box-sizing: border-box;
+  margin: 1rem 0;
 }
 
-.adsense-slot-fallback:hover {
-  border-color: rgba(48, 87, 84, 0.4);
-  background: linear-gradient(135deg, rgba(242, 251, 250, 1) 0%, rgba(232, 242, 242, 0.95) 100%);
+/* =============================================
+   TEST AD PLACEHOLDER STYLES
+   These make test ads clearly visible with
+   styling, slot info, and instructions.
+   ============================================= */
+.adsense-test-ad {
+  width: 100%;
+  margin: 1rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 2px solid #e8c547;
+  background: linear-gradient(135deg, #fffef5 0%, #fff9e0 50%, #fffef5 100%);
+  box-shadow: 0 4px 20px rgba(232, 197, 71, 0.15);
+  animation: adsense-test-fadein 0.4s ease-out;
 }
 
-/* Responsive Design */
+@keyframes adsense-test-fadein {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.adsense-test-ad-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  gap: 0.5rem;
+  text-align: center;
+  min-height: 120px;
+}
+
+.adsense-test-ad-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #e8c547, #d4a72c);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(232, 197, 71, 0.3);
+}
+
+.adsense-test-ad-icon {
+  color: #c9a832;
+  margin: 0.25rem 0;
+  opacity: 0.7;
+}
+
+.adsense-test-ad-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #6b5a1e;
+  margin-top: 0.15rem;
+}
+
+.adsense-test-ad-info {
+  font-size: 13px;
+  color: #8a7b3f;
+  font-weight: 500;
+}
+
+.adsense-test-ad-info code {
+  background: rgba(232, 197, 71, 0.2);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  color: #6b5a1e;
+  word-break: break-all;
+}
+
+.adsense-test-ad-meta {
+  font-size: 11px;
+  color: #a89a4f;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.adsense-test-ad-meta code {
+  background: rgba(232, 197, 71, 0.15);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-family: 'Courier New', monospace;
+  color: #6b5a1e;
+}
+
+.adsense-test-ad-env {
+  display: inline-block;
+  background: #2c7a2e;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-top: 0.15rem;
+}
+
+.adsense-test-ad-hint {
+  font-size: 11px;
+  color: #9a8b40;
+  line-height: 1.5;
+  max-width: 360px;
+  margin-top: 0.35rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(200, 180, 60, 0.3);
+}
+
+.adsense-test-ad-hint strong {
+  color: #6b5a1e;
+}
+
+/* =============================================
+   Responsive Design - Tablet
+   ============================================= */
 @media screen and (max-width: 768px) {
-  .adsense-slot-wrapper {
-    border-radius: 12px;
-    margin: 1rem 0;
-  }
-
-  .adsense-slot-ins {
-    min-height: 80px;
-  }
-
-  .adsense-slot-skeleton {
-    padding: 1rem;
-    min-height: 80px;
-  }
-
-  .adsense-slot-fallback {
-    padding: 1rem;
-    min-height: 80px;
-    border-radius: 12px;
-    font-size: 13px;
-  }
-}
-
-@media screen and (max-width: 480px) {
   .adsense-slot-wrapper {
     border-radius: 10px;
     margin: 0.75rem 0;
   }
 
   .adsense-slot-ins {
-    min-height: 60px;
+    min-height: 70px;
   }
 
   .adsense-slot-skeleton {
-    padding: 0.75rem;
-    min-height: 60px;
+    padding: 1rem;
+    min-height: 70px;
   }
 
   .adsense-slot-fallback {
@@ -147,5 +242,81 @@
     border-radius: 10px;
     font-size: 12px;
   }
+
+  .adsense-test-ad-inner {
+    padding: 1.25rem 0.75rem;
+    min-height: 100px;
+  }
+
+  .adsense-test-ad-label {
+    font-size: 14px;
+  }
+
+  .adsense-test-ad-hint {
+    font-size: 10px;
+  }
 }
 
+/* =============================================
+   Responsive Design - Mobile
+   ============================================= */
+@media screen and (max-width: 480px) {
+  .adsense-slot-wrapper {
+    border-radius: 8px;
+    margin: 0.5rem 0;
+  }
+
+  .adsense-slot-ins {
+    min-height: 50px;
+  }
+
+  .adsense-slot-skeleton {
+    padding: 0.75rem;
+    min-height: 50px;
+  }
+
+  .adsense-slot-fallback {
+    padding: 0.5rem;
+    min-height: 50px;
+    border-radius: 8px;
+    font-size: 11px;
+  }
+
+  .adsense-test-ad {
+    border-radius: 8px;
+    margin: 0.5rem 0;
+  }
+
+  .adsense-test-ad-inner {
+    padding: 1rem 0.5rem;
+    gap: 0.35rem;
+    min-height: 80px;
+  }
+
+  .adsense-test-ad-badge {
+    font-size: 10px;
+    padding: 3px 10px;
+  }
+
+  .adsense-test-ad-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .adsense-test-ad-label {
+    font-size: 13px;
+  }
+
+  .adsense-test-ad-info {
+    font-size: 11px;
+  }
+
+  .adsense-test-ad-meta {
+    font-size: 10px;
+  }
+
+  .adsense-test-ad-hint {
+    font-size: 9px;
+    max-width: 100%;
+  }
+}

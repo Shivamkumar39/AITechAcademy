@@ -19,7 +19,8 @@ const defaults = {
   adsenseSidebarSlot: "",
   adsenseInfeedSlot: "",
   adsenseInArticleSlot: "",
-  adsenseFooterSlot: ""
+  adsenseFooterSlot: "",
+  adsenseTestMode: false
 };
 
 export function getSiteSettings() {

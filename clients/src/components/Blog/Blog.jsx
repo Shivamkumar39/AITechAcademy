@@ -12,6 +12,7 @@ import Navbar from '../Navbar/Navbar';
 import Share from '../AdditionalPages/Share';
 import loadingAnimation from "../../assets/loading.gif"
 import AdSenseSlot from '../Ads/AdSenseSlot'
+import AdBanner from '../Ads/AdBanner'
 import { getGuestId, useSiteSettings } from '../../utils/siteSettings'
 
 function PopularAuthors(props) {
@@ -226,11 +227,7 @@ function Blog() {
                   &nbsp;
                 </div>
               </div>
-              <AdSenseSlot
-                className='ads-blog-header-slot'
-                slot={settings.adsenseBannerSlot}
-                fallbackText='Ad Slot'
-              />
+              <AdBanner className='ads-blog-header-slot' />
               <div className='single-blog-container'>
                 <h3 className='single-blog-title'>{blog.title}</h3>
                 <img className='single-blog-image' src={blog.image} alt={blog.title || 'Blog image'} onError={(e) => { e.currentTarget.src = FALLBACK_BLOG_IMAGE; e.currentTarget.alt = blog.title || 'Blog image' }} />

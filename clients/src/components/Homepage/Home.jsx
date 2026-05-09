@@ -13,6 +13,7 @@ import Navbar from '../Navbar/Navbar'
 import Seo from '../SEO/Seo'
 import StructuredData from '../SEO/StructuredData'
 import AdSenseSlot from '../Ads/AdSenseSlot'
+import AdBanner from '../Ads/AdBanner'
 import { useSiteSettings } from '../../utils/siteSettings'
 
 const url = process.env.REACT_APP_API_URL || "http://localhost:8000"
@@ -249,11 +250,7 @@ function Home() {
 
       <div style={{ display: loading ? 'none' : '' }} className='container-fluid homepage'>
         <section className='left-section'>
-          <AdSenseSlot
-            className='ads-banner-slot'
-            slot={settings.adsenseBannerSlot}
-            fallbackText='Banner Ad Slot (Google AdSense)'
-          />
+          <AdBanner className='ads-banner-slot' />
           <h3 className='featured'><span className='backgroundColor'>&nbsp;Featured </span>&nbsp;This Week</h3>
           <FeaturedBlogs blogs={allBlogs} />
           <AdSenseSlot

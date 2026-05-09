@@ -25,8 +25,8 @@ import ContactUs from './components/Legal/ContactUs';
 import Disclaimer from './components/Legal/Disclaimer';
 import Footer from './components/Footer/Footer';
 import { trackSiteVisit } from './apis/Blogs';
-import { getSiteSettings, loadSiteSettings } from './utils/siteSettings';
 import CookieConsent from './components/Common/CookieConsent';
+import { useSiteSettings } from './utils/siteSettings';
 
 
 
@@ -66,21 +66,23 @@ function AppRoutes() {
 }
 
 function App() {
+  const settings = useSiteSettings();
+
   useEffect(() => {
-    const init = async () => {
-      const settings = await loadSiteSettings();
-      const client = settings?.adsensePublisherId?.trim();
-      if (!settings?.adsenseEnabled || !client) return;
-      if (document.getElementById("adsense-script")) return;
-      const script = document.createElement("script");
-      script.id = "adsense-script";
-      script.async = true;
-      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
-      script.crossOrigin = "anonymous";
-      document.head.appendChild(script);
-    };
-    init();
-  }, []);
+    if (settings.adsenseEnabled && settings.adsensePublisherId?.trim()) {
+      if (!document.getElementById("adsense-script")) {
+        const script = document.createElement("script");
+        script.id = "adsense-script";
+        script.async = true;
+        script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${settings.adsensePublisherId.trim()}`;
+        script.crossOrigin = "anonymous";
+        document.head.appendChild(script);
+        script.addEventListener("error", () => {
+          console.log("Adsense script failed to load.");
+        });
+      }
+    }
+  }, [settings.adsenseEnabled, settings.adsensePublisherId]);
  
   return (
     <Router>

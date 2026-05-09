@@ -58,19 +58,19 @@ function AdminDashboard() {
       console.error(err)
     }
   }
-  const saveSocial = async () => {
+  const saveSocial = async (sectionName = "Settings") => {
     try {
       const res = await updateSiteSettings(social, token)
       if (res?.data?.settings) {
         setSocial(res.data.settings)
         saveSiteSettings(res.data.settings)
-        alert("Social links updated")
+        alert(`${sectionName} updated successfully`)
       } else {
-        alert("Unable to save social links")
+        alert(`Unable to save ${sectionName.toLowerCase()}`)
       }
     } catch (err) {
       console.error(err)
-      alert("Unable to save social links")
+      alert(`Unable to save ${sectionName.toLowerCase()}`)
     }
   }
 
@@ -128,7 +128,7 @@ function AdminDashboard() {
             <input className='admin-input' placeholder='e.g., aitechacademy.online' value={social.websiteDomain || ''} onChange={(e) => setSocial({ ...social, websiteDomain: e.target.value })} />
             <div className='admin-ad-description'>Used in copyright footer text.</div>
           </div>
-          <button className='admin-add-btn' onClick={saveSocial}>Save Website Branding</button>
+          <button className='admin-add-btn' onClick={() => saveSocial("Website Branding")}>Save Website Branding</button>
         </div>
         <div className='admin-blog-list' style={{ marginBottom: '20px' }}>
           <h2>Social Media Links (with Icons in Footer & Navbar)</h2>
@@ -139,7 +139,7 @@ function AdminDashboard() {
           <input className='admin-input' placeholder='YouTube URL' value={social.youtube || ''} onChange={(e) => setSocial({ ...social, youtube: e.target.value })} />
           <input className='admin-input' placeholder='GitHub URL' value={social.github || ''} onChange={(e) => setSocial({ ...social, github: e.target.value })} />
           <div className='admin-ad-description'>Social media icons will display in footer and navbar when URLs are provided.</div>
-          <button className='admin-add-btn' onClick={saveSocial}>Save Social Links</button>
+          <button className='admin-add-btn' onClick={() => saveSocial("Social Links")}>Save Social Links</button>
         </div>
         <div className='admin-blog-list' style={{ marginBottom: '20px' }}>
           <h2>Google AdSense Settings</h2>
@@ -151,6 +151,14 @@ function AdminDashboard() {
               onChange={(e) => setSocial({ ...social, adsenseEnabled: e.target.checked })}
             />
             Enable AdSense Ads
+          </label>
+          <label className='admin-check' style={{ marginTop: '10px' }}>
+            <input
+              type="checkbox"
+              checked={Boolean(social.adsenseTestMode)}
+              onChange={(e) => setSocial({ ...social, adsenseTestMode: e.target.checked })}
+            />
+            Enable AdSense Test Mode (Forces visible placeholders if ads are unfilled)
           </label>
           <div className='admin-field-group'>
             <label className='admin-label'>Publisher ID (Client)</label>
@@ -182,7 +190,7 @@ function AdminDashboard() {
             <input className='admin-input' placeholder='Footer / bottom-of-page ad slot' value={social.adsenseFooterSlot || ''} onChange={(e) => setSocial({ ...social, adsenseFooterSlot: e.target.value })} />
             <div className='admin-ad-description'>Rendered on page footer when available.</div>
           </div>
-          <button className='admin-add-btn' onClick={saveSocial}>Save AdSense Settings</button>
+          <button className='admin-add-btn' onClick={() => saveSocial("AdSense Settings")}>Save AdSense Settings</button>
         </div>
         <div className='admin-blog-list'>
           <h2>All Articles</h2>

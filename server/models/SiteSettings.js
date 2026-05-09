@@ -18,6 +18,7 @@ const siteSettingsSchema = new mongoose.Schema(
     adsenseInfeedSlot: { type: String, trim: true, default: "" },
     adsenseInArticleSlot: { type: String, trim: true, default: "" },
     adsenseFooterSlot: { type: String, trim: true, default: "" },
+    adsenseTestMode: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
