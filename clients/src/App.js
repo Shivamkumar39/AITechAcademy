@@ -25,7 +25,7 @@ import ContactUs from './components/Legal/ContactUs';
 import Disclaimer from './components/Legal/Disclaimer';
 import Footer from './components/Footer/Footer';
 import { trackSiteVisit } from './apis/Blogs';
-import { getSiteSettings } from './utils/siteSettings';
+import { getSiteSettings, loadSiteSettings } from './utils/siteSettings';
 import CookieConsent from './components/Common/CookieConsent';
 
 
@@ -67,16 +67,19 @@ function AppRoutes() {
 
 function App() {
   useEffect(() => {
-    const settings = getSiteSettings();
-    const client = settings?.adsensePublisherId?.trim();
-    if (!settings?.adsenseEnabled || !client) return;
-    if (document.getElementById("adsense-script")) return;
-    const script = document.createElement("script");
-    script.id = "adsense-script";
-    script.async = true;
-    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
-    script.crossOrigin = "anonymous";
-    document.head.appendChild(script);
+    const init = async () => {
+      const settings = await loadSiteSettings();
+      const client = settings?.adsensePublisherId?.trim();
+      if (!settings?.adsenseEnabled || !client) return;
+      if (document.getElementById("adsense-script")) return;
+      const script = document.createElement("script");
+      script.id = "adsense-script";
+      script.async = true;
+      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
+      script.crossOrigin = "anonymous";
+      document.head.appendChild(script);
+    };
+    init();
   }, []);
  
   return (

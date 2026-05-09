@@ -151,4 +151,28 @@ export const unlikeBlog=async(id,body)=>{
   } catch (error) {
     console.log("error in like api "+error)
   }
+}
+
+export const addComment = async (id, body) => {
+  try {
+    return await axios.patch(`${url}/comment/${id}`, body)
+  } catch (error) {
+    console.log("error in add comment api", error)
   }
+}
+
+export const getSiteSettings = async () => {
+  try {
+    return await axios.get(`${url}/site-settings`)
+  } catch (error) {
+    console.log("error in get site settings api", error)
+  }
+}
+
+export const updateSiteSettings = async (body, token) => {
+  try {
+    return await axios.patch(`${url}/site-settings`, body, { headers: { Authorization: token } })
+  } catch (error) {
+    console.log("error in update site settings api", error)
+  }
+}

@@ -10,13 +10,13 @@ import { IconContext } from 'react-icons';
 import { LoginContext } from '../../contextProvider/Context';
 import defaultimage from '../../assets/defaultprofile.png';
 import axios from 'axios';
-import { getSiteSettings } from '../../utils/siteSettings';
+import { useSiteSettings } from '../../utils/siteSettings';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 function Navbar() {
   const [sidebar, setSidebar] = useState(false);
-  const [social, setSocial] = useState(getSiteSettings());
+  const social = useSiteSettings();
   const { loginData, setLoginData } = useContext(LoginContext);
   const navigate = useNavigate();
 
@@ -54,11 +54,6 @@ function Navbar() {
 
   useEffect(() => {
     homeValid();
-    const refreshSettings = () => setSocial(getSiteSettings());
-    window.addEventListener('site-settings-updated', refreshSettings);
-    return () => {
-      window.removeEventListener('site-settings-updated', refreshSettings);
-    };
   }, []);
 
   return (

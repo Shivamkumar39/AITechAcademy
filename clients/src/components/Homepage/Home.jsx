@@ -13,7 +13,7 @@ import Navbar from '../Navbar/Navbar'
 import Seo from '../SEO/Seo'
 import StructuredData from '../SEO/StructuredData'
 import AdSenseSlot from '../Ads/AdSenseSlot'
-import { getSiteSettings } from '../../utils/siteSettings'
+import { useSiteSettings } from '../../utils/siteSettings'
 
 const url = process.env.REACT_APP_API_URL || "http://localhost:8000"
 const FALLBACK_BLOG_IMAGE = "https://via.placeholder.com/1200x700?text=AITECHACADEMY"
@@ -178,7 +178,7 @@ function Home() {
   const [loading, setLoading] = useState(false)
   const [catCount, setCatCount] = useState({})
   const { setLoginData } = useContext(LoginContext)
-  const settings = getSiteSettings()
+  const settings = useSiteSettings()
 
   const homeSchema = useMemo(() => ({
     "@context": "https://schema.org",

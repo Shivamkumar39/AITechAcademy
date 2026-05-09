@@ -5,6 +5,7 @@ const text = require("html-to-text");
 const request = require("request");
 const Users = require("../models/User.js");
 const SiteStats = require("../models/SiteStats.js");
+const SiteSettings = require("../models/SiteSettings.js");
 const BASE_VISITS = 1010;
 const authentication = require("../middleware/Auth.js");
 const monthNames = [
@@ -174,6 +175,53 @@ router.get("/site-stats", async (req, res) => {
   }
 });
 
+router.get("/site-settings", async (req, res) => {
+  try {
+    let settings = await SiteSettings.findOne({ key: "global" });
+    if (!settings) {
+      settings = await SiteSettings.create({ key: "global" });
+    }
+    res.json({ settings });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to fetch site settings" });
+  }
+});
+
+router.patch("/site-settings", authentication, async (req, res) => {
+  if (!req.rootUser || req.rootUser.role !== "admin") {
+    return res.status(403).json({ error: "Admin only" });
+  }
+  try {
+    const payload = {
+      websiteName: String(req.body.websiteName || "").trim(),
+      websiteDomain: String(req.body.websiteDomain || "").trim(),
+      facebook: String(req.body.facebook || "").trim(),
+      instagram: String(req.body.instagram || "").trim(),
+      twitter: String(req.body.twitter || "").trim(),
+      linkedin: String(req.body.linkedin || "").trim(),
+      youtube: String(req.body.youtube || "").trim(),
+      github: String(req.body.github || "").trim(),
+      adsenseEnabled: Boolean(req.body.adsenseEnabled),
+      adsensePublisherId: String(req.body.adsensePublisherId || "").trim(),
+      adsenseBannerSlot: String(req.body.adsenseBannerSlot || "").trim(),
+      adsenseSidebarSlot: String(req.body.adsenseSidebarSlot || "").trim(),
+      adsenseInfeedSlot: String(req.body.adsenseInfeedSlot || "").trim(),
+      adsenseInArticleSlot: String(req.body.adsenseInArticleSlot || "").trim(),
+      adsenseFooterSlot: String(req.body.adsenseFooterSlot || "").trim(),
+    };
+    const settings = await SiteSettings.findOneAndUpdate(
+      { key: "global" },
+      { $set: payload },
+      { upsert: true, new: true }
+    );
+    res.json({ settings });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to save site settings" });
+  }
+});
+
 router.post("/site-visit", async (req, res) => {
   try {
     const site = await SiteStats.findOneAndUpdate(
@@ -315,7 +363,7 @@ router.patch("/unbookmark/:id", async (req, res) => {
 });
 router.patch("/like/:id", async (req, res) => {
   const { id } = req.params;
-  const { userId } = req.body;
+  const userId = String(req.body.userId || "anonymous");
   const blog = await Blog.findOne({ _id: id });
   if (blog) {
     if (!blog.likes.includes(userId)) {
@@ -330,7 +378,7 @@ router.patch("/like/:id", async (req, res) => {
 });
 router.patch("/unlike/:id", async (req, res) => {
   const { id } = req.params;
-  const { userId } = req.body;
+  const userId = String(req.body.userId || "anonymous");
   const blog = await Blog.findOne({ _id: id });
   if (blog) {
     if (blog.likes.includes(userId)) {
@@ -341,6 +389,29 @@ router.patch("/unlike/:id", async (req, res) => {
     }
   } else {
     res.json("No blogs found");
+  }
+});
+router.patch("/comment/:id", async (req, res) => {
+  const { id } = req.params;
+  const { userId, info } = req.body;
+  if (!info || !info.toString().trim()) {
+    return res.status(400).json({ error: "Comment text is required" });
+  }
+  const blog = await Blog.findOne({ _id: id });
+  if (!blog) {
+    return res.status(404).json({ error: "Blog not found" });
+  }
+  const comment = {
+    userId: String(userId || "anonymous"),
+    info: String(info).trim(),
+    blogId: String(id),
+  };
+  try {
+    await blog.updateOne({ $push: { comments: comment } });
+    res.json({ message: "Comment added", comment });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to add comment" });
   }
 });
 router.patch("/test", (req, res) => {

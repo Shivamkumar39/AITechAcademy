@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { LoginContext } from '../../contextProvider/Context'
-import { getAdminBlogs, getAdminStats, deleteBlogById } from '../../apis/Blogs'
+import { getAdminBlogs, getAdminStats, deleteBlogById, getSiteSettings as fetchSiteSettings, updateSiteSettings } from '../../apis/Blogs'
 import Navbar from '../Navbar/Navbar'
 import './AdminDashboard.css'
 import { getSiteSettings, saveSiteSettings } from '../../utils/siteSettings'
@@ -26,6 +26,7 @@ function AdminDashboard() {
     try {
       const statsRes = await getAdminStats(token)
       const blogsRes = await getAdminBlogs(token)
+      const settingsRes = await fetchSiteSettings().catch(() => null)
       if (statsRes?.data) setStats(statsRes.data)
       if (blogsRes?.data?.blogs) {
         const sortedBlogs = [...blogsRes.data.blogs].sort((a, b) => {
@@ -34,6 +35,10 @@ function AdminDashboard() {
           return bDate - aDate
         })
         setBlogs(sortedBlogs)
+      }
+      if (settingsRes?.data?.settings) {
+        setSocial(settingsRes.data.settings)
+        saveSiteSettings(settingsRes.data.settings)
       }
       if (statsRes?.data?.error || blogsRes?.data?.error) {
         setError(statsRes?.data?.error || blogsRes?.data?.error)
@@ -53,9 +58,20 @@ function AdminDashboard() {
       console.error(err)
     }
   }
-  const saveSocial = () => {
-    saveSiteSettings(social)
-    alert("Social links updated")
+  const saveSocial = async () => {
+    try {
+      const res = await updateSiteSettings(social, token)
+      if (res?.data?.settings) {
+        setSocial(res.data.settings)
+        saveSiteSettings(res.data.settings)
+        alert("Social links updated")
+      } else {
+        alert("Unable to save social links")
+      }
+    } catch (err) {
+      console.error(err)
+      alert("Unable to save social links")
+    }
   }
 
   useEffect(() => {

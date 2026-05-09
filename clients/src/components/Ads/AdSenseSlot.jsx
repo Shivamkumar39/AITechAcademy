@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { getSiteSettings } from "../../utils/siteSettings";
+import { useSiteSettings } from "../../utils/siteSettings";
 import "./AdSenseSlot.css";
 
 export default function AdSenseSlot({ slot = "", className = "", fallbackText = "Ad Slot", showFallback = false }) {
-  const settings = getSiteSettings();
+  const settings = useSiteSettings();
   const enabled = Boolean(settings.adsenseEnabled);
   const clientId = settings.adsensePublisherId?.trim();
   const slotId = slot?.trim();

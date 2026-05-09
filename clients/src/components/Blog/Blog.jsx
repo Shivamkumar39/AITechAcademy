@@ -5,14 +5,14 @@ import { AiOutlineShareAlt, AiOutlineLike, AiFillLike } from 'react-icons/ai';
 import { VscComment } from "react-icons/vsc"
 import { MdOutlineBookmarkAdd, MdOutlineBookmark } from "react-icons/md"
 import { Link, useParams } from "react-router-dom"
-import { bookmark, getAllBlogs, getBlogById, likeBlog, unbookmark, unlikeBlog } from "../../apis/Blogs.js"
+import { bookmark, getAllBlogs, getBlogById, likeBlog, unbookmark, unlikeBlog, addComment } from "../../apis/Blogs.js"
 import { LoginContext } from '../../contextProvider/Context';
 import { RightSection } from "../Homepage/Home.jsx"
 import Navbar from '../Navbar/Navbar';
 import Share from '../AdditionalPages/Share';
 import loadingAnimation from "../../assets/loading.gif"
 import AdSenseSlot from '../Ads/AdSenseSlot'
-import { getSiteSettings } from '../../utils/siteSettings'
+import { getGuestId, useSiteSettings } from '../../utils/siteSettings'
 
 function PopularAuthors(props) {
 
@@ -41,10 +41,14 @@ function Blog() {
   const [bookmarkSet, setBookmark] = useState(false)
   const [liked, setLiked] = useState(false)
   const [likes, setLikes] = useState([])
+  const [commentText, setCommentText] = useState("")
   const [loading, setLoading] = useState(false)
+  const [submittingComment, setSubmittingComment] = useState(false)
   const [showApp, setShowApp] = useState(false)
   const [showCopy, setShowCopy] = useState(false)
-  const settings = getSiteSettings()
+  const [commentSuccess, setCommentSuccess] = useState(false)
+  const settings = useSiteSettings()
+  const guestId = getGuestId()
 
   const getRecent = async () => {
     const res = await getAllBlogs()
@@ -65,41 +69,73 @@ function Blog() {
   }
   const checkLogin = () => {
     if (!loginData || !loginData._id) {
-      alert("Please login first to perform this action")
-      window.location.href = "/login"
       return false
     }
     return true
   }
 
   const bookmarkBlog = async () => {
-    if (!checkLogin()) return
+    if (!checkLogin()) {
+      alert("Please login first to bookmark this article")
+      window.location.href = "/login"
+      return
+    }
     await bookmark(id, { userId: loginData._id })
     setBookmark(true)
   }
   const unbookmarkBlog = async () => {
-    if (!checkLogin()) return
+    if (!checkLogin()) {
+      alert("Please login first to manage bookmarks")
+      window.location.href = "/login"
+      return
+    }
     await unbookmark(id, { userId: loginData._id })
     setBookmark(false)
   }
   const like = async () => {
-    if (!checkLogin()) return
-    await likeBlog(id, { userId: loginData._id })
+    await likeBlog(id, { userId: loginData?._id || guestId })
     setLiked(true)
     getBlog()
   }
   const unlike = async () => {
-    if (!checkLogin()) return
-    await unlikeBlog(id, { userId: loginData._id })
+    await unlikeBlog(id, { userId: loginData?._id || guestId })
     setLiked(false)
     getBlog()
   }
+  const submitComment = async () => {
+    if (!commentText.trim()) {
+      alert("Enter a comment before posting")
+      return
+    }
+    setSubmittingComment(true)
+    try {
+      const newComment = {
+        userId: loginData?._id || guestId,
+        info: commentText.trim(),
+        blogId: id,
+      }
+      await addComment(id, { userId: newComment.userId, info: newComment.info })
+      
+      // Optimistic update
+      setBlog((prevBlog) => ({
+        ...prevBlog,
+        comments: [...(prevBlog.comments || []), newComment],
+      }))
+      
+      setCommentText("")
+      setCommentSuccess(true)
+      setTimeout(() => setCommentSuccess(false), 3000)
+    } catch (error) {
+      console.error("Failed to add comment:", error)
+      alert("Failed to post comment. Please try again.")
+    } finally {
+      setSubmittingComment(false)
+    }
+  }
   const shareToApps = () => {
-    if (!checkLogin()) return
     if (showApp === false) {
       setShowApp(true)
-    }
-    else {
+    } else {
       setShowApp(false)
     }
   }
@@ -122,9 +158,10 @@ function Blog() {
   useEffect(() => {
     const isBookmarked = !!loginData?.bookmarks?.includes(blog?._id)
     setBookmark(isBookmarked)
-    const isLiked = !!blog?.likes?.includes(loginData?._id)
+    const currentUserId = loginData?._id || guestId
+    const isLiked = !!blog?.likes?.includes(currentUserId)
     setLiked(isLiked)
-  }, [blog, loginData])
+  }, [blog, loginData, guestId])
 
   if (loading || !blog) {
     return (
@@ -294,7 +331,54 @@ function Blog() {
                 </div>
               </div>
               <div className='comment-section'>
-                <h3>{blog?.comments?.length || 0} Comment{(blog?.comments?.length || 0) === 1 ? '' : 's'}</h3>
+                <h3 className='comments-heading'>{blog?.comments?.length || 0} Comment{(blog?.comments?.length || 0) === 1 ? '' : 's'}</h3>
+                <div className='comment-form-wrapper'>
+                  <div className='comment-form'>
+                    <textarea
+                      className='comment-textarea'
+                      placeholder='Share your thoughts on this article...'
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      disabled={submittingComment}
+                      maxLength={500}
+                    />
+                    <div className='comment-form-footer'>
+                      <span className='comment-char-count'>{commentText.length}/500</span>
+                      <button 
+                        className='comment-submit' 
+                        onClick={submitComment}
+                        disabled={submittingComment || !commentText.trim()}
+                      >
+                        {submittingComment ? '✓ Posting...' : '✓ Post Comment'}
+                      </button>
+                    </div>
+                    {commentSuccess && (
+                      <div className='comment-success-msg'>✓ Comment posted successfully!</div>
+                    )}
+                  </div>
+                </div>
+                <div className='comment-list'>
+                  {blog?.comments && blog.comments.length > 0 ? (
+                    blog.comments.map((comment, index) => (
+                      <div key={`${comment.blogId}-${index}`} className='comment-item'>
+                        <div className='comment-avatar'>
+                          {(comment.userId === loginData?._id ? 'You' : comment.userId || 'Visitor').charAt(0).toUpperCase()}
+                        </div>
+                        <div className='comment-body'>
+                          <div className='comment-header'>
+                            <strong className='comment-author'>{comment.userId === loginData?._id ? 'You' : comment.userId || 'Visitor'}</strong>
+                            <span className='comment-index'>#{index + 1}</span>
+                          </div>
+                          <p className='comment-text'>{comment.info}</p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className='no-comments'>
+                      <p>No comments yet. Be the first to share your thoughts!</p>
+                    </div>
+                  )}
+                </div>
               </div>
               <AdSenseSlot
                 className='ads-blog-footer-slot'

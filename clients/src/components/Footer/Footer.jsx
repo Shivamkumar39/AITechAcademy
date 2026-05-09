@@ -1,11 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "./Footer.css";
-import { getSiteSettings } from "../../utils/siteSettings";
+import { useSiteSettings } from "../../utils/siteSettings";
 import { FaFacebook, FaInstagram, FaTwitter, FaLinkedin, FaYoutube, FaGithub } from "react-icons/fa";
 
 export default function Footer() {
-  const social = getSiteSettings();
+  const social = useSiteSettings();
 
   return (
     <footer className="site-footer">
