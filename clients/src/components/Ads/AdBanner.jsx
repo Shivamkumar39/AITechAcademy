@@ -13,7 +13,7 @@ export default function AdBanner({ className = "", fallbackText = "Advertisement
   const enabled = Boolean(settings.adsenseEnabled);
   const testMode = Boolean(settings.adsenseTestMode);
 
-  const IS_DEVELOPMENT = process.env.REACT_APP_ENV === "development" || process.env.NODE_ENV === "development";
+  const IS_DEVELOPMENT = process.env.NODE_ENV === "development";
 
   // If neither adsense nor test mode is enabled and not in dev, render nothing
   if (!enabled && !testMode && !IS_DEVELOPMENT) {

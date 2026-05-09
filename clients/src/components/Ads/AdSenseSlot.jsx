@@ -16,7 +16,7 @@ import "./AdSenseSlot.css";
  * On localhost, real Google ads will NOT load at all (Google blocks them).
  * So in development mode, we show clearly labeled test placeholders instead.
  */
-const IS_DEVELOPMENT = process.env.REACT_APP_ENV === "development" || process.env.NODE_ENV === "development";
+const IS_DEVELOPMENT = process.env.NODE_ENV === "development";
 
 export default function AdSenseSlot({
   slot = "",
