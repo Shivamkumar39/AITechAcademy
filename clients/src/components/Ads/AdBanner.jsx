@@ -33,6 +33,7 @@ export default function AdBanner({ className = "", fallbackText = "Advertisement
         fallbackText={fallbackText}
         showFallback
         format="auto"
+        minHeight="100px"
       />
     </div>
   );

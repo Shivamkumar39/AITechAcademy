@@ -6,15 +6,6 @@ import "./AdSenseSlot.css";
  * Google's official web AdSense test publisher ID and slot.
  * In development mode, these are used so you can verify ad placements
  * without needing real AdSense approval.
- *
- * NOTE: Google does NOT provide official "test" ad unit IDs for web AdSense
- * the way they do for AdMob (mobile apps). For web, the correct approach is:
- * - Use `data-adtest="on"` attribute on the <ins> tag
- * - This tells Google to serve non-billable test ads
- * - Test ads only show on domains registered in your AdSense account
- *
- * On localhost, real Google ads will NOT load at all (Google blocks them).
- * So in development mode, we show clearly labeled test placeholders instead.
  */
 const IS_DEVELOPMENT = process.env.NODE_ENV === "development";
 
@@ -26,6 +17,7 @@ export default function AdSenseSlot({
   format = "auto",
   layout = "",
   layoutKey = "",
+  minHeight = "250px", // Default minHeight to prevent CLS
 }) {
   const settings = getSiteSettings();
   const enabled = Boolean(settings.adsenseEnabled);
@@ -36,18 +28,10 @@ export default function AdSenseSlot({
   const adRef = useRef(null);
   const pushAttempted = useRef(false);
 
-  // Determine if we should show test placeholders
-  // Show test placeholders when:
-  // 1. Test mode is explicitly enabled in admin dashboard, OR
-  // 2. Running in development environment (localhost)
-  // We check this regardless of the "enabled" flag so Test Mode works forcefully!
   const shouldShowTestAd = testMode || IS_DEVELOPMENT;
-
-  // Only load real Google ads in production with test mode OFF
   const shouldLoadRealAds = enabled && !testMode && !IS_DEVELOPMENT && clientId && slotId;
 
   useEffect(() => {
-    // If showing test ads, no need to load Google script
     if (shouldShowTestAd) {
       setLoading(false);
       return;
@@ -58,7 +42,6 @@ export default function AdSenseSlot({
       return;
     }
 
-    // Prevent duplicate pushes
     if (pushAttempted.current) {
       setLoading(false);
       return;
@@ -98,19 +81,19 @@ export default function AdSenseSlot({
     return () => window.clearTimeout(loader);
   }, [shouldShowTestAd, shouldLoadRealAds, clientId, slotId]);
 
-  // If neither are enabled and not dev, show fallback or nothing
-  if (!enabled && !testMode && !IS_DEVELOPMENT) {
-    return showFallback ? (
-      <div className={`adsense-slot-fallback ${className}`}>{fallbackText}</div>
-    ) : null;
+  // Master switch: strictly follow admin panel checks
+  // If both are OFF, return nothing and take no space (even in development)
+  if (!enabled && !testMode) {
+    return null;
   }
 
-  // === TEST MODE or DEVELOPMENT: Show visible custom placeholder ===
-  // This prevents the blank white box issue on localhost!
+  // If we are here, some form of ad or placeholder WILL be shown.
+  // We apply the minHeight only here to reserve space.
+
   if (shouldShowTestAd) {
     const envLabel = IS_DEVELOPMENT ? "Development Mode" : "Test Mode (Admin)";
     return (
-      <div className={`adsense-test-ad ${className}`}>
+      <div className={`adsense-test-ad ${className}`} style={{ minHeight }}>
         <div className="adsense-test-ad-inner">
           <div className="adsense-test-ad-badge">TEST AD</div>
           <div className="adsense-test-ad-icon">
@@ -157,16 +140,14 @@ export default function AdSenseSlot({
     );
   }
 
-  // === PRODUCTION: No valid IDs configured ===
   if (!clientId || !slotId) {
     return showFallback ? (
-      <div className={`adsense-slot-fallback ${className}`}>Ad IDs Missing</div>
+      <div className={`adsense-slot-fallback ${className}`} style={{ minHeight }}>Ad IDs Missing</div>
     ) : null;
   }
 
-  // === PRODUCTION MODE: Load real Google AdSense ad ===
   return (
-    <div className={`adsense-slot-wrapper ${className}`} ref={adRef}>
+    <div className={`adsense-slot-wrapper ${className}`} ref={adRef} style={{ minHeight }}>
       {loading && (
         <div className="adsense-slot-skeleton" aria-hidden="true">
           <div className="adsense-slot-skeleton-top"></div>
@@ -175,7 +156,7 @@ export default function AdSenseSlot({
         </div>
       )}
       <ins
-        className="adsbygoogle adsense-slot-ins"
+        className="adsbygoogle adsbygoogle-noablate adsense-slot-ins"
         style={{ display: "block" }}
         data-ad-client={clientId}
         data-ad-slot={slotId}

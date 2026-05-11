@@ -31,7 +31,7 @@ const FeaturedBlogs = memo(({ blogs }) => {
           <Link to={`/blog/${blog._id}`}>
             <h2 className='title mt-2 mb-4'>{blog.title}</h2>
             {blog.image ? (
-              <div className="aspect-ratio-box" style={{ borderRadius: '8px' }}>
+              <div className="aspect-ratio-box" style={{ borderRadius: '8px', background: '#f1f5f9', overflow: 'hidden' }}>
                 <img 
                   className='blog-image' 
                   src={blog.image} 
@@ -42,7 +42,11 @@ const FeaturedBlogs = memo(({ blogs }) => {
                   onError={(e) => { e.currentTarget.src = FALLBACK_BLOG_IMAGE }} 
                 />
               </div>
-            ) : null}
+            ) : (
+              <div className="blog-placeholder-large">
+                <span className="placeholder-text-large">{blog.title}</span>
+              </div>
+            )}
           </Link>
           <div className='minor-info mt-3'>
             <Link style={{ textDecoration: 'none' }} to={`/profile/${blog.authorid}`}>
@@ -280,9 +284,7 @@ function Home() {
 
       <div className='container-fluid homepage'>
         <section className='left-section'>
-          <div style={{ minHeight: '100px' }}>
              <AdBanner className='ads-banner-slot' />
-          </div>
           <h3 className='featured'><span className='backgroundColor'>&nbsp;Featured </span>&nbsp;This Week</h3>
           
           {loading ? (
@@ -294,23 +296,21 @@ function Home() {
             <FeaturedBlogs blogs={allBlogs} />
           )}
 
-          <div style={{ minHeight: '250px' }}>
             <AdSenseSlot
               className='ads-infeed-slot'
               slot={settings.adsenseInfeedSlot}
               fallbackText='In-feed Ad Slot'
+              minHeight="250px"
             />
-          </div>
         </section>
 
         <section className='right-section'>
-          <div style={{ minHeight: '300px' }}>
             <AdSenseSlot
               className='ads-side-slot'
               slot={settings.adsenseSidebarSlot}
               fallbackText='Sidebar Ad Slot (Google AdSense)'
+              minHeight="300px"
             />
-          </div>
           <div className='right-blog'>
             <h3 className='featured'><span className='backgroundColor'>&nbsp;Popular </span>&nbsp;Posted</h3>
             <div className='scroll'>
@@ -332,7 +332,7 @@ function Home() {
                   <article className={`blog-card${e.image ? '' : ' no-image'}`}>
                     {e.image ? (
                       <Link to={`/blog/${e._id}`}>
-                        <div className="aspect-ratio-box" style={{ borderRadius: '8px' }}>
+                        <div className="aspect-ratio-box" style={{ borderRadius: '8px', background: '#f1f5f9', overflow: 'hidden' }}>
                           <img 
                             className='recent-blog-img' 
                             src={e.image} 
@@ -344,7 +344,13 @@ function Home() {
                           />
                         </div>
                       </Link>
-                    ) : null}
+                    ) : (
+                      <Link to={`/blog/${e._id}`}>
+                        <div className="blog-placeholder-mini mb-3">
+                          <span className="placeholder-text-small">{e.title}</span>
+                        </div>
+                      </Link>
+                    )}
                     <div className='blogInfo'>
                       <Link to={`/tag/${e.category}`} className='category'>{e.category}</Link>
                       <Link to={`/blog/${e._id}`} style={{ textDecoration: 'none' }}>
@@ -370,13 +376,12 @@ function Home() {
                     </div>
                   </article>
                   {index === 1 && (
-                    <div style={{ minHeight: '250px', width: '100%' }}>
                       <AdSenseSlot
                         className='ads-in-article-slot'
                         slot={settings.adsenseInArticleSlot}
                         fallbackText='In-article Ad'
+                        minHeight="250px"
                       />
-                    </div>
                   )}
                 </React.Fragment>
               ))
@@ -386,13 +391,12 @@ function Home() {
 
         <RightSection catCount={catCount} loading={loading} />
       </section>
-      <div style={{ minHeight: '250px' }}>
         <AdSenseSlot
           className='ads-footer-slot'
           slot={settings.adsenseFooterSlot}
           fallbackText='Footer Ad Slot (Google AdSense)'
+          minHeight="250px"
         />
-      </div>
     </>
   )
 }

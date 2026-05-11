@@ -18,16 +18,22 @@ import { SkeletonBlogDetail, SkeletonBlogCard } from '../Common/Skeletons'
 const RelatedPost = memo(({ e, FALLBACK_BLOG_IMAGE }) => (
   <Link style={{ textDecoration: "none" }} to={`/blog/${e._id}`} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
     <div className='blog-card'>
-      <div className="aspect-ratio-box" style={{ borderRadius: '8px', height: '200px' }}>
-        <img 
-          className='recent-blog-img' 
-          src={e.image} 
-          alt={e.title || 'Blog post'} 
-          width="400"
-          height="250"
-          loading="lazy"
-          onError={(ev) => { ev.currentTarget.src = FALLBACK_BLOG_IMAGE; ev.currentTarget.alt = e.title || 'Blog post' }} 
-        />
+      <div className="aspect-ratio-box" style={{ borderRadius: '8px', height: '200px', background: '#f1f5f9', overflow: 'hidden' }}>
+        {e.image ? (
+          <img 
+            className='recent-blog-img' 
+            src={e.image} 
+            alt={e.title || 'Blog post'} 
+            width="400"
+            height="250"
+            loading="lazy"
+            onError={(ev) => { ev.currentTarget.src = FALLBACK_BLOG_IMAGE; ev.currentTarget.alt = e.title || 'Blog post' }} 
+          />
+        ) : (
+          <div className="blog-placeholder-mini">
+            <span className="placeholder-text-small">{e.title}</span>
+          </div>
+        )}
       </div>
       <div className='blogInfo'>
         <span className='category'>{e.category}</span>
@@ -260,9 +266,7 @@ function Blog() {
                   &nbsp;
                 </div>
               </div>
-              <div style={{ minHeight: '100px' }}>
-                <AdBanner className='ads-blog-header-slot' />
-              </div>
+              <AdBanner className='ads-blog-header-slot' />
               <div className='single-blog-container'>
                 <h3 className='single-blog-title'>{blog.title}</h3>
                 <div className="aspect-ratio-box" style={{ borderRadius: '12px', marginBottom: '30px' }}>
@@ -299,13 +303,12 @@ function Blog() {
                   </div>
                 )}
 
-                <div style={{ minHeight: '250px' }}>
-                  <AdSenseSlot
-                    className='ads-blog-inline-slot'
-                    slot={settings.adsenseInArticleSlot}
-                    fallbackText='In-article Ad Slot'
-                  />
-                </div>
+                <AdSenseSlot
+                  className='ads-blog-inline-slot'
+                  slot={settings.adsenseInArticleSlot}
+                  fallbackText='In-article Ad Slot'
+                  minHeight="250px"
+                />
 
                 <div className='appreciation'>
                   <div className='like-comment'>
@@ -337,25 +340,23 @@ function Blog() {
 
               <div className='recent-blog-container'>
                 <h3 className='featured pt-4 mb-5'><span className='backgroundColor'>&nbsp;See Related&nbsp;</span>&nbsp;Posts</h3>
-                <div style={{ minHeight: '250px' }}>
-                  <AdSenseSlot
-                    className='ads-related-posts-slot'
-                    slot={settings.adsenseInfeedSlot}
-                    fallbackText='In-feed Ad Slot'
-                  />
-                </div>
+                <AdSenseSlot
+                  className='ads-related-posts-slot'
+                  slot={settings.adsenseInfeedSlot}
+                  fallbackText='In-feed Ad Slot'
+                  minHeight="250px"
+                />
                 <div className='related-blogs'>
                   {recentBlog.slice(0, 10).map((e, index) => (
                     <React.Fragment key={e._id}>
                       <RelatedPost e={e} FALLBACK_BLOG_IMAGE={FALLBACK_BLOG_IMAGE} />
                       {index === 1 && (
-                        <div style={{ minHeight: '250px', width: '100%' }}>
-                          <AdSenseSlot
-                            className='ads-related-posts-slot'
-                            slot={settings.adsenseSidebarSlot}
-                            fallbackText='Ad Slot'
-                          />
-                        </div>
+                        <AdSenseSlot
+                          className='ads-related-posts-slot'
+                          slot={settings.adsenseSidebarSlot}
+                          fallbackText='Ad Slot'
+                          minHeight="250px"
+                        />
                       )}
                     </React.Fragment>
                   ))}
@@ -402,13 +403,12 @@ function Blog() {
                   )}
                 </div>
               </div>
-              <div style={{ minHeight: '250px' }}>
-                <AdSenseSlot
-                  className='ads-blog-footer-slot'
-                  slot={settings.adsenseFooterSlot}
-                  fallbackText='Ad Slot'
-                />
-              </div>
+              <AdSenseSlot
+                className='ads-blog-footer-slot'
+                slot={settings.adsenseFooterSlot}
+                fallbackText='Ad Slot'
+                minHeight="250px"
+              />
             </>
           )}
         </section>

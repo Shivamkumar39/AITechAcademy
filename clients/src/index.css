@@ -74,3 +74,56 @@ code {
   height: 100%;
   object-fit: cover;
 }
+
+/* Global Blog Thumbnail Placeholders */
+.blog-placeholder-mini, .blog-placeholder-large {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(135deg, #00b4d8 0%, #0077ff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  text-align: center;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.blog-placeholder-mini {
+  height: 200px;
+}
+
+.blog-placeholder-large {
+  padding-top: 56.25%; /* Maintain 16:9 */
+  height: 0;
+}
+
+.placeholder-text-small, .placeholder-text-large {
+  color: #fff;
+  font-weight: 800;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.placeholder-text-small {
+  font-size: 1.1rem;
+  -webkit-line-clamp: 4;
+}
+
+.placeholder-text-large {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  font-size: 2rem;
+  -webkit-line-clamp: 3;
+}
+
+@media (max-width: 600px) {
+  .placeholder-text-large {
+    font-size: 1.4rem;
+  }
+}

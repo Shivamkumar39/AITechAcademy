@@ -35,7 +35,13 @@ const ProfileBlogCard = memo(({ e }) => (
   <Link style={{ textDecoration: "none" }} to={`/blog/${e._id}`}>
     <div className='blog my-blog-single'>
       <div className="profile-blog-image-wrapper">
-        <img className='blog-image' src={e.image} alt={e.title} loading="lazy" />
+        {e.image ? (
+          <img className='blog-image' src={e.image} alt={e.title} loading="lazy" />
+        ) : (
+          <div className="blog-image-placeholder">
+            <span className="placeholder-title">{e.title}</span>
+          </div>
+        )}
         <div className="blog-category-badge">{e.category}</div>
       </div>
       <div className="blog-content-wrapper">
