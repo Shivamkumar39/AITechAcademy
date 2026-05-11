@@ -286,21 +286,15 @@
 
 /* Glow Effect */
 .navbar-text-logo::after {
-  content: "AITechAcademy";
+  content: attr(data-text);
   position: absolute;
   left: 0;
   top: 0;
-
-  background: linear-gradient(
-    90deg,
-    #00b4d8,
-    #0077ff,
-    #6a00ff
-  );
-
+  width: 100%;
+  height: 100%;
+  background: inherit;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-
   filter: blur(10px);
   opacity: 0.4;
   z-index: -1;

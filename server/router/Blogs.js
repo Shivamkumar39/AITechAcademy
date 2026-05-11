@@ -9,28 +9,22 @@ const SiteSettings = require("../models/SiteSettings.js");
 const BASE_VISITS = 1010;
 const authentication = require("../middleware/Auth.js");
 const monthNames = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
-let totalBlogs = 0;
+
+// Helper to set cache headers
+const setCache = (res, seconds = 60) => {
+  if (process.env.NODE_ENV === 'production') {
+    res.set('Cache-Control', `public, max-age=${seconds}`);
+  }
+};
 
 router.post("/addBlog", authentication, async (req, res) => {
   if (!req.rootUser || req.rootUser.role !== "admin") {
     return res.status(403).json({ error: "Only admin can add articles" });
   }
   const d = new Date();
-  const date =
-    +d.getDate() + " " + monthNames[d.getMonth()] + " " + d.getFullYear();
+  const date = +d.getDate() + " " + monthNames[d.getMonth()] + " " + d.getFullYear();
   const { title, authorid, image, description, category, readtime, tags } = req.body;
   const authorImage = "https://www.kindpng.com/picc/m/21-214439_free-high-quality-person-icon-default-profile-picture.png";
   const authorName = "shivam_kushwaha";
@@ -51,35 +45,46 @@ router.post("/addBlog", authentication, async (req, res) => {
   try {
     await blog.save();
     res.json({ message: "blog added" });
-    console.log("Admin added a blog");
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to save blog" });
   }
 });
+
 router.get("/blogs", async (req, res) => {
   try {
-    await Blog.find({}, (err, e) => {
-      if (err) console.log(err);
-      res.json(e);
-    });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100; // Default to 100 for now to not break front-end
+    const skip = (page - 1) * limit;
+
+    const blogs = await Blog.find({}).sort({ _id: -1 }).skip(skip).limit(limit).lean();
+    setCache(res, 300); // 5 min cache
+    res.json(blogs);
   } catch (error) {
     console.log(error);
+    res.status(500).json({ error: "Server Error" });
   }
 });
+
 router.get("/blog/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const blog = await Blog.findById(id);
+    // Atomic view increment and fetch
+    const blog = await Blog.findByIdAndUpdate(
+      id, 
+      { $inc: { views: 1 } }, 
+      { new: true }
+    ).lean();
+    
     if (!blog) return res.status(404).json({ error: "Blog not found" });
-    blog.views = (blog.views || 0) + 1;
-    await blog.save();
+    setCache(res, 60); // 1 min cache for specific blog
     res.json({ message: blog });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to fetch blog" });
   }
 });
+
 router.patch("/update/blog/:id", authentication, async (req, res) => {
   const { id } = req.params;
   const d = new Date();
@@ -98,27 +103,29 @@ router.patch("/update/blog/:id", authentication, async (req, res) => {
     authorImage: authorImage,
     publishDate: "Edited " + date,
   };
-  const blog = await Blog.findOne({ _id: id });
-  if (!blog) return res.status(404).json({ error: "Blog not found" });
-  if (blog.authorid == req.userId || req.rootUser.role === "admin") {
-    try {
+
+  try {
+    const blog = await Blog.findById(id).lean();
+    if (!blog) return res.status(404).json({ error: "Blog not found" });
+    
+    if (blog.authorid == req.userId || req.rootUser.role === "admin") {
       await Blog.findByIdAndUpdate(id, { $set: data });
       res.json({ success: "Updated" });
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: "Failed to update blog" });
+    } else {
+      res.status(403).json({ message: "Cannot update others blog" });
     }
-  } else {
-    res.status(403).json({ message: "Cannot update others blog" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to update blog" });
   }
 });
+
 router.delete("/delete/blog/:id", authentication, async (req, res) => {
   const { id } = req.params;
   try {
-    const blog = await Blog.findById(id);
+    const blog = await Blog.findById(id).lean();
     if (!blog) return res.status(404).json({ error: "Blog not found" });
     if (blog.authorid == req.userId || req.rootUser.role === "admin") {
-      // Preserve views so total view count never decreases
       await SiteStats.findOneAndUpdate(
         { key: "global" },
         { $inc: { totalVisits: blog.views || 0 } },
@@ -140,7 +147,7 @@ router.get("/admin/blogs", authentication, async (req, res) => {
     return res.status(403).json({ error: "Admin only" });
   }
   try {
-    const blogs = await Blog.find({}).sort({ publishDate: -1 });
+    const blogs = await Blog.find({}).sort({ _id: -1 }).lean();
     res.json({ blogs });
   } catch (error) {
     console.log(error);
@@ -153,12 +160,13 @@ router.get("/admin/stats", authentication, async (req, res) => {
     return res.status(403).json({ error: "Admin only" });
   }
   try {
-    const totalBlogs = await Blog.countDocuments();
-    const totalUsers = await Users.countDocuments();
-    const totalViews = await Blog.aggregate([
-      { $group: { _id: null, views: { $sum: "$views" } } },
+    const [totalBlogs, totalUsers, totalViews, siteStats] = await Promise.all([
+      Blog.countDocuments(),
+      Users.countDocuments(),
+      Blog.aggregate([{ $group: { _id: null, views: { $sum: "$views" } } }]),
+      SiteStats.findOne({ key: "global" }).lean()
     ]);
-    const siteStats = await SiteStats.findOne({ key: "global" });
+
     const blogViews = totalViews[0]?.views || 0;
     const visits = siteStats?.totalVisits || BASE_VISITS;
     
@@ -175,13 +183,14 @@ router.get("/admin/stats", authentication, async (req, res) => {
 
 router.get("/site-stats", async (req, res) => {
   try {
-    const totalViews = await Blog.aggregate([{ $group: { _id: null, views: { $sum: "$views" } } }]);
-    let site = await SiteStats.findOne({ key: "global" });
-    if (!site) {
-      site = await SiteStats.create({ key: "global", totalVisits: BASE_VISITS });
-    }
+    const [totalViews, site] = await Promise.all([
+      Blog.aggregate([{ $group: { _id: null, views: { $sum: "$views" } } }]),
+      SiteStats.findOne({ key: "global" }).lean()
+    ]);
+    
     const blogViews = totalViews[0]?.views || 0;
     const visits = site?.totalVisits || BASE_VISITS;
+    setCache(res, 600); // 10 min cache for stats
     res.json({ totalViews: blogViews + visits, totalVisits: visits });
   } catch (error) {
     console.log(error);
@@ -191,10 +200,8 @@ router.get("/site-stats", async (req, res) => {
 
 router.get("/site-settings", async (req, res) => {
   try {
-    let settings = await SiteSettings.findOne({ key: "global" });
-    if (!settings) {
-      settings = await SiteSettings.create({ key: "global" });
-    }
+    const settings = await SiteSettings.findOne({ key: "global" }).lean();
+    setCache(res, 3600); // 1 hour cache for settings
     res.json({ settings });
   } catch (error) {
     console.log(error);
@@ -229,7 +236,7 @@ router.patch("/site-settings", authentication, async (req, res) => {
       { key: "global" },
       { $set: payload },
       { upsert: true, new: true }
-    );
+    ).lean();
     res.json({ settings });
   } catch (error) {
     console.log(error);
@@ -243,7 +250,7 @@ router.post("/site-visit", async (req, res) => {
       { key: "global" },
       { $setOnInsert: { totalVisits: BASE_VISITS }, $inc: { totalVisits: 1 } },
       { upsert: true, new: true }
-    );
+    ).lean();
     res.json({ totalVisits: site.totalVisits });
   } catch (error) {
     console.log(error);
@@ -254,167 +261,138 @@ router.post("/site-visit", async (req, res) => {
 router.get("/blogsByAuthorId/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const blogs = await Blog.find({ authorid: id });
+    const blogs = await Blog.find({ authorid: id }).lean();
     res.json({ Blogs: blogs });
   } catch (error) {
     res.json({ err: error });
   }
 });
+
 router.get("/categorycount", async (req, res) => {
   try {
-    const blockchain = await Blog.countDocuments({ category: { $regex: /^blockchain$/i } });
-    const fashion = await Blog.countDocuments({ category: { $regex: /^fashion$/i } });
-    const technology = await Blog.countDocuments({ category: { $regex: /^technology$/i } });
-    const business = await Blog.countDocuments({ category: { $regex: /^business$/i } });
-    const health = await Blog.countDocuments({ category: { $regex: /^health$/i } });
-    const fitness = await Blog.countDocuments({ category: { $regex: /^fitness$/i } });
-    const javascript = await Blog.countDocuments({ category: { $regex: /^javascript$/i } });
-    const video = await Blog.countDocuments({ category: { $regex: /^video(s)?$/i } });
-    res.json({
-      blockchain,
-      fashion,
-      technology,
-      business,
-      health,
-      fitness,
-      javascript,
-      video,
-    });
+    const categories = ["blockchain", "fashion", "technology", "business", "health", "fitness", "javascript", "video"];
+    const counts = await Promise.all(categories.map(cat => 
+      Blog.countDocuments({ category: { $regex: new RegExp(`^${cat}(s)?$`, 'i') } })
+    ));
+    
+    const result = {};
+    categories.forEach((cat, i) => result[cat] = counts[i]);
+    setCache(res, 1800); // 30 min cache
+    res.json(result);
   } catch (error) {
     res.json(error);
   }
 });
+
 router.get("/categories", async (req, res) => {
   try {
-    const categories = await Blog.distinct("category");
-    const tags = await Blog.distinct("tags");
+    const [categories, tags] = await Promise.all([
+      Blog.distinct("category"),
+      Blog.distinct("tags")
+    ]);
     const suggestions = Array.from(new Set([...(categories || []), ...(tags || [])]));
+    setCache(res, 3600);
     res.json({ categories, tags, suggestions });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to fetch categories" });
   }
 });
+
 router.get("/tag/:id", async (req, res) => {
   const { id } = req.params;
-  const blogs = await Blog.find({ $or: [{ category: id }, { tags: id }] });
-  if (blogs) {
-    res.json({ blogs: blogs });
-  } else {
-    res.json({ message: "No Blogs Available" });
+  try {
+    const blogs = await Blog.find({ $or: [{ category: id }, { tags: id }] }).lean();
+    setCache(res, 300);
+    res.json({ blogs });
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching tagged blogs" });
   }
 });
 
-router.get("/blogscount", (req, res) => {
-  // use mongoose to get the count of Users in the database
-  Blog.count(function (err, count) {
-    // if there is an error retrieving, send the error. nothing after res.send(err) will execute
-    if (err) res.send(err);
-
-    res.json({ count: count }); // return return the count in JSON format
-    // console.log(count)
-  });
-});
-router.get("/search/title?", async (req, res) => {
+router.get("/search/title", async (req, res) => {
   const { q } = req.query;
-  await Blog.find({ title: { $regex: q, $options: "$i" } })
-    .then((data) => res.json(data))
-    .catch((error) => res.json(error));
-});
-router.get("/search/category?", (req, res) => {
-  const { q } = req.query;
-  Blog.find({ category: { $regex: q, $options: "$i" } })
-    .then((data) => res.json(data))
-    .catch((error) => res.json(error));
-});
-router.patch("/bookmarks/:id", async (req, res) => {
-  const { id } = req.params;
-  const { userId } = req.body;
-  const blog = await Blog.findOne({ _id: id });
-  const user = await Users.findOne({ _id: userId });
-  if (user) {
-    try {
-      if (!user.bookmarks.includes(id)) {
-        await user.updateOne({ $push: { bookmarks: id } });
-        res.json("Bookmarked");
-      } else {
-        res.json("already Bookmarked");
-      }
-    } catch (error) {}
+  try {
+    const data = await Blog.find({ title: { $regex: q, $options: "i" } }).limit(20).lean();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json(error);
   }
 });
+
+router.get("/search/category", async (req, res) => {
+  const { q } = req.query;
+  try {
+    const data = await Blog.find({ category: { $regex: q, $options: "i" } }).limit(20).lean();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
+
 router.patch("/bookmark/:id", async (req, res) => {
   const { id } = req.params;
   const { userId } = req.body;
-  console.log(id, userId);
-  const blog = await Blog.findOne({ _id: id });
-  const user = await Users.findOne({ _id: userId });
-  if (user) {
-    try {
-      if (!user.bookmarks.includes(id)) {
-        await user.updateOne({ $push: { bookmarks: id } });
-        res.json("Bookmarked");
-      } else {
-        res.json("already Bookmarked");
-      }
-    } catch (error) {}
+  try {
+    const user = await Users.findById(userId);
+    if (!user) return res.status(404).json("User not found");
+    
+    if (!user.bookmarks.includes(id)) {
+      await user.updateOne({ $push: { bookmarks: id } });
+      res.json("Bookmarked");
+    } else {
+      res.json("already Bookmarked");
+    }
+  } catch (error) {
+    res.status(500).json("Error bookmarking");
   }
 });
+
 router.patch("/unbookmark/:id", async (req, res) => {
   const { id } = req.params;
   const { userId } = req.body;
-  const blog = await Blog.findOne({ _id: id });
-  const user = await Users.findOne({ _id: userId });
-  if (user) {
-    try {
-      if (user.bookmarks.includes(id)) {
-        await user.updateOne({ $pull: { bookmarks: id } });
-        res.json("unbookmarked");
-      } else {
-        res.json("bookmark first");
-      }
-    } catch (error) {}
+  try {
+    await Users.findByIdAndUpdate(userId, { $pull: { bookmarks: id } });
+    res.json("unbookmarked");
+  } catch (error) {
+    res.status(500).json("Error unbookmarking");
   }
 });
+
 router.patch("/like/:id", async (req, res) => {
   const { id } = req.params;
   const userId = String(req.body.userId || "anonymous");
-  const blog = await Blog.findOne({ _id: id });
-  if (blog) {
-    if (!blog.likes.includes(userId)) {
-      await blog.updateOne({ $push: { likes: userId } });
-      res.json("Liked");
-    } else {
-      res.json("You already liked it");
+  try {
+    // Atomic update to prevent race conditions and extra queries
+    const result = await Blog.updateOne(
+      { _id: id, likes: { $ne: userId } },
+      { $push: { likes: userId } }
+    );
+    if (result.modifiedCount === 0) {
+      return res.json("You already liked it or blog not found");
     }
-  } else {
-    res.json("No blogs found");
+    res.json("Liked");
+  } catch (error) {
+    res.status(500).json("Error liking");
   }
 });
+
 router.patch("/unlike/:id", async (req, res) => {
   const { id } = req.params;
   const userId = String(req.body.userId || "anonymous");
-  const blog = await Blog.findOne({ _id: id });
-  if (blog) {
-    if (blog.likes.includes(userId)) {
-      await blog.updateOne({ $pull: { likes: userId } });
-      res.json("unliked");
-    } else {
-      res.json("You never liked it ");
-    }
-  } else {
-    res.json("No blogs found");
+  try {
+    await Blog.updateOne({ _id: id }, { $pull: { likes: userId } });
+    res.json("unliked");
+  } catch (error) {
+    res.status(500).json("Error unliking");
   }
 });
+
 router.patch("/comment/:id", async (req, res) => {
   const { id } = req.params;
   const { userId, info } = req.body;
   if (!info || !info.toString().trim()) {
     return res.status(400).json({ error: "Comment text is required" });
-  }
-  const blog = await Blog.findOne({ _id: id });
-  if (!blog) {
-    return res.status(404).json({ error: "Blog not found" });
   }
   const comment = {
     userId: String(userId || "anonymous"),
@@ -422,14 +400,12 @@ router.patch("/comment/:id", async (req, res) => {
     blogId: String(id),
   };
   try {
-    await blog.updateOne({ $push: { comments: comment } });
+    await Blog.updateOne({ _id: id }, { $push: { comments: comment } });
     res.json({ message: "Comment added", comment });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to add comment" });
   }
 });
-router.patch("/test", (req, res) => {
-  console.log(req.body);
-});
+
 module.exports = router;

@@ -1,11 +1,10 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useState, memo } from 'react'
 import { Link } from 'react-router-dom'
 import { TiSocialFacebook, TiSocialLinkedin, TiSocialTwitter } from "react-icons/ti"
 import { AiOutlineInstagram } from "react-icons/ai"
 import axios from "axios"
 
 import "./Home.css"
-import loadingAnimation from "../../assets/loading.gif"
 import { categoryCount, getAllBlogs, getSiteStats } from '../../apis/Blogs'
 import { getUserById } from '../../apis/users'
 import { LoginContext } from '../../contextProvider/Context'
@@ -15,11 +14,12 @@ import StructuredData from '../SEO/StructuredData'
 import AdSenseSlot from '../Ads/AdSenseSlot'
 import AdBanner from '../Ads/AdBanner'
 import { useSiteSettings } from '../../utils/siteSettings'
+import { SkeletonBlogCard, SkeletonSidebar, SkeletonBlogList } from '../Common/Skeletons'
 
 const url = process.env.REACT_APP_API_URL || "http://localhost:8000"
 const FALLBACK_BLOG_IMAGE = "https://via.placeholder.com/1200x700?text=AITECHACADEMY"
 
-function FeaturedBlogs({ blogs }) {
+const FeaturedBlogs = memo(({ blogs }) => {
   const featured = blogs.slice(0, 2)
   if (!featured.length) return null
 
@@ -31,12 +31,30 @@ function FeaturedBlogs({ blogs }) {
           <Link to={`/blog/${blog._id}`}>
             <h2 className='title mt-2 mb-4'>{blog.title}</h2>
             {blog.image ? (
-              <img className='blog-image' src={blog.image} alt={blog.title || 'Blog image'} onError={(e) => { e.currentTarget.src = FALLBACK_BLOG_IMAGE }} />
+              <div className="aspect-ratio-box" style={{ borderRadius: '8px' }}>
+                <img 
+                  className='blog-image' 
+                  src={blog.image} 
+                  alt={blog.title || 'Blog image'} 
+                  width="1200"
+                  height="700"
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.src = FALLBACK_BLOG_IMAGE }} 
+                />
+              </div>
             ) : null}
           </Link>
           <div className='minor-info mt-3'>
             <Link style={{ textDecoration: 'none' }} to={`/profile/${blog.authorid}`}>
-              <img className='author-image' src={blog.authorImage} alt={blog.authorName || 'Author'} onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/80?text=User" }} />
+              <img 
+                className='author-image' 
+                src={blog.authorImage} 
+                alt={blog.authorName || 'Author'} 
+                width="40"
+                height="40"
+                loading="lazy"
+                onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/80?text=User" }} 
+              />
             </Link>
             <span className='publishdate'>{blog.authorName || 'Anonymous'}</span>
             <span className='publishdate'>| {blog.publishDate}</span>
@@ -47,9 +65,9 @@ function FeaturedBlogs({ blogs }) {
       ))}
     </div>
   )
-}
+})
 
-function ShortBlogs({ blogs }) {
+const ShortBlogs = memo(({ blogs }) => {
   return (
     <>
       {blogs.slice(0, 12).map((e) => (
@@ -59,7 +77,15 @@ function ShortBlogs({ blogs }) {
             <h3 className='right-blog-title short-blog-title mt-3'>{e.title}</h3>
           </Link>
           <div className='minor-info pt-2 mb-0'>
-            <img className='author-image' src={e.authorImage} alt={e.authorName || 'Author'} onError={(ev) => { ev.currentTarget.src = "https://via.placeholder.com/80?text=User" }} />
+            <img 
+              className='author-image' 
+              src={e.authorImage} 
+              alt={e.authorName || 'Author'} 
+              width="40"
+              height="40"
+              loading="lazy"
+              onError={(ev) => { ev.currentTarget.src = "https://via.placeholder.com/80?text=User" }} 
+            />
             <p className='publishdate'>{e.publishDate}</p>
             <p className='publishdate'>| {e.readtime}</p>
           </div>
@@ -68,9 +94,9 @@ function ShortBlogs({ blogs }) {
       ))}
     </>
   )
-}
+})
 
-function PopularAuthors() {
+const PopularAuthors = memo(() => {
   const [author, setAuthor] = useState(null)
 
   useEffect(() => {
@@ -90,7 +116,15 @@ function PopularAuthors() {
   return (
     <Link to={`/profile/${author._id}`} style={{ textDecoration: 'none' }}>
       <div className='profile mb-5'>
-        <img className='top-author' src={author.profilePic} alt={author.username || 'Author'} onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/120?text=Author" }} />
+        <img 
+          className='top-author' 
+          src={author.profilePic} 
+          alt={author.username || 'Author'} 
+          width="120"
+          height="120"
+          loading="lazy"
+          onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/120?text=Author" }} 
+        />
         <div className='author-info'>
           <h4 className='authorName'>{author.username}</h4>
           <h5 className='designation'>{(author.bio || 'Top contributor').slice(0, 60)}...</h5>
@@ -104,9 +138,9 @@ function PopularAuthors() {
       </div>
     </Link>
   )
-}
+})
 
-export function RightSection({ catCount }) {
+export const RightSection = memo(({ catCount, loading }) => {
   const [totalViews, setTotalViews] = useState(0)
 
   useEffect(() => {
@@ -129,12 +163,14 @@ export function RightSection({ catCount }) {
     return () => window.removeEventListener('site-visit-updated', handleVisitUpdate)
   }, [])
 
+  if (loading) return <SkeletonSidebar />
+
   return (
     <div className='sec-2-right'>
       <h3 className='featured mb-5'><span className='backgroundColor'>&nbsp;Top &nbsp;</span>&nbsp;Author</h3>
       <PopularAuthors />
 
-      <div className='ad text-center center'>
+      <div className='ad text-center center' style={{ minHeight: '250px' }}>
         <p className='ad-title'>Ad</p>
         <div className='for-add'>
           <h6 className='adTitle'>Want To Collaborate Or Suggest Something?</h6>
@@ -172,11 +208,11 @@ export function RightSection({ catCount }) {
       </div>
     </div>
   )
-}
+})
 
 function Home() {
   const [allBlogs, setAllBlogs] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [catCount, setCatCount] = useState({})
   const { setLoginData } = useContext(LoginContext)
   const settings = useSiteSettings()
@@ -242,86 +278,121 @@ function Home() {
       <StructuredData data={homeSchema} />
       <Navbar />
 
-      <div style={{ display: loading ? 'block' : 'none' }} className='loading-animation'>
-        <div className='loading-div'>
-          <img style={{ width: '200px', height: '200px' }} src={loadingAnimation} alt='Loading' />
-        </div>
-      </div>
-
-      <div style={{ display: loading ? 'none' : '' }} className='container-fluid homepage'>
+      <div className='container-fluid homepage'>
         <section className='left-section'>
-          <AdBanner className='ads-banner-slot' />
+          <div style={{ minHeight: '100px' }}>
+             <AdBanner className='ads-banner-slot' />
+          </div>
           <h3 className='featured'><span className='backgroundColor'>&nbsp;Featured </span>&nbsp;This Week</h3>
-          <FeaturedBlogs blogs={allBlogs} />
-          <AdSenseSlot
-            className='ads-infeed-slot'
-            slot={settings.adsenseInfeedSlot}
-            fallbackText='In-feed Ad Slot'
-          />
+          
+          {loading ? (
+            <div className="featured-blogs">
+              <SkeletonBlogCard />
+              <SkeletonBlogCard />
+            </div>
+          ) : (
+            <FeaturedBlogs blogs={allBlogs} />
+          )}
+
+          <div style={{ minHeight: '250px' }}>
+            <AdSenseSlot
+              className='ads-infeed-slot'
+              slot={settings.adsenseInfeedSlot}
+              fallbackText='In-feed Ad Slot'
+            />
+          </div>
         </section>
 
         <section className='right-section'>
-          <AdSenseSlot
-            className='ads-side-slot'
-            slot={settings.adsenseSidebarSlot}
-            fallbackText='Sidebar Ad Slot (Google AdSense)'
-          />
+          <div style={{ minHeight: '300px' }}>
+            <AdSenseSlot
+              className='ads-side-slot'
+              slot={settings.adsenseSidebarSlot}
+              fallbackText='Sidebar Ad Slot (Google AdSense)'
+            />
+          </div>
           <div className='right-blog'>
             <h3 className='featured'><span className='backgroundColor'>&nbsp;Popular </span>&nbsp;Posted</h3>
             <div className='scroll'>
-              <ShortBlogs blogs={allBlogs} />
+              {loading ? <SkeletonBlogList count={4} /> : <ShortBlogs blogs={allBlogs} />}
             </div>
           </div>
         </section>
       </div>
 
-      <section style={{ display: loading ? 'none' : '' }} className='section-2'>
+      <section className='section-2'>
         <div className='sec-2-left'>
           <h3 className='featured'><span className='backgroundColor'>&nbsp;Recently </span>&nbsp;Posted</h3>
           <div className='recent-blogs'>
-            {allBlogs.slice(0, 10).map((e, index) => (
-              <React.Fragment key={e._id}>
-                <article className={`blog-card${e.image ? '' : ' no-image'}`}>
-                  {e.image ? (
-                    <Link to={`/blog/${e._id}`}>
-                      <img className='recent-blog-img' src={e.image} alt={e.title || 'Blog'} onError={(event) => { event.currentTarget.src = FALLBACK_BLOG_IMAGE }} />
-                    </Link>
-                  ) : null}
-                  <div className='blogInfo'>
-                    <Link to={`/tag/${e.category}`} className='category'>{e.category}</Link>
-                    <Link to={`/blog/${e._id}`} style={{ textDecoration: 'none' }}>
-                      <h3 className='right-blog-title mt-2'>{e.title}</h3>
-                    </Link>
-                    <div className='minor-info'>
-                      <Link style={{ textDecoration: 'none' }} to={`/profile/${e.authorid}`}>
-                        <img className='author-image' src={e.authorImage} alt={e.authorName || 'Author'} onError={(event) => { event.currentTarget.src = "https://via.placeholder.com/80?text=User" }} />
+            {loading ? (
+              <SkeletonBlogList count={6} />
+            ) : (
+              allBlogs.slice(0, 10).map((e, index) => (
+                <React.Fragment key={e._id}>
+                  <article className={`blog-card${e.image ? '' : ' no-image'}`}>
+                    {e.image ? (
+                      <Link to={`/blog/${e._id}`}>
+                        <div className="aspect-ratio-box" style={{ borderRadius: '8px' }}>
+                          <img 
+                            className='recent-blog-img' 
+                            src={e.image} 
+                            alt={e.title || 'Blog'} 
+                            width="400"
+                            height="250"
+                            loading="lazy"
+                            onError={(event) => { event.currentTarget.src = FALLBACK_BLOG_IMAGE }} 
+                          />
+                        </div>
                       </Link>
-                      <span className='publishdate'>{e.authorName}</span>
-                      <span className='publishdate'>| {e.publishDate}</span>
-                      <span className='publishdate'>| {e.readtime}</span>
+                    ) : null}
+                    <div className='blogInfo'>
+                      <Link to={`/tag/${e.category}`} className='category'>{e.category}</Link>
+                      <Link to={`/blog/${e._id}`} style={{ textDecoration: 'none' }}>
+                        <h3 className='right-blog-title mt-2'>{e.title}</h3>
+                      </Link>
+                      <div className='minor-info'>
+                        <Link style={{ textDecoration: 'none' }} to={`/profile/${e.authorid}`}>
+                          <img 
+                            className='author-image' 
+                            src={e.authorImage} 
+                            alt={e.authorName || 'Author'} 
+                            width="40"
+                            height="40"
+                            loading="lazy"
+                            onError={(event) => { event.currentTarget.src = "https://via.placeholder.com/80?text=User" }} 
+                          />
+                        </Link>
+                        <span className='publishdate'>{e.authorName}</span>
+                        <span className='publishdate'>| {e.publishDate}</span>
+                        <span className='publishdate'>| {e.readtime}</span>
+                      </div>
+                      <div className='intro right-intro recent-blogs-intro' dangerouslySetInnerHTML={{ __html: `${(e.description || '').slice(0, 150)}...` }} />
                     </div>
-                    <div className='intro right-intro recent-blogs-intro' dangerouslySetInnerHTML={{ __html: `${(e.description || '').slice(0, 150)}...` }} />
-                  </div>
-                </article>
-                {index === 1 && (
-                  <AdSenseSlot
-                    className='ads-in-article-slot'
-                    slot={settings.adsenseInArticleSlot}
-                    fallbackText='In-article Ad'
-                  />
-                )}
-              </React.Fragment>
-            ))}
+                  </article>
+                  {index === 1 && (
+                    <div style={{ minHeight: '250px', width: '100%' }}>
+                      <AdSenseSlot
+                        className='ads-in-article-slot'
+                        slot={settings.adsenseInArticleSlot}
+                        fallbackText='In-article Ad'
+                      />
+                    </div>
+                  )}
+                </React.Fragment>
+              ))
+            )}
           </div>
         </div>
 
-        <RightSection catCount={catCount} />
+        <RightSection catCount={catCount} loading={loading} />
       </section>
-      <AdSenseSlot
-        className='ads-footer-slot'
-        slot={settings.adsenseFooterSlot}
-        fallbackText='Footer Ad Slot (Google AdSense)'
-      />
+      <div style={{ minHeight: '250px' }}>
+        <AdSenseSlot
+          className='ads-footer-slot'
+          slot={settings.adsenseFooterSlot}
+          fallbackText='Footer Ad Slot (Google AdSense)'
+        />
+      </div>
     </>
   )
 }

@@ -1,35 +1,41 @@
 import './App.css';
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import Login from './components/Login/Login';
-import Register from './components/Register/Register.jsx';
-import Home from './components/Homepage/Home';
-
-
-import Blog from './components/Blog/Blog';
-import Navbar from './components/Navbar/Navbar';
-import Profile from './components/Profile/Profile';
-import EditProfile from './components/Editprofile/EditProfile';
-import Tag from './components/Tagwise/Tag';
-import Search from './components/Search/Search';
-import Error from './components/AdditionalPages/Error';
-import Pending from './components/AdditionalPages/Pending';
-import Bookmark from './components/Bookmark/Bookmark';
-import Write from './components/Write/Write';
-import Share from './components/AdditionalPages/Share';
-import AdminDashboard from './components/Admin/AdminDashboard';
-import PrivacyPolicy from './components/Legal/PrivacyPolicy';
-import TermsAndConditions from './components/Legal/TermsAndConditions';
-import About from './components/Legal/About';
-import ContactUs from './components/Legal/ContactUs';
-import Disclaimer from './components/Legal/Disclaimer';
-import Footer from './components/Footer/Footer';
 import { trackSiteVisit } from './apis/Blogs';
-import CookieConsent from './components/Common/CookieConsent';
 import { useSiteSettings } from './utils/siteSettings';
 
+// Lazy loading components for better performance
+const Login = lazy(() => import('./components/Login/Login'));
+const Register = lazy(() => import('./components/Register/Register.jsx'));
+const Home = lazy(() => import('./components/Homepage/Home'));
+const Blog = lazy(() => import('./components/Blog/Blog'));
+const Navbar = lazy(() => import('./components/Navbar/Navbar'));
+const Profile = lazy(() => import('./components/Profile/Profile'));
+const EditProfile = lazy(() => import('./components/Editprofile/EditProfile'));
+const Tag = lazy(() => import('./components/Tagwise/Tag'));
+const Search = lazy(() => import('./components/Search/Search'));
+const Error = lazy(() => import('./components/AdditionalPages/Error'));
+const Pending = lazy(() => import('./components/AdditionalPages/Pending'));
+const Bookmark = lazy(() => import('./components/Bookmark/Bookmark'));
+const Write = lazy(() => import('./components/Write/Write'));
+const Share = lazy(() => import('./components/AdditionalPages/Share'));
+const AdminDashboard = lazy(() => import('./components/Admin/AdminDashboard'));
+const PrivacyPolicy = lazy(() => import('./components/Legal/PrivacyPolicy'));
+const TermsAndConditions = lazy(() => import('./components/Legal/TermsAndConditions'));
+const About = lazy(() => import('./components/Legal/About'));
+const ContactUs = lazy(() => import('./components/Legal/ContactUs'));
+const Disclaimer = lazy(() => import('./components/Legal/Disclaimer'));
+const Footer = lazy(() => import('./components/Footer/Footer'));
+const CookieConsent = lazy(() => import('./components/Common/CookieConsent'));
 
-
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="loading-animation">
+    <div className="loading-div">
+      <div className="skeleton-loader" style={{ width: '100px', height: '100px', borderRadius: '50%' }}></div>
+    </div>
+  </div>
+);
 
 function AppRoutes() {
   const location = useLocation();
@@ -39,29 +45,31 @@ function AppRoutes() {
   }, [location.pathname]);
 
   return (
-    <Routes>
-      <Route exact path='/login' element={<Login/>}/>
-      <Route exact path='/register' element={<Register/>}/>
-      <Route exact path='/' element={<Home/>}/>
-      <Route path='/blog/:id' element={<Blog/>}/>
-      <Route exact path='/navbar' element={<Navbar/>}/>
-      <Route exact path='/edit/:id' element={<EditProfile/>}/>
-      <Route exact path='/profile/:id' element={<Profile/>}/>
-      <Route exact path='/tag/:id' element={<Tag/>}/>
-      <Route path='/search' element={<Search/>}/>
-      <Route path='/notifications' element={<Pending/>}/>
-      <Route exact path='/bookmarks' element={<Bookmark/>}/>
-      <Route exact path='/write' element={<Write/>}/>
-      <Route exact path='/write/:id' element={<Write/>}/>
-      <Route exact path='/admin/dashboard' element={<AdminDashboard/>}/>
-      <Route exact path='/share' element={<Share/>}/>
-      <Route exact path='/privacy-policy' element={<PrivacyPolicy/>}/>
-      <Route exact path='/terms-and-conditions' element={<TermsAndConditions/>}/>
-      <Route exact path='/about' element={<About/>}/>
-      <Route exact path='/contact-us' element={<ContactUs/>}/>
-      <Route exact path='/disclaimer' element={<Disclaimer/>}/>
-      <Route path='*' element={<Error/>}/>
-    </Routes>
+    <Suspense fallback={<LoadingFallback />}>
+      <Routes>
+        <Route exact path='/login' element={<Login/>}/>
+        <Route exact path='/register' element={<Register/>}/>
+        <Route exact path='/' element={<Home/>}/>
+        <Route path='/blog/:id' element={<Blog/>}/>
+        <Route exact path='/navbar' element={<Navbar/>}/>
+        <Route exact path='/edit/:id' element={<EditProfile/>}/>
+        <Route exact path='/profile/:id' element={<Profile/>}/>
+        <Route exact path='/tag/:id' element={<Tag/>}/>
+        <Route path='/search' element={<Search/>}/>
+        <Route path='/notifications' element={<Pending/>}/>
+        <Route exact path='/bookmarks' element={<Bookmark/>}/>
+        <Route exact path='/write' element={<Write/>}/>
+        <Route exact path='/write/:id' element={<Write/>}/>
+        <Route exact path='/admin/dashboard' element={<AdminDashboard/>}/>
+        <Route exact path='/share' element={<Share/>}/>
+        <Route exact path='/privacy-policy' element={<PrivacyPolicy/>}/>
+        <Route exact path='/terms-and-conditions' element={<TermsAndConditions/>}/>
+        <Route exact path='/about' element={<About/>}/>
+        <Route exact path='/contact-us' element={<ContactUs/>}/>
+        <Route exact path='/disclaimer' element={<Disclaimer/>}/>
+        <Route path='*' element={<Error/>}/>
+      </Routes>
+    </Suspense>
   )
 }
 

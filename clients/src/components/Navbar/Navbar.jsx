@@ -63,10 +63,7 @@ function Navbar() {
           <button type='button' className='menu-bars' onClick={showSidebar} aria-label='Open menu'>
             <FaIcons.FaBars />
           </button>
-          {/* <Link to='/' className='navbar-logo-wrapper'>
-            <img src='/image.png' alt='Logo' className='navbar-logo-img' title={social.websiteName || 'AITechAcademy'} />
-          </Link> */}
-          <Link to='/' className='navbar-text-logo'>
+          <Link to='/' className='navbar-text-logo' data-text={social.websiteName || 'AITechAcademy'}>
             {social.websiteName || 'AITechAcademy'}
           </Link>
           <div className='navbar-social-icons'>

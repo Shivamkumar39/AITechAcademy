@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState, useContext, memo } from 'react'
 import "./Blog.css"
 import { BsLink45Deg } from 'react-icons/bs';
 import { AiOutlineShareAlt, AiOutlineLike, AiFillLike } from 'react-icons/ai';
@@ -10,28 +10,57 @@ import { LoginContext } from '../../contextProvider/Context';
 import { RightSection } from "../Homepage/Home.jsx"
 import Navbar from '../Navbar/Navbar';
 import Share from '../AdditionalPages/Share';
-import loadingAnimation from "../../assets/loading.gif"
 import AdSenseSlot from '../Ads/AdSenseSlot'
 import AdBanner from '../Ads/AdBanner'
 import { getGuestId, useSiteSettings } from '../../utils/siteSettings'
+import { SkeletonBlogDetail, SkeletonBlogCard } from '../Common/Skeletons'
 
-function PopularAuthors(props) {
-
-
-  return (
-    <>
-
-      <div className='profile mb-5'>
-        <img className='top-author' src={props.popularAuthorImg} alt={props.popularAuthorName} />
-        <div className='author-info'>
-          <h4 className='authorName'>{props.popularAuthorName}</h4>
-          <h5 className='designation'>{props.popularAuthorDesignation}</h5>
-          <button className='follow-btn'>Follow</button>
-        </div>
+const RelatedPost = memo(({ e, FALLBACK_BLOG_IMAGE }) => (
+  <Link style={{ textDecoration: "none" }} to={`/blog/${e._id}`} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+    <div className='blog-card'>
+      <div className="aspect-ratio-box" style={{ borderRadius: '8px', height: '200px' }}>
+        <img 
+          className='recent-blog-img' 
+          src={e.image} 
+          alt={e.title || 'Blog post'} 
+          width="400"
+          height="250"
+          loading="lazy"
+          onError={(ev) => { ev.currentTarget.src = FALLBACK_BLOG_IMAGE; ev.currentTarget.alt = e.title || 'Blog post' }} 
+        />
       </div>
-    </>
-  )
-}
+      <div className='blogInfo'>
+        <span className='category'>{e.category}</span>
+        <h3 className='right-blog-title mt-2'>{e.title}</h3>
+        <div className='minor-info'>
+          <img 
+            className='author-image' 
+            src={e.authorImage || "https://via.placeholder.com/40?text=User"} 
+            alt={e.authorName || 'Author image'} 
+            width="40"
+            height="40"
+            loading="lazy"
+            onError={(ev) => { ev.currentTarget.src = "https://via.placeholder.com/40?text=User"; ev.currentTarget.alt = e.authorName || 'Author image' }} 
+          />
+          <span className='publishdate'>&nbsp;&nbsp;{e.authorName || 'shivam_kushwaha'}</span>
+          &nbsp;
+          <div className='icons-flex'> &nbsp;<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 small-icons">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
+          </svg>&nbsp;
+            <p className='publishdate'>{e.publishDate}</p></div>
+          &nbsp;
+          <div className='icons-flex'> &nbsp;<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 small-icons">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+            &nbsp;
+            <p className='publishdate'>{e.readtime}</p></div>
+        </div>
+        <div className='intro right-intro' dangerouslySetInnerHTML={{ __html: e.description.slice(0, 200) }} />
+      </div>
+    </div>
+  </Link>
+));
+
 function Blog() {
   const FALLBACK_BLOG_IMAGE = "https://via.placeholder.com/1200x700?text=AIVista+Journal"
   const { id } = useParams()
@@ -43,7 +72,7 @@ function Blog() {
   const [liked, setLiked] = useState(false)
   const [likes, setLikes] = useState([])
   const [commentText, setCommentText] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [submittingComment, setSubmittingComment] = useState(false)
   const [showApp, setShowApp] = useState(false)
   const [showCopy, setShowCopy] = useState(false)
@@ -57,16 +86,20 @@ function Blog() {
     const sortedBlogs = [...allBlogs].sort((a, b) => (a._id < b._id ? 1 : -1))
     setRecentBlog(sortedBlogs)
   }
-  const getBlog = async () => {
-    setLoading(true)
+  const getBlog = async (isInitialLoad = false) => {
+    if (isInitialLoad) {
+      setLoading(true)
+    }
     const res = await getBlogById(id)
     const data = res?.data?.message
     if (data) {
       setBlog(data)
       setLikes(data.likes || [])
     }
-    setLoading(false)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    if (isInitialLoad) {
+      setLoading(false)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }
   const checkLogin = () => {
     if (!loginData || !loginData._id) {
@@ -81,8 +114,10 @@ function Blog() {
       window.location.href = "/login"
       return
     }
-    await bookmark(id, { userId: loginData._id })
+    // Optimistic update
     setBookmark(true)
+    await bookmark(id, { userId: loginData._id })
+    getBlog(false) // Silent sync
   }
   const unbookmarkBlog = async () => {
     if (!checkLogin()) {
@@ -90,18 +125,28 @@ function Blog() {
       window.location.href = "/login"
       return
     }
-    await unbookmark(id, { userId: loginData._id })
+    // Optimistic update
     setBookmark(false)
+    await unbookmark(id, { userId: loginData._id })
+    getBlog(false) // Silent sync
   }
   const like = async () => {
-    await likeBlog(id, { userId: loginData?._id || guestId })
+    const currentUserId = loginData?._id || guestId
+    // Optimistic update
     setLiked(true)
-    getBlog()
+    setLikes(prev => prev.includes(currentUserId) ? prev : [...prev, currentUserId])
+    
+    await likeBlog(id, { userId: currentUserId })
+    getBlog(false) // Silent sync
   }
   const unlike = async () => {
-    await unlikeBlog(id, { userId: loginData?._id || guestId })
+    const currentUserId = loginData?._id || guestId
+    // Optimistic update
     setLiked(false)
-    getBlog()
+    setLikes(prev => prev.filter(userId => userId !== currentUserId))
+    
+    await unlikeBlog(id, { userId: currentUserId })
+    getBlog(false) // Silent sync
   }
   const submitComment = async () => {
     if (!commentText.trim()) {
@@ -149,7 +194,7 @@ function Blog() {
     }, 2000);
   }
   useEffect(() => {
-    getBlog()
+    getBlog(true) // Initial load with loading state and scroll
   }, [id])
 
   useEffect(() => {
@@ -164,34 +209,27 @@ function Blog() {
     setLiked(isLiked)
   }, [blog, loginData, guestId])
 
-  if (loading || !blog) {
-    return (
-      <>
-        <Navbar />
-        <div className='loading-animation'>
-          <div className='loading-div'>
-            <img style={{ width: '200px', height: '200px' }} src={loadingAnimation} alt='Loading' />
-          </div>
-        </div>
-      </>
-    )
-  }
-
   return (
     <>
       <Navbar />
       <div className='blog-container'>
         <section className='blog-section'>
-          {
+          {loading || !blog ? (
+            <SkeletonBlogDetail />
+          ) : (
             <>
               <span className='category'>{blog.category}</span>
               <div className='topBlogFlex'>
-
-
                 <div className='minor-info single-info'>
                   <a href={`/profile/${blog.authorid}`}>
-                    <img className='author-image single-blog-author' src={blog.authorImage} alt={blog.authorName || 'Author image'} onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/80?text=User"; e.currentTarget.alt = blog.authorName || 'Author image' }} />
-
+                    <img 
+                      className='author-image single-blog-author' 
+                      src={blog.authorImage} 
+                      alt={blog.authorName || 'Author image'} 
+                      width="60"
+                      height="60"
+                      onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/80?text=User"; e.currentTarget.alt = blog.authorName || 'Author image' }} 
+                    />
                   </a>
 
                   <div className='authorProfileInfo'>
@@ -201,39 +239,45 @@ function Blog() {
 
                     <div className='profileMinorInfo'>
                       <div className='icons-flex'> &nbsp;<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 small-icons">
-
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
                       </svg>&nbsp;
-
                         <p className='publishdate'>&nbsp;{blog.publishDate}&nbsp;</p></div>
                       <div><span className='dot m-1'>.</span></div>
                       <div className='icons-flex'> &nbsp;<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 small-icons">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                         &nbsp;
-
                         <p className='publishdate'>&nbsp;{blog.readtime}&nbsp;</p></div>
-
 
                       <div className='link-div'>
                         <MdOutlineBookmarkAdd style={{ display: bookmarkSet ? "none" : "block" }} onClick={() => bookmarkBlog()} className='bookmark-icon blog-icons' />
                         <MdOutlineBookmark style={{ display: bookmarkSet ? "block" : "none" }} onClick={() => unbookmarkBlog()} className='bookmark-icon blog-icons' />
                         <BsLink45Deg onClick={copytoclipboard} className='link-icon blog-icons' />
                         <span style={{ display: showCopy ? "block" : "none" }} className='copied'>Copied</span>
-
                       </div>
                     </div>
                   </div>
                   &nbsp;
                 </div>
               </div>
-              <AdBanner className='ads-blog-header-slot' />
+              <div style={{ minHeight: '100px' }}>
+                <AdBanner className='ads-blog-header-slot' />
+              </div>
               <div className='single-blog-container'>
                 <h3 className='single-blog-title'>{blog.title}</h3>
-                <img className='single-blog-image' src={blog.image} alt={blog.title || 'Blog image'} onError={(e) => { e.currentTarget.src = FALLBACK_BLOG_IMAGE; e.currentTarget.alt = blog.title || 'Blog image' }} />
-                <div className='description-area' dangerouslySetInnerHTML={{ __html: blog.description }}>
-
+                <div className="aspect-ratio-box" style={{ borderRadius: '12px', marginBottom: '30px' }}>
+                  <img 
+                    className='single-blog-image' 
+                    src={blog.image} 
+                    alt={blog.title || 'Blog image'} 
+                    width="1200"
+                    height="700"
+                    fetchpriority="high"
+                    onError={(e) => { e.currentTarget.src = FALLBACK_BLOG_IMAGE; e.currentTarget.alt = blog.title || 'Blog image' }} 
+                  />
                 </div>
+                <div className='description-area' dangerouslySetInnerHTML={{ __html: blog.description }}></div>
+                
                 {blog.pdfLinks && blog.pdfLinks.length > 0 && (
                   <div className='pdf-downloads-container'>
                     <h4 className='pdf-downloads-title'>
@@ -244,13 +288,7 @@ function Blog() {
                     </h4>
                     <div className='pdf-downloads-grid'>
                       {blog.pdfLinks.map((pdf, index) => (
-                        <a 
-                          key={index} 
-                          href={pdf.link} 
-                          target='_blank' 
-                          rel='noopener noreferrer' 
-                          className='pdf-download-btn'
-                        >
+                        <a key={index} href={pdf.link} target='_blank' rel='noopener noreferrer' className='pdf-download-btn'>
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" style={{ width: '20px', height: '20px' }}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                           </svg>
@@ -260,11 +298,15 @@ function Blog() {
                     </div>
                   </div>
                 )}
-                <AdSenseSlot
-                  className='ads-blog-inline-slot'
-                  slot={settings.adsenseInArticleSlot}
-                  fallbackText='In-article Ad Slot'
-                />
+
+                <div style={{ minHeight: '250px' }}>
+                  <AdSenseSlot
+                    className='ads-blog-inline-slot'
+                    slot={settings.adsenseInArticleSlot}
+                    fallbackText='In-article Ad Slot'
+                  />
+                </div>
+
                 <div className='appreciation'>
                   <div className='like-comment'>
                     <div>
@@ -278,11 +320,9 @@ function Blog() {
                     </div>
                   </div>
                   <div className='link-bookmark'>
-                    {/* <AiOutlineShareAlt style={{ color: "black" }} className='link-icon' /> */}
                     <div className='sharing-div'>
                       <div style={{ display: showApp ? "" : "none" }} className='share-apps'>
                         <Share link={window.location.href} />
-
                       </div>
                       <AiOutlineShareAlt onClick={shareToApps} style={{ color: "black" }} className='link-icon' />
                     </div>
@@ -291,68 +331,37 @@ function Blog() {
                   </div>
                 </div>
                 <div className='end-dots mt-5'>
-                  <div className='enddots'></div>
-                  <div className='enddots'></div>
-                  <div className='enddots'></div>
-                  <div className='enddots'></div>
+                  <div className='enddots'></div><div className='enddots'></div><div className='enddots'></div><div className='enddots'></div>
                 </div>
               </div>
+
               <div className='recent-blog-container'>
                 <h3 className='featured pt-4 mb-5'><span className='backgroundColor'>&nbsp;See Related&nbsp;</span>&nbsp;Posts</h3>
-                <AdSenseSlot
-                  className='ads-related-posts-slot'
-                  slot={settings.adsenseInfeedSlot}
-                  fallbackText='In-feed Ad Slot'
-                />
+                <div style={{ minHeight: '250px' }}>
+                  <AdSenseSlot
+                    className='ads-related-posts-slot'
+                    slot={settings.adsenseInfeedSlot}
+                    fallbackText='In-feed Ad Slot'
+                  />
+                </div>
                 <div className='related-blogs'>
-                  {
-
-                    recentBlog.map((e, index) => {
-                      if (index < 10) {
-                        return (
-                          <React.Fragment key={e._id}>
-                            <Link style={{ textDecoration: "none" }} to={`/blog/${e._id}`} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                              <div className='blog-card'>
-                                <img className='recent-blog-img' src={e.image} alt={e.title || 'Blog post'} onError={(ev) => { ev.currentTarget.src = FALLBACK_BLOG_IMAGE; ev.currentTarget.alt = e.title || 'Blog post' }} />
-                                <div className='blogInfo'>
-                                  <span className='category'>{e.category}</span>
-                                  <h3 className='right-blog-title mt-2'>{e.title}</h3>
-                                  <div className='minor-info'>
-                                    <img className='author-image' src={e.authorImage || "https://via.placeholder.com/40?text=User"} alt={e.authorName || 'Author image'} onError={(ev) => { ev.currentTarget.src = "https://via.placeholder.com/40?text=User"; ev.currentTarget.alt = e.authorName || 'Author image' }} />
-                                    <span className='publishdate'>&nbsp;&nbsp;{e.authorName || 'shivam_kushwaha'}</span>
-                                    &nbsp;
-                                    <div className='icons-flex'> &nbsp;<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 small-icons">
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
-                                    </svg>&nbsp;
-                                      <p className='publishdate'>{e.publishDate}</p></div>
-                                    &nbsp;
-                                    <div className='icons-flex'> &nbsp;<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 small-icons">
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                      &nbsp;
-                                      <p className='publishdate'>{e.readtime}</p></div>
-                                  </div>
-                                  <div className='intro right-intro' dangerouslySetInnerHTML={{ __html: e.description.slice(0, 200) }} />
-                                </div>
-                              </div>
-                            </Link>
-                            {index === 1 && (
-                              <AdSenseSlot
-                                className='ads-related-posts-slot'
-                                slot={settings.adsenseSidebarSlot}
-                                fallbackText='Ad Slot'
-                              />
-                            )}
-                          </React.Fragment>
-                        )
-                      }
-                      return null
-                    })
-
-
-                  }
+                  {recentBlog.slice(0, 10).map((e, index) => (
+                    <React.Fragment key={e._id}>
+                      <RelatedPost e={e} FALLBACK_BLOG_IMAGE={FALLBACK_BLOG_IMAGE} />
+                      {index === 1 && (
+                        <div style={{ minHeight: '250px', width: '100%' }}>
+                          <AdSenseSlot
+                            className='ads-related-posts-slot'
+                            slot={settings.adsenseSidebarSlot}
+                            fallbackText='Ad Slot'
+                          />
+                        </div>
+                      )}
+                    </React.Fragment>
+                  ))}
                 </div>
               </div>
+
               <div className='comment-section'>
                 <h3 className='comments-heading'>{blog?.comments?.length || 0} Comment{(blog?.comments?.length || 0) === 1 ? '' : 's'}</h3>
                 <div className='comment-form-wrapper'>
@@ -367,26 +376,18 @@ function Blog() {
                     />
                     <div className='comment-form-footer'>
                       <span className='comment-char-count'>{commentText.length}/500</span>
-                      <button 
-                        className='comment-submit' 
-                        onClick={submitComment}
-                        disabled={submittingComment || !commentText.trim()}
-                      >
+                      <button className='comment-submit' onClick={submitComment} disabled={submittingComment || !commentText.trim()}>
                         {submittingComment ? '✓ Posting...' : '✓ Post Comment'}
                       </button>
                     </div>
-                    {commentSuccess && (
-                      <div className='comment-success-msg'>✓ Comment posted successfully!</div>
-                    )}
+                    {commentSuccess && <div className='comment-success-msg'>✓ Comment posted successfully!</div>}
                   </div>
                 </div>
                 <div className='comment-list'>
                   {blog?.comments && blog.comments.length > 0 ? (
                     blog.comments.map((comment, index) => (
                       <div key={`${comment.blogId}-${index}`} className='comment-item'>
-                        <div className='comment-avatar'>
-                          {(comment.userId === loginData?._id ? 'You' : comment.userId || 'Visitor').charAt(0).toUpperCase()}
-                        </div>
+                        <div className='comment-avatar'>{(comment.userId === loginData?._id ? 'You' : comment.userId || 'Visitor').charAt(0).toUpperCase()}</div>
                         <div className='comment-body'>
                           <div className='comment-header'>
                             <strong className='comment-author'>{comment.userId === loginData?._id ? 'You' : comment.userId || 'Visitor'}</strong>
@@ -397,28 +398,21 @@ function Blog() {
                       </div>
                     ))
                   ) : (
-                    <div className='no-comments'>
-                      <p>No comments yet. Be the first to share your thoughts!</p>
-                    </div>
+                    <div className='no-comments'><p>No comments yet. Be the first to share your thoughts!</p></div>
                   )}
                 </div>
               </div>
-              <AdSenseSlot
-                className='ads-blog-footer-slot'
-                slot={settings.adsenseFooterSlot}
-                fallbackText='Ad Slot'
-              />
+              <div style={{ minHeight: '250px' }}>
+                <AdSenseSlot
+                  className='ads-blog-footer-slot'
+                  slot={settings.adsenseFooterSlot}
+                  fallbackText='Ad Slot'
+                />
+              </div>
             </>
-
-          }
-
-
-
-
-
-
+          )}
         </section>
-        <RightSection />
+        <RightSection loading={loading} />
       </div>
     </>
   )
