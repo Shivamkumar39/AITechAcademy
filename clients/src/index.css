@@ -79,7 +79,7 @@ code {
 .blog-placeholder-mini, .blog-placeholder-large {
   position: relative;
   width: 100%;
-  background: linear-gradient(135deg, #00b4d8 0%, #0077ff 100%);
+  background: #f1f5f9; /* Neutral grey/blank background */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -87,10 +87,12 @@ code {
   text-align: center;
   border-radius: 8px;
   box-sizing: border-box;
+  border: 1px dashed #cbd5e1;
 }
 
 .blog-placeholder-mini {
-  height: 200px;
+  height: 100%;
+  min-height: 180px;
 }
 
 .blog-placeholder-large {
@@ -99,9 +101,8 @@ code {
 }
 
 .placeholder-text-small, .placeholder-text-large {
-  color: #fff;
+  color: #475569; /* Darker text for light background */
   font-weight: 800;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;

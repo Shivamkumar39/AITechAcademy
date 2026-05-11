@@ -329,28 +329,26 @@ function Home() {
             ) : (
               allBlogs.slice(0, 10).map((e, index) => (
                 <React.Fragment key={e._id}>
-                  <article className={`blog-card${e.image ? '' : ' no-image'}`}>
-                    {e.image ? (
-                      <Link to={`/blog/${e._id}`}>
+                  <article className='blog-card'>
+                    <Link to={`/blog/${e._id}`} className='recent-blog-img-link'>
+                      {e.image ? (
                         <div className="aspect-ratio-box" style={{ borderRadius: '8px', background: '#f1f5f9', overflow: 'hidden' }}>
                           <img 
                             className='recent-blog-img' 
                             src={e.image} 
-                            alt={e.title || 'Blog'} 
+                            alt={e.title || 'Blog article'} 
                             width="400"
                             height="250"
                             loading="lazy"
                             onError={(event) => { event.currentTarget.src = FALLBACK_BLOG_IMAGE }} 
                           />
                         </div>
-                      </Link>
-                    ) : (
-                      <Link to={`/blog/${e._id}`}>
-                        <div className="blog-placeholder-mini mb-3">
+                      ) : (
+                        <div className="blog-placeholder-mini">
                           <span className="placeholder-text-small">{e.title}</span>
                         </div>
-                      </Link>
-                    )}
+                      )}
+                    </Link>
                     <div className='blogInfo'>
                       <Link to={`/tag/${e.category}`} className='category'>{e.category}</Link>
                       <Link to={`/blog/${e._id}`} style={{ textDecoration: 'none' }}>
