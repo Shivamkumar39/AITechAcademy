@@ -44,6 +44,7 @@ router.post("/addBlog", authentication, async (req, res) => {
     category: String(category || '').trim(),
     readtime: String(readtime || '').trim(),
     tags: Array.isArray(tags) ? tags.map((tag) => String(tag || '').trim()).filter(Boolean) : [],
+    pdfLinks: Array.isArray(req.body.pdfLinks) ? req.body.pdfLinks : [],
     publishDate: date,
   };
   const blog = new Blog(data);
@@ -92,6 +93,7 @@ router.patch("/update/blog/:id", authentication, async (req, res) => {
     category: String(category || '').trim(),
     readtime: String(readtime || '').trim(),
     tags: Array.isArray(tags) ? tags.map((tag) => String(tag || '').trim()).filter(Boolean) : [],
+    pdfLinks: Array.isArray(req.body.pdfLinks) ? req.body.pdfLinks : [],
     authorName: "shivam_kushwaha",
     authorImage: authorImage,
     publishDate: "Edited " + date,
@@ -116,6 +118,12 @@ router.delete("/delete/blog/:id", authentication, async (req, res) => {
     const blog = await Blog.findById(id);
     if (!blog) return res.status(404).json({ error: "Blog not found" });
     if (blog.authorid == req.userId || req.rootUser.role === "admin") {
+      // Preserve views so total view count never decreases
+      await SiteStats.findOneAndUpdate(
+        { key: "global" },
+        { $inc: { totalVisits: blog.views || 0 } },
+        { upsert: true }
+      );
       await Blog.findByIdAndDelete(id);
       res.json({ success: "Blog deleted" });
     } else {

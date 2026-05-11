@@ -49,6 +49,10 @@ const blogSchema=new mongoose.Schema({
     type:String,
     required:true
   },
+  pdfLinks: [{
+    link: String,
+    text: String
+  }],
   tags: {
     type:[String],
     default: []

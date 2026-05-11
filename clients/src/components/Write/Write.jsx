@@ -24,7 +24,8 @@ function Write() {
     readtime: "",
     authorName: "shivam_kushwaha",
     authorImage: "",
-    tags: []
+    tags: [],
+    pdfLinks: []
   });
   const [tagInput, setTagInput] = useState("");
   const [availableTags, setAvailableTags] = useState([]);
@@ -48,7 +49,8 @@ function Write() {
             readtime: blog.readtime || "",
             authorName: blog.authorName || "shivam_kushwaha",
             authorImage: blog.authorImage || "",
-            tags: Array.isArray(blog.tags) ? blog.tags : []
+            tags: Array.isArray(blog.tags) ? blog.tags : [],
+            pdfLinks: Array.isArray(blog.pdfLinks) ? blog.pdfLinks : []
           });
         }
       } finally {
@@ -88,13 +90,29 @@ function Write() {
     setPost((prev) => ({ ...prev, tags: prev.tags.filter((_, index) => index !== removeIndex) }));
   };
 
+  const handlePdfLinkChange = (index, field, value) => {
+    const updated = [...post.pdfLinks];
+    updated[index][field] = value;
+    setPost({ ...post, pdfLinks: updated });
+  };
+  const addPdfLink = () => {
+    if (post.pdfLinks.length < 10) {
+      setPost({ ...post, pdfLinks: [...post.pdfLinks, { text: '', link: '' }] });
+    }
+  };
+  const removePdfLink = (index) => {
+    const updated = [...post.pdfLinks];
+    updated.splice(index, 1);
+    setPost({ ...post, pdfLinks: updated });
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!canManage) {
       alert("Only admin can publish or update articles.");
       return;
     }
-    const body = { ...post, authorid: loginData?._id || null, authorName: post.authorName || "shivam_kushwaha", tags: post.tags };
+    const body = { ...post, authorid: loginData?._id || null, authorName: post.authorName || "shivam_kushwaha", tags: post.tags, pdfLinks: post.pdfLinks };
     if (isEditMode) {
       await updateBlogById(id, body, token);
       alert("Article updated successfully.");
@@ -193,6 +211,38 @@ function Write() {
                 </span>
               ))}
             </div>
+          </div>
+
+          <div className='pdf-links-section mt-4'>
+            <div className='tag-label'>PDF Download Buttons (Max 10)</div>
+            {post.pdfLinks.map((pdf, index) => (
+              <div key={index} className='pdf-link-row' style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                <input
+                  type='text'
+                  className='inputs'
+                  placeholder='Button Text (e.g., Download PDF)'
+                  value={pdf.text}
+                  onChange={(e) => handlePdfLinkChange(index, 'text', e.target.value)}
+                  style={{ flex: 1 }}
+                />
+                <input
+                  type='text'
+                  className='inputs'
+                  placeholder='Google Drive Link'
+                  value={pdf.link}
+                  onChange={(e) => handlePdfLinkChange(index, 'link', e.target.value)}
+                  style={{ flex: 2 }}
+                />
+                <button type='button' className='publish-btn' onClick={() => removePdfLink(index)} style={{ backgroundColor: '#ff4d4f', width: 'auto', padding: '0 15px' }}>
+                  Remove
+                </button>
+              </div>
+            ))}
+            {post.pdfLinks.length < 10 && (
+              <button type='button' className='publish-btn mt-2' onClick={addPdfLink} style={{ backgroundColor: '#28a745', width: 'auto', padding: '10px 20px', borderRadius: '5px' }}>
+                + Add PDF Button
+              </button>
+            )}
           </div>
 
           <button className='publish-btn mt-3' type='submit' disabled={loading}>

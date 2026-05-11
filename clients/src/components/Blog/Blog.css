@@ -781,3 +781,58 @@ button:focus,button:focus{
     font-size: 18px;
   }
 }
+
+/* =============================================
+   PDF Download Buttons
+   ============================================= */
+.pdf-downloads-container {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #fdfdfd;
+  border-radius: 12px;
+  border: 1px solid #eee;
+}
+
+.pdf-downloads-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pdf-downloads-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.pdf-download-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #ff4d4f 0%, #d9363e 100%);
+  color: white !important;
+  text-decoration: none !important;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(255, 77, 79, 0.2);
+  gap: 8px;
+}
+
+.pdf-download-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(255, 77, 79, 0.3);
+  background: linear-gradient(135deg, #ff3335 0%, #c12b32 100%);
+}
+
+.pdf-download-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 6px rgba(255, 77, 79, 0.2);
+}
