@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Stack from '@mui/material/Stack';
 import LinearProgress from '@mui/material/LinearProgress';
 import { useState } from 'react';
+import Navbar from '../Navbar/Navbar'
 const defaultValue = {
   username: "",
   email: "",
@@ -62,6 +63,7 @@ function Register() {
   }
   return (
     <>
+      <Navbar />
 
       <div className='register-page' style={{ transition: "0.6s", display: loading ? "none" : "block" }} onClick={registerpageClick}>
 

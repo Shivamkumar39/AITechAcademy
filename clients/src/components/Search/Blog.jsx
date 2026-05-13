@@ -1,69 +1,105 @@
-import React from 'react'
-import { useState } from 'react'
-import { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { searchBlog } from '../../apis/Blogs'
 
-function Blog(props) {
-  let search = props.search
-  let [blogs, setBlogs] = useState([])
-  const searchForBlogs = async () => {
-    const res = await searchBlog(search)
-    console.log(res)
-    setBlogs(res.data)
-    blogs.filter(e => e.title.toLowerCase().includes(search))
+function Blog({ search }) {
+  const [blogs, setBlogs] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [searched, setSearched] = useState(false)
 
-  }
   useEffect(() => {
+    const searchForBlogs = async () => {
+      if (!search || search.trim() === '') {
+        setBlogs([])
+        setSearched(false)
+        return
+      }
+      setLoading(true)
+      try {
+        const res = await searchBlog(search)
+        setBlogs(Array.isArray(res?.data) ? res.data : [])
+        setSearched(true)
+      } catch {
+        setBlogs([])
+        setSearched(true)
+      } finally {
+        setLoading(false)
+      }
+    }
     searchForBlogs()
   }, [search])
+
+  if (loading) {
+    return (
+      <div className="search-loading">
+        <div className="search-loading-spinner"></div>
+        Searching blogs...
+      </div>
+    )
+  }
+
+  if (!search || search.trim() === '') {
+    return (
+      <div className="search-empty-state">
+        <div className="search-empty-icon">🔍</div>
+        <h3>Search for Blogs</h3>
+        <p>Type something to find interesting blog posts</p>
+      </div>
+    )
+  }
+
+  if (searched && blogs.length === 0) {
+    return (
+      <div className='noResults'>
+        <p>No blogs found for "<strong>{search}</strong>"<br />
+          Make sure all words are spelled correctly.<br />
+          Try different or more general keywords.</p>
+      </div>
+    )
+  }
+
   return (
     <>
-
-
-      <div className='noResults'>
-        <p>Make sure all words are spelled correctly.<br />
-          Try different keywords.<br />
-          Try more general keywords.</p>
-      </div>
-
-      {
-        search && blogs.map((e) => {
-          return (
-            <>
-              <a href={`/blog/${e._id}`} >
-                <div className={`blog-card mt-4${e.image ? '' : ' no-image'}`}>
-                  {e.image ? <img className='recent-blog-img' src={e.image} alt={e.title} /> : null}
-                  <div className='blogInfo'>
-                    <span className='category'>{e.category}</span>
-                    <h3 className='right-blog-title mt-2'>{e.title}</h3>
-                    <div className='minor-info'>
-                      <img className='author-image' src={e.authorImage} alt={e.authorName} />
-                      <span className='publishdate'>&nbsp;&nbsp;{e.authorName}</span>
-                      &nbsp;
-                      <div className='icons-flex'> &nbsp;<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 small-icons">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
-                      </svg>&nbsp;
-
-                        <p className='publishdate'>{e.publishDate}</p></div>
-                      &nbsp;
-                      <div className='icons-flex'> &nbsp;<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 small-icons">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                        &nbsp;
-
-                        <p className='publishdate'>{e.readtime}</p></div>
-                    </div>
-                    <div className='intro right-intro' dangerouslySetInnerHTML={{ __html: e.description.slice(0, 150) }}>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </>
-          )
-        })
-
-
-      }
+      {blogs.map((e) => (
+        <Link key={e._id} to={`/blog/${e._id}`} className="search-blog-card">
+          <div className="search-blog-img-wrap">
+            {e.image ? (
+              <img
+                src={e.image}
+                alt={e.title || 'Blog post'}
+                loading="lazy"
+                onError={(ev) => { ev.currentTarget.src = 'https://via.placeholder.com/400x250?text=Blog' }}
+              />
+            ) : (
+              <div className="search-blog-placeholder">
+                <span>{e.title}</span>
+              </div>
+            )}
+          </div>
+          <div className="search-blog-info">
+            <span className="search-blog-category">{e.category}</span>
+            <h3 className="search-blog-title">{e.title}</h3>
+            <div className="search-blog-meta">
+              {e.authorImage && (
+                <img
+                  src={e.authorImage}
+                  alt={e.authorName || 'Author'}
+                  onError={(ev) => { ev.currentTarget.src = 'https://via.placeholder.com/80?text=User' }}
+                />
+              )}
+              <span>{e.authorName || 'Anonymous'}</span>
+              {e.publishDate && <span>| {e.publishDate}</span>}
+              {e.readtime && <span>| {e.readtime}</span>}
+            </div>
+            {e.description && (
+              <div
+                className="search-blog-desc"
+                dangerouslySetInnerHTML={{ __html: (e.description || '').slice(0, 150) }}
+              />
+            )}
+          </div>
+        </Link>
+      ))}
     </>
   )
 }

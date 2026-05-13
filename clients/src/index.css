@@ -128,3 +128,83 @@ code {
     font-size: 1.4rem;
   }
 }
+
+/* =========================================================
+   Tailwind-equivalent utility classes for SVG icons
+   These are used across Blog, Tagwise, Bookmark, Profile
+   ========================================================= */
+
+/* Width utilities */
+.w-4 { width: 16px !important; }
+.w-6 { width: 24px !important; }
+
+/* Height utilities */
+.h-4 { height: 16px !important; }
+.h-6 { height: 24px !important; }
+
+/* =========================================================
+   SVG Icon Sizing (small-icons used in blog metadata)
+   ========================================================= */
+.small-icons {
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+/* Icon + text flex container */
+.icons-flex {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.icons-flex svg {
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0;
+}
+
+.icons-flex p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+/* Global SVG constraint inside metadata areas */
+.profileMinorInfo svg,
+.minor-info svg,
+.blog-meta-footer svg,
+.read-time-small svg {
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0;
+}
+
+/* Blog action icons (bookmark, link, share) */
+.blog-icons {
+  width: 20px !important;
+  height: 20px !important;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Responsive icon sizing */
+@media (max-width: 480px) {
+  .small-icons,
+  .icons-flex svg,
+  .profileMinorInfo svg,
+  .minor-info svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  .blog-icons {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .w-6 { width: 20px !important; }
+  .h-6 { height: 20px !important; }
+}

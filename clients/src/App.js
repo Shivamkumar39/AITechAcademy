@@ -3,6 +3,9 @@ import React, { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { trackSiteVisit } from './apis/Blogs';
 import { useSiteSettings } from './utils/siteSettings';
+import Footer from './components/Footer/Footer';
+import CookieConsent from './components/Common/CookieConsent';
+import ScrollToTop from './components/Common/ScrollToTop';
 
 // Lazy loading components for better performance
 const Login = lazy(() => import('./components/Login/Login'));
@@ -25,8 +28,6 @@ const TermsAndConditions = lazy(() => import('./components/Legal/TermsAndConditi
 const About = lazy(() => import('./components/Legal/About'));
 const ContactUs = lazy(() => import('./components/Legal/ContactUs'));
 const Disclaimer = lazy(() => import('./components/Legal/Disclaimer'));
-const Footer = lazy(() => import('./components/Footer/Footer'));
-const CookieConsent = lazy(() => import('./components/Common/CookieConsent'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -97,6 +98,7 @@ function App() {
       <AppRoutes />
       <Footer/>
       <CookieConsent />
+      <ScrollToTop />
     </Router>
   );
 }

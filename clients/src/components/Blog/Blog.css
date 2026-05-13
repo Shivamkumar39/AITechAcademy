@@ -37,7 +37,7 @@
   margin-bottom: -20px;
 }
 .profileMinorInfo div{
-  margin-top: -12px;
+  margin-top: 0;
 }
 .single-blog-title{
   font-size: 28px;
@@ -272,7 +272,7 @@
   cursor: pointer;
 }
 .blog-icons{
-  margin-top: -14px;
+  margin-top: 0;
   cursor: pointer;
 }
 .single-blog-container{

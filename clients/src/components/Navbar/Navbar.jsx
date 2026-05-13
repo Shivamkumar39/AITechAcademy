@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';
-import { BiLogOut } from 'react-icons/bi';
+import { BiLogOut, BiLogIn } from 'react-icons/bi';
 import { MdDashboard } from 'react-icons/md';
 import { Link, useNavigate } from 'react-router-dom';
 import { SidebarData } from './SidebarData';
+import { BsPencilSquare, BsBookmarks } from "react-icons/bs"
 import './Navbar.css';
 import { IconContext } from 'react-icons';
 import { LoginContext } from '../../contextProvider/Context';
@@ -134,6 +135,24 @@ function Navbar() {
               </li>
             ))}
 
+            {loginData?._id ? (
+              <li className='nav-text'>
+                <Link to='/bookmarks' className='nav-link'>
+                  <BsBookmarks />
+                  <span className='nav-icons'>Bookmarks</span>
+                </Link>
+              </li>
+            ) : null}
+
+            {loginData?.role === 'admin' ? (
+              <li className='nav-text'>
+                <Link to='/write' className='nav-link'>
+                  <BsPencilSquare />
+                  <span className='nav-icons'>Write</span>
+                </Link>
+              </li>
+            ) : null}
+
             <li className='nav-text sidebar-social-section'>
               <div className='sidebar-social-header'>Follow Us</div>
               <div className='sidebar-social-icons'>
@@ -186,7 +205,14 @@ function Navbar() {
                   <span className='nav-icons'>Logout</span>
                 </button>
               </li>
-            ) : null}
+            ) : (
+              <li className='nav-text'>
+                <Link to='/login' className='nav-link'>
+                  <BiLogIn />
+                  <span className='nav-icons'>Login</span>
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
       </IconContext.Provider>

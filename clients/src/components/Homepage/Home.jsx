@@ -32,14 +32,14 @@ const FeaturedBlogs = memo(({ blogs }) => {
             <h2 className='title mt-2 mb-4'>{blog.title}</h2>
             {blog.image ? (
               <div className="aspect-ratio-box" style={{ borderRadius: '8px', background: '#f1f5f9', overflow: 'hidden' }}>
-                <img 
-                  className='blog-image' 
-                  src={blog.image} 
-                  alt={blog.title || 'Blog image'} 
+                <img
+                  className='blog-image'
+                  src={blog.image}
+                  alt={blog.title || 'Blog image'}
                   width="1200"
                   height="700"
                   loading="lazy"
-                  onError={(e) => { e.currentTarget.src = FALLBACK_BLOG_IMAGE }} 
+                  onError={(e) => { e.currentTarget.src = FALLBACK_BLOG_IMAGE }}
                 />
               </div>
             ) : (
@@ -50,14 +50,14 @@ const FeaturedBlogs = memo(({ blogs }) => {
           </Link>
           <div className='minor-info mt-3'>
             <Link style={{ textDecoration: 'none' }} to={`/profile/${blog.authorid}`}>
-              <img 
-                className='author-image' 
-                src={blog.authorImage} 
-                alt={blog.authorName || 'Author'} 
+              <img
+                className='author-image'
+                src={blog.authorImage}
+                alt={blog.authorName || 'Author'}
                 width="40"
                 height="40"
                 loading="lazy"
-                onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/80?text=User" }} 
+                onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/80?text=User" }}
               />
             </Link>
             <span className='publishdate'>{blog.authorName || 'Anonymous'}</span>
@@ -81,14 +81,14 @@ const ShortBlogs = memo(({ blogs }) => {
             <h3 className='right-blog-title short-blog-title mt-3'>{e.title}</h3>
           </Link>
           <div className='minor-info pt-2 mb-0'>
-            <img 
-              className='author-image' 
-              src={e.authorImage} 
-              alt={e.authorName || 'Author'} 
+            <img
+              className='author-image'
+              src={e.authorImage}
+              alt={e.authorName || 'Author'}
               width="40"
               height="40"
               loading="lazy"
-              onError={(ev) => { ev.currentTarget.src = "https://via.placeholder.com/80?text=User" }} 
+              onError={(ev) => { ev.currentTarget.src = "https://via.placeholder.com/80?text=User" }}
             />
             <p className='publishdate'>{e.publishDate}</p>
             <p className='publishdate'>| {e.readtime}</p>
@@ -120,14 +120,14 @@ const PopularAuthors = memo(() => {
   return (
     <Link to={`/profile/${author._id}`} style={{ textDecoration: 'none' }}>
       <div className='profile mb-5'>
-        <img 
-          className='top-author' 
-          src={author.profilePic} 
-          alt={author.username || 'Author'} 
+        <img
+          className='top-author'
+          src={author.profilePic}
+          alt={author.username || 'Author'}
           width="120"
           height="120"
           loading="lazy"
-          onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/120?text=Author" }} 
+          onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/120?text=Author" }}
         />
         <div className='author-info'>
           <h4 className='authorName'>{author.username}</h4>
@@ -284,9 +284,9 @@ function Home() {
 
       <div className='container-fluid homepage'>
         <section className='left-section'>
-             <AdBanner className='ads-banner-slot' />
+          <AdBanner className='ads-banner-slot' />
           <h3 className='featured'><span className='backgroundColor'>&nbsp;Featured </span>&nbsp;This Week</h3>
-          
+
           {loading ? (
             <div className="featured-blogs">
               <SkeletonBlogCard />
@@ -296,21 +296,21 @@ function Home() {
             <FeaturedBlogs blogs={allBlogs} />
           )}
 
-            <AdSenseSlot
-              className='ads-infeed-slot'
-              slot={settings.adsenseInfeedSlot}
-              fallbackText='In-feed Ad Slot'
-              minHeight="250px"
-            />
+          <AdSenseSlot
+            className='ads-infeed-slot'
+            slot={settings.adsenseInfeedSlot}
+            fallbackText='In-feed Ad Slot'
+            minHeight="250px"
+          />
         </section>
 
         <section className='right-section'>
-            <AdSenseSlot
-              className='ads-side-slot'
-              slot={settings.adsenseSidebarSlot}
-              fallbackText='Sidebar Ad Slot (Google AdSense)'
-              minHeight="300px"
-            />
+          <AdSenseSlot
+            className='ads-side-slot'
+            slot={settings.adsenseSidebarSlot}
+            fallbackText='Sidebar Ad Slot (Google AdSense)'
+            minHeight="300px"
+          />
           <div className='right-blog'>
             <h3 className='featured'><span className='backgroundColor'>&nbsp;Popular </span>&nbsp;Posted</h3>
             <div className='scroll'>
@@ -333,14 +333,14 @@ function Home() {
                     <Link to={`/blog/${e._id}`} className='recent-blog-img-link'>
                       {e.image ? (
                         <div className="aspect-ratio-box" style={{ borderRadius: '8px', background: '#f1f5f9', overflow: 'hidden' }}>
-                          <img 
-                            className='recent-blog-img' 
-                            src={e.image} 
-                            alt={e.title || 'Blog article'} 
+                          <img
+                            className='recent-blog-img'
+                            src={e.image}
+                            alt={e.title || 'Blog article'}
                             width="400"
                             height="250"
                             loading="lazy"
-                            onError={(event) => { event.currentTarget.src = FALLBACK_BLOG_IMAGE }} 
+                            onError={(event) => { event.currentTarget.src = FALLBACK_BLOG_IMAGE }}
                           />
                         </div>
                       ) : (
@@ -356,14 +356,14 @@ function Home() {
                       </Link>
                       <div className='minor-info'>
                         <Link style={{ textDecoration: 'none' }} to={`/profile/${e.authorid}`}>
-                          <img 
-                            className='author-image' 
-                            src={e.authorImage} 
-                            alt={e.authorName || 'Author'} 
+                          <img
+                            className='author-image'
+                            src={e.authorImage}
+                            alt={e.authorName || 'Author'}
                             width="40"
                             height="40"
                             loading="lazy"
-                            onError={(event) => { event.currentTarget.src = "https://via.placeholder.com/80?text=User" }} 
+                            onError={(event) => { event.currentTarget.src = "https://via.placeholder.com/80?text=User" }}
                           />
                         </Link>
                         <span className='publishdate'>{e.authorName}</span>
@@ -374,12 +374,12 @@ function Home() {
                     </div>
                   </article>
                   {index === 1 && (
-                      <AdSenseSlot
-                        className='ads-in-article-slot'
-                        slot={settings.adsenseInArticleSlot}
-                        fallbackText='In-article Ad'
-                        minHeight="250px"
-                      />
+                    <AdSenseSlot
+                      className='ads-in-article-slot'
+                      slot={settings.adsenseInArticleSlot}
+                      fallbackText='In-article Ad'
+                      minHeight="250px"
+                    />
                   )}
                 </React.Fragment>
               ))
@@ -389,12 +389,12 @@ function Home() {
 
         <RightSection catCount={catCount} loading={loading} />
       </section>
-        <AdSenseSlot
-          className='ads-footer-slot'
-          slot={settings.adsenseFooterSlot}
-          fallbackText='Footer Ad Slot (Google AdSense)'
-          minHeight="250px"
-        />
+      <AdSenseSlot
+        className='ads-footer-slot'
+        slot={settings.adsenseFooterSlot}
+        fallbackText='Footer Ad Slot (Google AdSense)'
+        minHeight="250px"
+      />
     </>
   )
 }

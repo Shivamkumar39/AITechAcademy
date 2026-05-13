@@ -8,6 +8,7 @@ import Stack from '@mui/material/Stack';
 import LinearProgress from '@mui/material/LinearProgress';
 
 import axios from 'axios'
+import Navbar from '../Navbar/Navbar'
 const defaultData = {
   email: "",
   password: ""
@@ -52,6 +53,7 @@ function Login() {
   }
   return (
     <>
+      <Navbar />
 
       <div className='login-page' onClick={() => setErrorExits(false)}>
         <form className='container login-card'>
