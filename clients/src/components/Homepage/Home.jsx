@@ -139,6 +139,16 @@ const Home = () => {
   const settings = useSiteSettings()
 
   useEffect(() => {
+    const handleVisitUpdate = (e) => {
+      if (e.detail?.totalVisits) {
+        setSiteStats(prev => ({ ...prev, ...e.detail }));
+      }
+    };
+    window.addEventListener('site-visit-updated', handleVisitUpdate);
+    return () => window.removeEventListener('site-visit-updated', handleVisitUpdate);
+  }, []);
+
+  useEffect(() => {
     const loadData = async () => {
       setLoading(true)
       try {

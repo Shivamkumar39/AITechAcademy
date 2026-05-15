@@ -75,6 +75,16 @@ function Blog() {
   const settings = useSiteSettings()
   const guestId = getGuestId()
 
+  useEffect(() => {
+    const handleVisitUpdate = (e) => {
+      if (e.detail?.totalVisits) {
+        setSiteStats(prev => ({ ...prev, ...e.detail }));
+      }
+    };
+    window.addEventListener('site-visit-updated', handleVisitUpdate);
+    return () => window.removeEventListener('site-visit-updated', handleVisitUpdate);
+  }, []);
+
   const getRecent = async () => {
     const cachedBlogs = localStorage.getItem('CACHE_BLOGS');
     if (cachedBlogs) {
