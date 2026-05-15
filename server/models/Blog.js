@@ -7,7 +7,8 @@ const blogSchema=new mongoose.Schema({
   },
   authorid:{
     type:String,
-    required:false
+    required:false,
+    index: true
   },
  authorImage:{
   type:String
@@ -47,7 +48,8 @@ const blogSchema=new mongoose.Schema({
   ],
   category:{
     type:String,
-    required:true
+    required:true,
+    index: true
   },
   pdfLinks: [{
     link: String,
@@ -69,5 +71,10 @@ const blogSchema=new mongoose.Schema({
     type:String,
     required:true
   },
-})
+  slug: {
+    type: String,
+    unique: true,
+    sparse: true
+  }
+}, { timestamps: true })
 module.exports=mongoose.model("Blog",blogSchema)

@@ -6,6 +6,9 @@ const blogController = require("../controllers/blogController");
 router.post("/addBlog", authentication, blogController.addBlog);
 router.get("/blogs", blogController.getAllBlogs);
 router.get("/blog/:id", blogController.getBlogById);
+router.get("/blog-image/:id", blogController.getBlogImage);
+router.get("/post/:slug", blogController.getBlogBySlug);
+router.get("/sitemap.xml", blogController.generateSitemap);
 router.patch("/update/blog/:id", authentication, blogController.updateBlog);
 router.delete("/delete/blog/:id", authentication, blogController.deleteBlog);
 

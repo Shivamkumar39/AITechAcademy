@@ -75,6 +75,13 @@ export const getBlogById=async(id)=>{
     // Error
   }
 }
+export const getBlogBySlug=async(slug)=>{
+  try {
+    return await axios.get(`${url}/post/${slug}`)
+  } catch (error) {
+    // Error
+  }
+}
 export const getAuthorBlogs=async(id)=>{
   try {
     return await axios.get(`${url}/blogsByAuthorId/${id}`)

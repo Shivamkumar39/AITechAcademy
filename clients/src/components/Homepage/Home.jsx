@@ -100,6 +100,48 @@ const ShortBlogs = memo(({ blogs }) => {
   )
 })
 
+const LazyBlogImage = ({ blogId, title, url }) => {
+  const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    axios.get(`${url}/blog-image/${blogId}`)
+      .then(res => {
+        if (isMounted) {
+          setImage(res.data.image);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted) setLoading(false);
+      });
+    return () => { isMounted = false };
+  }, [blogId, url]);
+
+  return (
+    <div className="aspect-ratio-box" style={{ borderRadius: '8px', background: '#f1f5f9', overflow: 'hidden', minHeight: '180px' }}>
+      {image ? (
+        <img
+          className='recent-blog-img'
+          src={image}
+          alt={title || 'Blog article'}
+          width="400"
+          height="250"
+          loading="lazy"
+          style={{ transition: 'opacity 0.3s ease-in-out' }}
+        />
+      ) : (
+        <div className="blog-placeholder-mini" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+          <span className="placeholder-text-small" style={{ color: '#94a3b8' }}>
+            {loading ? 'Loading Image...' : 'No Image'}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const PopularAuthors = memo(() => {
   const [author, setAuthor] = useState(null)
 
@@ -235,41 +277,54 @@ function Home() {
 
   useEffect(() => {
     const loadInitial = async () => {
-      setLoading(true)
-      try {
-        const token = localStorage.getItem("JWTFINALTOKEN")
+      // 1. Instant Load from Cache
+      const cachedBlogs = localStorage.getItem('CACHE_BLOGS');
+      const cachedCats = localStorage.getItem('CACHE_CATS');
+      if (cachedBlogs) setAllBlogs(JSON.parse(cachedBlogs));
+      if (cachedCats) setCatCount(JSON.parse(cachedCats));
+      
+      // If we have cache, don't show loading spinner
+      if (cachedBlogs) setLoading(false);
+      else setLoading(true);
 
-        const [blogsRes, catRes, statsRes] = await Promise.all([
-          getAllBlogs().catch(() => ({ data: [] })),
-          categoryCount().catch(() => ({ data: {} })),
-          getSiteStats().catch(() => ({ data: { totalViews: 0 } }))
-        ])
+      // 2. STAGE 1: Fetch Content
+      getAllBlogs().then((res) => {
+        const blogs = Array.isArray(res?.data) ? res.data : [];
+        setAllBlogs(blogs);
+        localStorage.setItem('CACHE_BLOGS', JSON.stringify(blogs));
+        setLoading(false);
+      }).catch(() => setLoading(false));
 
-        const blogs = Array.isArray(blogsRes?.data) ? blogsRes.data : []
-        const sortedBlogs = [...blogs].sort((a, b) => (a._id < b._id ? 1 : -1))
+      // 3. Background Data
+      categoryCount().then((res) => {
+        const data = res?.data || {};
+        setCatCount(data);
+        localStorage.setItem('CACHE_CATS', JSON.stringify(data));
+      }).catch(() => {});
 
-        setAllBlogs(sortedBlogs)
-        setCatCount(catRes?.data || {})
-        if (statsRes?.data?.totalViews !== undefined) {
-          window.dispatchEvent(new CustomEvent('site-visit-updated', { detail: { totalViews: statsRes.data.totalViews } }))
+      getSiteStats().then((res) => {
+        if (res?.data) {
+          localStorage.setItem('CACHE_STATS', JSON.stringify(res.data));
+          window.dispatchEvent(new CustomEvent('site-visit-updated', { detail: res.data }));
         }
+      }).catch(() => {});
 
-        if (token) {
-          try {
-            const res = await axios.get(`${url}/validuser`, { headers: { Authorization: token } })
-            if (res?.data?.status === 201) setLoginData(res.data.userValid)
-            else setLoginData({})
-          } catch {
-            setLoginData({})
-          }
-        }
-      } finally {
-        setLoading(false)
+      // 4. Auth Check
+      const token = localStorage.getItem("JWTFINALTOKEN");
+      if (token) {
+        axios.get(`${url}/validuser`, { headers: { Authorization: token } })
+          .then((res) => {
+            if (res?.data?.status === 201) setLoginData(res.data.userValid);
+          })
+          .catch(() => {
+            localStorage.removeItem("JWTFINALTOKEN");
+            setLoginData({});
+          });
       }
-    }
+    };
 
-    loadInitial()
-  }, [setLoginData])
+    loadInitial();
+  }, [setLoginData]);
 
   return (
     <>
@@ -285,7 +340,7 @@ function Home() {
       <div className='container-fluid homepage'>
         <section className='left-section'>
           <AdBanner className='ads-banner-slot' />
-          <h3 className='featured'><span className='backgroundColor'>&nbsp;Featured </span>&nbsp;This Week</h3>
+          <h1 className='featured main-h1'><span className='backgroundColor'>&nbsp;Featured </span>&nbsp;This Week</h1>
 
           {loading ? (
             <div className="featured-blogs">
@@ -330,47 +385,29 @@ function Home() {
               allBlogs.slice(0, 10).map((e, index) => (
                 <React.Fragment key={e._id}>
                   <article className='blog-card'>
-                    <Link to={`/blog/${e._id}`} className='recent-blog-img-link'>
-                      {e.image ? (
-                        <div className="aspect-ratio-box" style={{ borderRadius: '8px', background: '#f1f5f9', overflow: 'hidden' }}>
-                          <img
-                            className='recent-blog-img'
-                            src={e.image}
-                            alt={e.title || 'Blog article'}
-                            width="400"
-                            height="250"
-                            loading="lazy"
-                            onError={(event) => { event.currentTarget.src = FALLBACK_BLOG_IMAGE }}
-                          />
-                        </div>
-                      ) : (
-                        <div className="blog-placeholder-mini">
-                          <span className="placeholder-text-small">{e.title}</span>
-                        </div>
-                      )}
+                    <Link to={`/blog/${e.slug}`} className='recent-blog-img-link'>
+                      <LazyBlogImage blogId={e._id} title={e.title} url={url} />
                     </Link>
                     <div className='blogInfo'>
                       <Link to={`/tag/${e.category}`} className='category'>{e.category}</Link>
-                      <Link to={`/blog/${e._id}`} style={{ textDecoration: 'none' }}>
-                        <h3 className='right-blog-title mt-2'>{e.title}</h3>
+                      <Link to={`/blog/${e.slug}`} style={{ textDecoration: 'none' }}>
+                        <h1 className='single-blog-title'>{e.title}</h1>
                       </Link>
                       <div className='minor-info'>
                         <Link style={{ textDecoration: 'none' }} to={`/profile/${e.authorid}`}>
-                          <img
-                            className='author-image'
-                            src={e.authorImage}
-                            alt={e.authorName || 'Author'}
-                            width="40"
-                            height="40"
-                            loading="lazy"
-                            onError={(event) => { event.currentTarget.src = "https://via.placeholder.com/80?text=User" }}
-                          />
+                          <div className='author-details'>
+                            <img
+                              className='author-image'
+                              src={e.authorImage || FALLBACK_BLOG_IMAGE}
+                              alt={e.authorName}
+                              loading="lazy"
+                            />
+                            <span className='author-name'>{e.authorName}</span>
+                          </div>
                         </Link>
-                        <span className='publishdate'>{e.authorName}</span>
                         <span className='publishdate'>| {e.publishDate}</span>
                         <span className='publishdate'>| {e.readtime}</span>
                       </div>
-                      <div className='intro right-intro recent-blogs-intro' dangerouslySetInnerHTML={{ __html: `${(e.description || '').slice(0, 150)}...` }} />
                     </div>
                   </article>
                   {index === 1 && (

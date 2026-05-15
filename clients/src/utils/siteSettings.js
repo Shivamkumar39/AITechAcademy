@@ -39,18 +39,29 @@ export function saveSiteSettings(settings) {
   window.dispatchEvent(new Event("site-settings-updated"));
 }
 
+let settingsPromise = null;
+
 export async function loadSiteSettings() {
-  try {
-    const response = await fetch(`${API_URL}/site-settings`);
-    const data = await response.json();
-    if (data?.settings) {
-      saveSiteSettings(data.settings);
-      return data.settings;
+  if (settingsPromise) return settingsPromise;
+
+  settingsPromise = (async () => {
+    try {
+      const response = await fetch(`${API_URL}/site-settings`);
+      const data = await response.json();
+      if (data?.settings) {
+        saveSiteSettings(data.settings);
+        return data.settings;
+      }
+    } catch (error) {
+      console.error("Unable to load site settings", error);
+    } finally {
+      // Clear promise after some time to allow fresh updates later if needed
+      setTimeout(() => { settingsPromise = null; }, 300000); // 5 minutes cache
     }
-  } catch (error) {
-    console.error("Unable to load site settings", error);
-  }
-  return getSiteSettings();
+    return getSiteSettings();
+  })();
+
+  return settingsPromise;
 }
 
 export function useSiteSettings() {

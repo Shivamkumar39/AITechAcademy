@@ -25,7 +25,8 @@ function Write() {
     authorName: "shivam_kushwaha",
     authorImage: "",
     tags: [],
-    pdfLinks: []
+    pdfLinks: [],
+    slug: ""
   });
   const [tagInput, setTagInput] = useState("");
   const [availableTags, setAvailableTags] = useState([]);
@@ -50,7 +51,8 @@ function Write() {
             authorName: blog.authorName || "shivam_kushwaha",
             authorImage: blog.authorImage || "",
             tags: Array.isArray(blog.tags) ? blog.tags : [],
-            pdfLinks: Array.isArray(blog.pdfLinks) ? blog.pdfLinks : []
+            pdfLinks: Array.isArray(blog.pdfLinks) ? blog.pdfLinks : [],
+            slug: blog.slug || ""
           });
         }
       } finally {
@@ -142,6 +144,8 @@ function Write() {
       <div className='container mt-5'>
         <form onSubmit={onSubmit}>
           <input onChange={onChange} value={post.title} className='inputs' type="text" name="title" placeholder="Title" required />
+          <input onChange={onChange} value={post.slug} className='inputs mt-2' type="text" name="slug" placeholder="Custom URL Slug (optional - e.g. my-cool-post)" />
+          <small className="form-text text-muted thumbnailMessage mb-3">Leave blank to auto-generate from title.</small>
 
           {canManage ? (
             <button className="thumbnailbtn" type="button">

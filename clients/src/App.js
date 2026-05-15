@@ -51,7 +51,6 @@ function AppRoutes() {
         <Route exact path='/login' element={<Login/>}/>
         <Route exact path='/register' element={<Register/>}/>
         <Route exact path='/' element={<Home/>}/>
-        <Route path='/blog/:id' element={<Blog/>}/>
         <Route exact path='/navbar' element={<Navbar/>}/>
         <Route exact path='/edit/:id' element={<EditProfile/>}/>
         <Route exact path='/profile/:id' element={<Profile/>}/>
@@ -68,6 +67,7 @@ function AppRoutes() {
         <Route exact path='/about' element={<About/>}/>
         <Route exact path='/contact-us' element={<ContactUs/>}/>
         <Route exact path='/disclaimer' element={<Disclaimer/>}/>
+        <Route path='/blog/:slug' element={<Blog/>}/>
         <Route path='*' element={<Error/>}/>
       </Routes>
     </Suspense>

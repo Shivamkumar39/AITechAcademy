@@ -32,7 +32,7 @@ const modalStyle = {
 };
 
 const ProfileBlogCard = memo(({ e }) => (
-  <Link style={{ textDecoration: "none" }} to={`/blog/${e._id}`}>
+  <Link style={{ textDecoration: "none" }} to={`/blog/${e.slug}`}>
     <div className='blog my-blog-single'>
       <div className="profile-blog-image-wrapper">
         {e.image ? (

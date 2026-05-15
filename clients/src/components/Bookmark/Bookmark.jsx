@@ -77,12 +77,12 @@ function Bookmark() {
           <div className='bookmarks-grid'>
             {bookmarks.map((blog) => (
               <article className='blog-card bookmark-card' key={blog._id}>
-                <Link to={`/blog/${blog._id}`} className='bookmark-img-link'>
+                <Link to={`/blog/${blog.slug}`} className='bookmark-img-link'>
                   <img className='recent-blog-img' src={blog.image} alt={blog.title} />
                 </Link>
                 <div className='blogInfo'>
                   <Link to={`/tag/${blog.category}`} className='category'>{blog.category}</Link>
-                  <Link to={`/blog/${blog._id}`} style={{ textDecoration: 'none' }}>
+                  <Link to={`/blog/${blog.slug}`} style={{ textDecoration: 'none' }}>
                     <h3 className='right-blog-title mt-2'>{blog.title}</h3>
                   </Link>
                   <div className='minor-info'>

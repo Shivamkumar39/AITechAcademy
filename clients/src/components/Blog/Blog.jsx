@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useContext, memo } from 'react'
+import { Helmet } from 'react-helmet-async'
 import "./Blog.css"
 import { BsLink45Deg } from 'react-icons/bs';
 import { AiOutlineShareAlt, AiOutlineLike, AiFillLike } from 'react-icons/ai';
 import { VscComment } from "react-icons/vsc"
 import { MdOutlineBookmarkAdd, MdOutlineBookmark } from "react-icons/md"
 import { Link, useParams } from "react-router-dom"
-import { bookmark, getAllBlogs, getBlogById, likeBlog, unbookmark, unlikeBlog, addComment } from "../../apis/Blogs.js"
+import { bookmark, getAllBlogs, getBlogBySlug, likeBlog, unbookmark, unlikeBlog, addComment } from "../../apis/Blogs.js"
 import { LoginContext } from '../../contextProvider/Context';
 import { RightSection } from "../Homepage/Home.jsx"
 import Navbar from '../Navbar/Navbar';
@@ -16,7 +17,7 @@ import { getGuestId, useSiteSettings } from '../../utils/siteSettings'
 import { SkeletonBlogDetail, SkeletonBlogCard } from '../Common/Skeletons'
 
 const RelatedPost = memo(({ e, FALLBACK_BLOG_IMAGE }) => (
-  <Link style={{ textDecoration: "none" }} to={`/blog/${e._id}`} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+  <Link style={{ textDecoration: "none" }} to={`/blog/${e.slug}`} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
     <div className='blog-card related-blog-card'>
       <div className="aspect-ratio-box" style={{ borderRadius: '8px', height: '180px', background: '#f1f5f9', overflow: 'hidden' }}>
         {e.image ? (
@@ -45,7 +46,7 @@ const RelatedPost = memo(({ e, FALLBACK_BLOG_IMAGE }) => (
 
 function Blog() {
   const FALLBACK_BLOG_IMAGE = "https://via.placeholder.com/1200x700?text=AIVista+Journal"
-  const { id } = useParams()
+  const { slug } = useParams()
   const [blog, setBlog] = useState(null)
   const [recentBlog, setRecentBlog] = useState([])
 
@@ -63,24 +64,51 @@ function Blog() {
   const guestId = getGuestId()
 
   const getRecent = async () => {
-    const res = await getAllBlogs()
+    const cachedBlogs = localStorage.getItem('CACHE_BLOGS');
+    if (cachedBlogs) {
+      setRecentBlog(JSON.parse(cachedBlogs));
+    }
+    const res = await getAllBlogs().catch(() => ({ data: [] }))
     const allBlogs = Array.isArray(res?.data) ? res.data : []
     const sortedBlogs = [...allBlogs].sort((a, b) => (a._id < b._id ? 1 : -1))
     setRecentBlog(sortedBlogs)
+    localStorage.setItem('CACHE_BLOGS', JSON.stringify(sortedBlogs));
   }
+
   const getBlog = async (isInitialLoad = false) => {
     if (isInitialLoad) {
       setLoading(true)
+      // 1. Try to find in global cache first (from home page)
+      const cachedList = JSON.parse(localStorage.getItem('CACHE_BLOGS') || '[]');
+      const foundInList = cachedList.find(b => b.slug === slug);
+      
+      // 2. Try to find in specific blog cache
+      const specificCache = JSON.parse(localStorage.getItem(`BLOG_CACHE_${slug}`) || 'null');
+      
+      if (specificCache) {
+        setBlog(specificCache);
+        setLikes(specificCache.likes || []);
+        setLoading(false); // Stop skeleton if we have full data
+      } else if (foundInList) {
+        setBlog(foundInList); // Show basic info while full blog loads
+      }
     }
-    const res = await getBlogById(id)
-    const data = res?.data?.message
-    if (data) {
-      setBlog(data)
-      setLikes(data.likes || [])
-    }
-    if (isInitialLoad) {
-      setLoading(false)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+
+    try {
+      const res = await getBlogBySlug(slug)
+      const data = res?.data?.message
+      if (data) {
+        setBlog(data)
+        setLikes(data.likes || [])
+        localStorage.setItem(`BLOG_CACHE_${slug}`, JSON.stringify(data));
+      }
+    } catch (err) {
+      console.error("Failed to load blog", err);
+    } finally {
+      if (isInitialLoad) {
+        setLoading(false)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
     }
   }
   const checkLogin = () => {
@@ -98,7 +126,7 @@ function Blog() {
     }
     // Optimistic update
     setBookmark(true)
-    await bookmark(id, { userId: loginData._id })
+    await bookmark(blog._id, { userId: loginData._id })
     getBlog(false) // Silent sync
   }
   const unbookmarkBlog = async () => {
@@ -109,7 +137,7 @@ function Blog() {
     }
     // Optimistic update
     setBookmark(false)
-    await unbookmark(id, { userId: loginData._id })
+    await unbookmark(blog._id, { userId: loginData._id })
     getBlog(false) // Silent sync
   }
   const like = async () => {
@@ -118,7 +146,7 @@ function Blog() {
     setLiked(true)
     setLikes(prev => prev.includes(currentUserId) ? prev : [...prev, currentUserId])
     
-    await likeBlog(id, { userId: currentUserId })
+    await likeBlog(blog._id, { userId: currentUserId })
     getBlog(false) // Silent sync
   }
   const unlike = async () => {
@@ -127,7 +155,7 @@ function Blog() {
     setLiked(false)
     setLikes(prev => prev.filter(userId => userId !== currentUserId))
     
-    await unlikeBlog(id, { userId: currentUserId })
+    await unlikeBlog(blog._id, { userId: currentUserId })
     getBlog(false) // Silent sync
   }
   const submitComment = async () => {
@@ -140,9 +168,9 @@ function Blog() {
       const newComment = {
         userId: loginData?._id || guestId,
         info: commentText.trim(),
-        blogId: id,
+        blogId: blog._id,
       }
-      await addComment(id, { userId: newComment.userId, info: newComment.info })
+      await addComment(blog._id, { userId: newComment.userId, info: newComment.info })
       
       // Optimistic update
       setBlog((prevBlog) => ({
@@ -177,7 +205,7 @@ function Blog() {
   }
   useEffect(() => {
     getBlog(true) // Initial load with loading state and scroll
-  }, [id])
+  }, [slug])
 
   useEffect(() => {
     getRecent()
@@ -193,6 +221,37 @@ function Blog() {
 
   return (
     <>
+      {blog && (
+        <Helmet>
+          <title>{blog.title} | AITECHACADEMY</title>
+          <meta name="description" content={blog.description?.replace(/<[^>]+>/g, '').slice(0, 160)} />
+          <meta name="keywords" content={blog.tags?.join(",")} />
+          <link rel="canonical" href={`https://aitechacademy.online/blog/${blog.slug}`} />
+          <meta property="og:title" content={blog.title} />
+          <meta property="og:description" content={blog.description?.replace(/<[^>]+>/g, '').slice(0, 160)} />
+          <meta property="og:image" content={blog.image} />
+          <meta property="og:url" content={`https://aitechacademy.online/blog/${blog.slug}`} />
+          <meta property="og:type" content="article" />
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BlogPosting",
+              headline: blog.title,
+              image: blog.image,
+              author: {
+                "@type": "Person",
+                name: blog.authorName || "AITECHACADEMY"
+              },
+              publisher: {
+                "@type": "Organization",
+                name: "AITECHACADEMY"
+              },
+              datePublished: blog.publishDate,
+              description: blog.description?.replace(/<[^>]+>/g, '').slice(0, 160)
+            })}
+          </script>
+        </Helmet>
+      )}
       <Navbar />
       <div className='blog-container'>
         <section className='blog-section'>
@@ -244,7 +303,7 @@ function Blog() {
               </div>
               <AdBanner className='ads-blog-header-slot' />
               <div className='single-blog-container'>
-                <h3 className='single-blog-title'>{blog.title}</h3>
+                <h1 className='single-blog-title'>{blog.title}</h1>
                 <div className="aspect-ratio-box" style={{ borderRadius: '12px', marginBottom: '30px' }}>
                   <img 
                     className='single-blog-image' 

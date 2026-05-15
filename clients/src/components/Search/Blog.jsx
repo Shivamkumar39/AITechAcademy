@@ -61,7 +61,7 @@ function Blog({ search }) {
   return (
     <>
       {blogs.map((e) => (
-        <Link key={e._id} to={`/blog/${e._id}`} className="search-blog-card">
+        <Link key={e._id} to={`/blog/${e.slug}`} className="search-blog-card">
           <div className="search-blog-img-wrap">
             {e.image ? (
               <img

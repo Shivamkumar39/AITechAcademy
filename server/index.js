@@ -7,16 +7,18 @@ const hpp = require('hpp')
 const compression = require('compression')
 const morgan = require('morgan')
 // const { expressjwt: jwt }=require('express-jwt')
-const authRouter=require("./router/Auth.js")
-const userRouter=require("./router/Users.js")
-const blogRoutes=require("./router/Blogs.js")
+const authRouter = require("./router/Auth.js")
+const userRouter = require("./router/Users.js")
+const blogRoutes = require("./router/Blogs.js")
+const sitemapRouter = require("./router/Sitemap.js")
 require('dotenv').config()
 
-const cookieParser=require('cookie-parser')
+const cookieParser = require('cookie-parser')
 
-const cors=require("cors")
-const app=express()
-const mongoConnection=require('./mongoDB/connection.js')
+const cors = require("cors")
+const app = express()
+app.set('etag', false);
+const mongoConnection = require('./mongoDB/connection.js')
 
 
 const corsConfig = {
@@ -46,9 +48,10 @@ app.use(express.json({ limit: '50mb' }))
 app.use(express.urlencoded({ extended: true, limit: '50mb', parameterLimit: 50000 }))
 app.use(cors(corsConfig))
 
-app.use("/",authRouter)
-app.use("/",userRouter)
-app.use("/",blogRoutes)
+app.use("/", authRouter)
+app.use("/", userRouter)
+app.use("/", blogRoutes)
+app.use("/", sitemapRouter)
 
 app.use((err, req, res, next) => {
   console.error(err?.message || err)
