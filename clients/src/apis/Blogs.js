@@ -1,5 +1,8 @@
 import axios from "axios"
 const url = process.env.REACT_APP_API_URL || "http://localhost:8000"
+
+axios.defaults.timeout = 5000;
+
 export const postBlog=async(body, token)=>{
   try {
     return await axios.post(`${url}/addBlog`, body, { headers: { Authorization: token } })
@@ -29,11 +32,15 @@ export const getSiteStats = async () => {
   }
 }
 export const trackSiteVisit = async () => {
+  // Prevent tracking during build/pre-rendering
+  if (typeof window !== 'undefined' && window.navigator.userAgent.includes('ReactSnap')) {
+    return;
+  }
+  
   try {
     const endpoint = `${url}/site-visit`
     const response = await fetch(endpoint, {
       method: "POST",
-      keepalive: true,
       headers: { "Content-Type": "application/json" },
       body: "{}"
     })

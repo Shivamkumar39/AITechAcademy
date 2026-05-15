@@ -30,6 +30,7 @@ function Write() {
   });
   const [tagInput, setTagInput] = useState("");
   const [availableTags, setAvailableTags] = useState([]);
+  const [availableCategories, setAvailableCategories] = useState([]);
   const [tagMessage, setTagMessage] = useState("");
 
   const canManage = useMemo(() => loginData?._id && loginData?.role === 'admin', [loginData]);
@@ -69,8 +70,13 @@ function Write() {
     if (tagMessage) setTagMessage("");
   };
   const selectSuggestedTag = (tag) => {
-    setPost((prev) => ({ ...prev, category: tag }));
-    setTagMessage(`Selected existing tag: ${tag}`);
+    const alreadySelected = post.tags.some((t) => t.toLowerCase() === tag.toLowerCase());
+    if (alreadySelected) {
+      setTagMessage("This tag is already added.");
+      return;
+    }
+    setPost((prev) => ({ ...prev, tags: [...prev.tags, tag] }));
+    setTagMessage(`Added tag: ${tag}`);
   };
   const addTag = () => {
     const value = tagInput.trim();
@@ -130,7 +136,13 @@ function Write() {
       try {
         const response = await getCategories();
         const suggestions = response?.data?.suggestions || [];
+        const cats = response?.data?.categories || [];
+        // Combine default requested categories with any dynamic ones
+        const defaultCats = ["Educational", "News", "Latest AI News", "Innovation", "Study Material", "Technology", "Btech CSE Material"];
+        const combinedCats = Array.from(new Set([...defaultCats, ...cats]));
+        
         setAvailableTags(suggestions);
+        setAvailableCategories(combinedCats);
       } catch (error) {
         console.log(error);
       }
@@ -179,8 +191,33 @@ function Write() {
               <small className="form-text text-muted thumbnailMessage mb-3">Eg: 7 min read</small>
             </div>
             <div>
-              <input onChange={onChange} value={post.category} className='categoryInput' type="text" name="category" placeholder='Enter category' required />
-              <small className="form-text text-muted thumbnailMessage mb-3">Eg: AI, Technology, Video</small>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <select 
+                  className='categoryInput' 
+                  onChange={(e) => setPost({ ...post, category: e.target.value })} 
+                  value={availableCategories.includes(post.category) ? post.category : "custom"}
+                  required
+                >
+                  <option value="" disabled>Select Category</option>
+                  {availableCategories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                  <option value="custom">Other (Custom)</option>
+                </select>
+                
+                {(!availableCategories.includes(post.category) && post.category !== "") || post.category === "custom" ? (
+                  <input 
+                    onChange={onChange} 
+                    value={post.category === "custom" ? "" : post.category} 
+                    className='categoryInput' 
+                    type="text" 
+                    name="category" 
+                    placeholder='Type custom category' 
+                    required 
+                  />
+                ) : null}
+              </div>
+              <small className="form-text text-muted thumbnailMessage mb-3">Choose a category or type a new one</small>
             </div>
           </div>
 
