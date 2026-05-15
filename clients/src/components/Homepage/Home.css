@@ -662,3 +662,214 @@ img {
     padding: 0.7rem;
   }
 }
+
+/* =========================================================
+   CATEGORY LIST
+========================================================= */
+
+.category-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  background: #f1f8f7;
+  border: 1px solid #e0eeec;
+  border-radius: 10px;
+  color: #123130;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.category-item:hover {
+  background: #0f8f87;
+  color: #fff;
+  border-color: #0f8f87;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(15, 143, 135, 0.2);
+}
+
+.category-item .cat-name {
+  /* text-transform: capitalize; removed to preserve exact casing from backend */
+}
+
+.category-item .count {
+  background: rgba(15, 143, 135, 0.1);
+  color: #0f8f87;
+  padding: 0.1rem 0.4rem;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  min-width: 20px;
+  text-align: center;
+}
+
+.category-item:hover .count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+/* =========================================================
+   VISITOR STATS
+========================================================= */
+
+.visitor-stats-card {
+  width: 100%;
+  background: linear-gradient(135deg, #103130 0%, #1a4d4b 100%);
+  border-radius: 18px;
+  padding: 1.25rem;
+  margin-top: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 25px rgba(16, 49, 48, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.visitor-stats-card::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(15, 143, 135, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.visitor-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.visitor-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(15, 143, 135, 0.15);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f8f87;
+  border: 1px solid rgba(15, 143, 135, 0.2);
+}
+
+.visitor-details {
+  flex: 1;
+}
+
+.visitor-label {
+  color: #a1b2b1;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.visitor-count-number {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: -0.5px;
+}
+
+/* =========================================================
+   PRO SKELETON LOADER
+========================================================= */
+
+.skeleton-shimmer {
+  background: #f6f7f8;
+  background-image: linear-gradient(
+    to right,
+    #f6f7f8 0%,
+    #edeef1 20%,
+    #f6f7f8 40%,
+    #f6f7f8 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 800px 100%;
+  display: inline-block;
+  position: relative;
+  animation: shimmer 1.5s infinite linear forwards;
+}
+
+@keyframes shimmer {
+  0% { background-position: -468px 0; }
+  100% { background-position: 468px 0; }
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #f1f5f9;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.image-loading-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+.smart-image {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.smart-image.loaded {
+  opacity: 1;
+}
+
+/* =========================================================
+   PRO CIRCULAR LOADER
+========================================================= */
+
+.progress-loader-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.circular-loader {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e2eded;
+  border-top: 4px solid #0f8f87;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-percentage {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0f8f87;
+  font-family: sans-serif;
+}

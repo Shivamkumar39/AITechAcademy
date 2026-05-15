@@ -48,6 +48,21 @@ app.use(express.json({ limit: '50mb' }))
 app.use(express.urlencoded({ extended: true, limit: '50mb', parameterLimit: 50000 }))
 app.use(cors(corsConfig))
 
+// Serve static images from the uploads folder
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Update Helmet to allow local images (fixes the broken icon issue)
+app.use(
+  helmet.contentSecurityPolicy({
+    useDefaults: true,
+    directives: {
+      "img-src": ["'self'", "data:", "https:", "http:"],
+      "connect-src": ["'self'", "http://127.0.0.1:5500", "http://localhost:5500", "https:"],
+    },
+  })
+);
+
 app.use("/", authRouter)
 app.use("/", userRouter)
 app.use("/", blogRoutes)

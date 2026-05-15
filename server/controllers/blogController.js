@@ -15,7 +15,7 @@ exports.addBlog = async (req, res) => {
   const d = new Date();
   const date = d.getDate() + " " + monthNames[d.getMonth()] + " " + d.getFullYear();
 
-  const { title, authorid, image, description, category, readtime, tags, pdfLinks, slug: customSlug } = req.body;
+  const { title, authorid, authorName, authorImage, image, description, category, readtime, tags, pdfLinks, slug: customSlug } = req.body;
 
   let slug = customSlug ? slugify(customSlug, { lower: true, strict: true }) : slugify(title || '', { lower: true, strict: true });
   if (!slug) slug = Date.now().toString();
@@ -31,8 +31,8 @@ exports.addBlog = async (req, res) => {
     title: String(title || '').trim(),
     slug: finalSlug,
     authorid: authorid || req.userId || null,
-    authorImage: "https://www.kindpng.com/picc/m/21-214439_free-high-quality-person-icon-default-profile-picture.png",
-    authorName: "shivam_kushwaha",
+    authorImage: authorImage || "https://www.kindpng.com/picc/m/21-214439_free-high-quality-person-icon-default-profile-picture.png",
+    authorName: authorName || (req.rootUser ? req.rootUser.name : "Admin"),
     image: String(image || '').trim(),
     description: String(description || '').trim(),
     category: String(category || '').trim(),
@@ -54,12 +54,8 @@ exports.addBlog = async (req, res) => {
 
 exports.getAllBlogs = async (req, res) => {
   try {
-    // 100ms Optimization: Excluding images from the main list.
-    const blogs = await Blog.find({})
-      .select('title slug category authorName authorImage authorid publishDate readtime')
-      .sort({ _id: -1 })
-      .limit(10)
-      .lean();
+    // Complete Restoration: Fetching all fields to ensure original UI is perfect.
+    const blogs = await Blog.find({}).sort({ _id: -1 }).limit(10).lean();
     res.json(blogs);
   } catch (error) {
     console.error(error);
@@ -280,26 +276,23 @@ exports.getBlogsByAuthorId = async (req, res) => {
 
 exports.getCategoryCount = async (req, res) => {
   try {
-    const results = await Blog.aggregate([
-      { $group: { _id: "$category", count: { $sum: 1 } } }
-    ]);
+    const requested = [
+      "Educational", "News", "Latest AI News", "Innovation", 
+      "Study Material", "Technology", "Btech CSE Material"
+    ];
 
-    const counts = {
-      blockchain: 0, fashion: 0, technology: 0, business: 0,
-      health: 0, fitness: 0, javascript: 0, video: 0
-    };
-
-    results.forEach(r => {
-      if (r._id) {
-        const cat = r._id.toLowerCase();
-        // Map common categories or handle video/videos plural
-        if (cat.startsWith('video')) {
-          counts.video += r.count;
-        } else if (counts.hasOwnProperty(cat)) {
-          counts[cat] = r.count;
-        }
-      }
-    });
+    const counts = {};
+    
+    // We fetch counts for each requested category individually to check both category and tags fields
+    await Promise.all(requested.map(async (cat) => {
+      const count = await Blog.countDocuments({
+        $or: [
+          { category: { $regex: new RegExp(`^${cat}$`, "i") } },
+          { tags: { $regex: new RegExp(`^${cat}$`, "i") } }
+        ]
+      });
+      counts[cat] = count;
+    }));
 
     res.json(counts);
   } catch (error) {
@@ -310,9 +303,20 @@ exports.getCategoryCount = async (req, res) => {
 
 exports.getCategories = async (req, res) => {
   try {
+    const requested = [
+      "Educational", "News", "Latest AI News", "Innovation", 
+      "Study Material", "Technology", "Btech CSE Material"
+    ];
     const categories = await Blog.distinct("category");
     const tags = await Blog.distinct("tags");
-    const suggestions = Array.from(new Set([...(categories || []), ...(tags || [])]));
+    
+    // Combine existing categories, tags, and our requested default list
+    const suggestions = Array.from(new Set([
+      ...requested,
+      ...(categories || []), 
+      ...(tags || [])
+    ]));
+    
     res.json({ categories, tags, suggestions });
   } catch (error) {
     console.error(error);
@@ -323,8 +327,17 @@ exports.getCategories = async (req, res) => {
 exports.getBlogsByTag = async (req, res) => {
   const { id } = req.params;
   try {
+    // Escape string for regex to avoid ReDoS or matching errors
+    const safeId = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    
     // Optimization: Exclude description to speed up results
-    const blogs = await Blog.find({ $or: [{ category: id }, { tags: id }] }, { description: 0 }).lean();
+    const blogs = await Blog.find({ 
+      $or: [
+        { category: { $regex: new RegExp(`^${safeId}$`, "i") } }, 
+        { tags: { $regex: new RegExp(`^${safeId}$`, "i") } }
+      ] 
+    }, { description: 0 }).lean();
+    
     res.json({ blogs: blogs || [] });
   } catch (error) {
     console.error(error);

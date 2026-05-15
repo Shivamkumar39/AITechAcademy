@@ -41,14 +41,21 @@ function Navbar() {
 
   const homeValid = async () => {
     const token = localStorage.getItem('JWTFINALTOKEN');
+    if (!token || token.split('.').length !== 3) {
+      if (token) localStorage.removeItem('JWTFINALTOKEN');
+      setLoginData({});
+      return;
+    }
     try {
       const res = await axios.get(`${API_URL}/validuser`, { headers: { Authorization: token } });
       if (res.data.status === 201) {
         setLoginData(res.data.userValid);
       } else {
+        localStorage.removeItem('JWTFINALTOKEN');
         setLoginData({});
       }
     } catch (error) {
+      localStorage.removeItem('JWTFINALTOKEN');
       setLoginData({});
     }
   };

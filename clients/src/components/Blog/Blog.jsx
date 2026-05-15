@@ -6,7 +6,17 @@ import { AiOutlineShareAlt, AiOutlineLike, AiFillLike } from 'react-icons/ai';
 import { VscComment } from "react-icons/vsc"
 import { MdOutlineBookmarkAdd, MdOutlineBookmark } from "react-icons/md"
 import { Link, useParams } from "react-router-dom"
-import { bookmark, getAllBlogs, getBlogBySlug, likeBlog, unbookmark, unlikeBlog, addComment } from "../../apis/Blogs.js"
+import { 
+  bookmark, 
+  getAllBlogs, 
+  getBlogBySlug, 
+  likeBlog, 
+  unbookmark, 
+  unlikeBlog, 
+  addComment, 
+  getSiteStats, 
+  categoryCount 
+} from "../../apis/Blogs.js"
 import { LoginContext } from '../../contextProvider/Context';
 import { RightSection } from "../Homepage/Home.jsx"
 import Navbar from '../Navbar/Navbar';
@@ -60,6 +70,8 @@ function Blog() {
   const [showApp, setShowApp] = useState(false)
   const [showCopy, setShowCopy] = useState(false)
   const [commentSuccess, setCommentSuccess] = useState(false)
+  const [siteStats, setSiteStats] = useState({ totalVisits: 0, totalViews: 0 })
+  const [catCount, setCatCount] = useState({})
   const settings = useSiteSettings()
   const guestId = getGuestId()
 
@@ -95,12 +107,25 @@ function Blog() {
     }
 
     try {
-      const res = await getBlogBySlug(slug)
-      const data = res?.data?.message
+      const [blogRes, statsRes, catsRes] = await Promise.all([
+        getBlogBySlug(slug),
+        getSiteStats().catch(() => ({})),
+        categoryCount().catch(() => ({ data: {} }))
+      ])
+
+      const data = blogRes?.data?.message
       if (data) {
         setBlog(data)
         setLikes(data.likes || [])
         localStorage.setItem(`BLOG_CACHE_${slug}`, JSON.stringify(data));
+      }
+
+      if (statsRes?.data) {
+        setSiteStats(statsRes.data)
+      }
+      
+      if (catsRes?.data) {
+        setCatCount(catsRes.data)
       }
     } catch (err) {
       console.error("Failed to load blog", err);
@@ -447,7 +472,7 @@ function Blog() {
             </>
           )}
         </section>
-        <RightSection loading={loading} />
+        <RightSection loading={loading} catCount={catCount} siteStats={siteStats} />
       </div>
     </>
   )

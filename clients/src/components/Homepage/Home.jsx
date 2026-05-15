@@ -1,23 +1,86 @@
-import React, { useContext, useEffect, useMemo, useState, memo } from 'react'
+import React, { useContext, useEffect, useState, memo } from 'react'
 import { Link } from 'react-router-dom'
-import { TiSocialFacebook, TiSocialLinkedin, TiSocialTwitter } from "react-icons/ti"
-import { AiOutlineInstagram } from "react-icons/ai"
 import axios from "axios"
 
 import "./Home.css"
 import { categoryCount, getAllBlogs, getSiteStats } from '../../apis/Blogs'
-import { getUserById } from '../../apis/users'
 import { LoginContext } from '../../contextProvider/Context'
 import Navbar from '../Navbar/Navbar'
 import Seo from '../SEO/Seo'
-import StructuredData from '../SEO/StructuredData'
 import AdSenseSlot from '../Ads/AdSenseSlot'
 import AdBanner from '../Ads/AdBanner'
 import { useSiteSettings } from '../../utils/siteSettings'
-import { SkeletonBlogCard, SkeletonSidebar, SkeletonBlogList } from '../Common/Skeletons'
+import { SkeletonBlogCard, SkeletonBlogList } from '../Common/Skeletons'
 
-const url = process.env.REACT_APP_API_URL || "http://localhost:8000"
-const FALLBACK_BLOG_IMAGE = "https://via.placeholder.com/1200x700?text=AITECHACADEMY"
+const url = process.env.REACT_APP_API_URL || "http://localhost:5500"
+
+// SIMPLE IMAGE COMPONENT - NO LOGIC, JUST DISPLAY
+const SimpleImage = memo(({ src, alt, className }) => {
+  if (!src) return <div className="image-placeholder" style={{ height: '200px', background: '#eee' }}></div>;
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      loading="lazy"
+      onError={(e) => {
+        // If image fails, try adding data prefix just in case
+        if (!src.startsWith('data:') && !src.startsWith('http')) {
+          e.target.src = `data:image/png;base64,${src}`;
+        }
+      }}
+    />
+  );
+});
+
+// Exporting RightSection for use in Blog.jsx
+export const RightSection = memo(({ catCount, loading, siteStats }) => {
+  const settings = useSiteSettings();
+  return (
+    <div className='sec-2-right'>
+       <div className='right-blog sticky-sidebar'>
+          <h3 className='featured'><span className='backgroundColor'>&nbsp;Categories </span></h3>
+          <div className='category-list mt-4'>
+            {[
+              "Educational", "News", "Latest AI News", "Innovation", 
+              "Study Material", "Technology", "Btech CSE Material"
+            ].map((name) => {
+              // Find case-insensitive match in catCount
+              const countKey = Object.keys(catCount || {}).find(k => k.toLowerCase() === name.toLowerCase());
+              const count = countKey ? catCount[countKey] : 0;
+              return (
+                <Link key={name} to={`/tag/${name}`} className='category-item'>
+                  <span className="cat-name">{name}</span>
+                  <span className='count'>{count}</span>
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="visitor-stats-card mt-4">
+            <div className="visitor-info">
+              <div className="visitor-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" style={{ width: '24px', height: '24px' }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                </svg>
+              </div>
+              <div className="visitor-details">
+                <p className="visitor-label">Total Visits</p>
+                <h4 className="visitor-count-number">{loading ? "..." : (siteStats?.totalVisits || "1,024")}</h4>
+              </div>
+            </div>
+          </div>
+
+          <AdSenseSlot
+            className='ads-sidebar-slot mt-4'
+            slot={settings.adsenseSidebarSlot}
+            fallbackText='Advertisement'
+            minHeight="300px"
+          />
+       </div>
+    </div>
+  )
+})
 
 const FeaturedBlogs = memo(({ blogs }) => {
   const featured = blogs.slice(0, 2)
@@ -28,43 +91,19 @@ const FeaturedBlogs = memo(({ blogs }) => {
       {featured.map((blog) => (
         <article className='blog' key={blog._id}>
           <Link to={`/tag/${blog.category}`} className='category'>{blog.category}</Link>
-          <Link to={`/blog/${blog._id}`}>
-            <h2 className='title mt-2 mb-4'>{blog.title}</h2>
-            {blog.image ? (
-              <div className="aspect-ratio-box" style={{ borderRadius: '8px', background: '#f1f5f9', overflow: 'hidden' }}>
-                <img
-                  className='blog-image'
-                  src={blog.image}
-                  alt={blog.title || 'Blog image'}
-                  width="1200"
-                  height="700"
-                  loading="lazy"
-                  onError={(e) => { e.currentTarget.src = FALLBACK_BLOG_IMAGE }}
-                />
-              </div>
-            ) : (
-              <div className="blog-placeholder-large">
-                <span className="placeholder-text-large">{blog.title}</span>
-              </div>
-            )}
+          <Link to={`/blog/${blog.slug || blog._id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+            <h2 className='title'>{blog.title}</h2>
           </Link>
-          <div className='minor-info mt-3'>
-            <Link style={{ textDecoration: 'none' }} to={`/profile/${blog.authorid}`}>
-              <img
-                className='author-image'
-                src={blog.authorImage}
-                alt={blog.authorName || 'Author'}
-                width="40"
-                height="40"
-                loading="lazy"
-                onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/80?text=User" }}
-              />
-            </Link>
-            <span className='publishdate'>{blog.authorName || 'Anonymous'}</span>
+          <Link to={`/blog/${blog.slug || blog._id}`} style={{ display: 'block' }}>
+            <SimpleImage src={blog.image} alt={blog.title} className='blog-image' />
+          </Link>
+          <div className='minor-info'>
+            <Link to={`/profile/${blog.authorid}`}><SimpleImage src={blog.authorImage} alt='Author' className='author-image' /></Link>
+            <span className='publishdate'>{blog.authorName}</span>
             <span className='publishdate'>| {blog.publishDate}</span>
             <span className='publishdate'>| {blog.readtime}</span>
           </div>
-          <div className='intro' dangerouslySetInnerHTML={{ __html: (blog.description || '').slice(0, 150) }} />
+          <div className='intro' dangerouslySetInnerHTML={{ __html: (blog.description || '').slice(0, 160) + '...' }} />
         </article>
       ))}
     </div>
@@ -75,301 +114,89 @@ const ShortBlogs = memo(({ blogs }) => {
   return (
     <>
       {blogs.slice(0, 12).map((e) => (
-        <article key={e._id} className='short-blog mb-5'>
+        <article key={e._id} className='short-blog'>
           <Link to={`/tag/${e.category}`} className='category'>{e.category}</Link>
-          <Link to={`/blog/${e._id}`}>
-            <h3 className='right-blog-title short-blog-title mt-3'>{e.title}</h3>
+          <Link to={`/blog/${e.slug || e._id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+            <h3 className='right-blog-title'>{e.title}</h3>
           </Link>
-          <div className='minor-info pt-2 mb-0'>
-            <img
-              className='author-image'
-              src={e.authorImage}
-              alt={e.authorName || 'Author'}
-              width="40"
-              height="40"
-              loading="lazy"
-              onError={(ev) => { ev.currentTarget.src = "https://via.placeholder.com/80?text=User" }}
-            />
-            <p className='publishdate'>{e.publishDate}</p>
-            <p className='publishdate'>| {e.readtime}</p>
+          <div className='minor-info'>
+            <SimpleImage src={e.authorImage} alt='Author' className='author-image' />
+            <p className='publishdate'>{e.authorName}</p>
+            <p className='publishdate'>| {e.publishDate}</p>
           </div>
-          <div className='intro right-intro' dangerouslySetInnerHTML={{ __html: (e.description || '').slice(0, 130) }} />
         </article>
       ))}
     </>
   )
 })
 
-const LazyBlogImage = ({ blogId, title, url }) => {
-  const [image, setImage] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-    axios.get(`${url}/blog-image/${blogId}`)
-      .then(res => {
-        if (isMounted) {
-          setImage(res.data.image);
-          setLoading(false);
-        }
-      })
-      .catch(() => {
-        if (isMounted) setLoading(false);
-      });
-    return () => { isMounted = false };
-  }, [blogId, url]);
-
-  return (
-    <div className="aspect-ratio-box" style={{ borderRadius: '8px', background: '#f1f5f9', overflow: 'hidden', minHeight: '180px' }}>
-      {image ? (
-        <img
-          className='recent-blog-img'
-          src={image}
-          alt={title || 'Blog article'}
-          width="400"
-          height="250"
-          loading="lazy"
-          style={{ transition: 'opacity 0.3s ease-in-out' }}
-        />
-      ) : (
-        <div className="blog-placeholder-mini" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-          <span className="placeholder-text-small" style={{ color: '#94a3b8' }}>
-            {loading ? 'Loading Image...' : 'No Image'}
-          </span>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const PopularAuthors = memo(() => {
-  const [author, setAuthor] = useState(null)
-
-  useEffect(() => {
-    const loadAuthor = async () => {
-      try {
-        const res = await getUserById("6356398360be867515164b63")
-        setAuthor(res?.data?.success || null)
-      } catch {
-        setAuthor(null)
-      }
-    }
-    loadAuthor()
-  }, [])
-
-  if (!author?._id) return null
-
-  return (
-    <Link to={`/profile/${author._id}`} style={{ textDecoration: 'none' }}>
-      <div className='profile mb-5'>
-        <img
-          className='top-author'
-          src={author.profilePic}
-          alt={author.username || 'Author'}
-          width="120"
-          height="120"
-          loading="lazy"
-          onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/120?text=Author" }}
-        />
-        <div className='author-info'>
-          <h4 className='authorName'>{author.username}</h4>
-          <h5 className='designation'>{(author.bio || 'Top contributor').slice(0, 60)}...</h5>
-          <div className='authorSocials'>
-            {author.facebook ? <a href={author.facebook} target='_blank' rel='noreferrer'><TiSocialFacebook className='social-icons' /></a> : null}
-            {author.linkedin ? <a href={author.linkedin} target='_blank' rel='noreferrer'><TiSocialLinkedin className='social-icons' /></a> : null}
-            {author.twitter ? <a href={author.twitter} target='_blank' rel='noreferrer'><TiSocialTwitter className='social-icons' /></a> : null}
-            {author.instagram ? <a href={author.instagram} target='_blank' rel='noreferrer'><AiOutlineInstagram className='social-icons' /></a> : null}
-          </div>
-        </div>
-      </div>
-    </Link>
-  )
-})
-
-export const RightSection = memo(({ catCount, loading }) => {
-  const [totalViews, setTotalViews] = useState(0)
-
-  useEffect(() => {
-    const loadVisits = async () => {
-      const siteStatsRes = await getSiteStats().catch(() => ({ data: { totalViews: 0 } }))
-      setTotalViews(Number(siteStatsRes?.data?.totalViews || siteStatsRes?.data?.totalVisits || 0))
-    }
-    const handleVisitUpdate = (event) => {
-      if (typeof event?.detail?.totalViews === 'number') {
-        setTotalViews(event.detail.totalViews)
-      } else if (typeof event?.detail?.totalVisits === 'number') {
-        setTotalViews(event.detail.totalVisits)
-      } else if (event?.detail?.increment) {
-        setTotalViews((prev) => prev + event.detail.increment)
-      }
-    }
-
-    loadVisits()
-    window.addEventListener('site-visit-updated', handleVisitUpdate)
-    return () => window.removeEventListener('site-visit-updated', handleVisitUpdate)
-  }, [])
-
-  if (loading) return <SkeletonSidebar />
-
-  return (
-    <div className='sec-2-right'>
-      <h3 className='featured mb-5'><span className='backgroundColor'>&nbsp;Top &nbsp;</span>&nbsp;Author</h3>
-      <PopularAuthors />
-
-      <div className='ad text-center center' style={{ minHeight: '250px' }}>
-        <p className='ad-title'>Ad</p>
-        <div className='for-add'>
-          <h6 className='adTitle'>Want To Collaborate Or Suggest Something?</h6>
-          <p className='adDescription'>If someone discovers any bugs or technical concerns, please notify me.</p>
-          <Link to='/contact-us'><button className='adBtn'>Contact</button></Link>
-        </div>
-      </div>
-
-      <div className='categories-section'>
-        <h3 className='featured mt-5'><span className='backgroundColor'>&nbsp;Categories&nbsp;</span></h3>
-        <table className='table table-borderless mt-4'>
-          <tbody>
-            {Object.entries(catCount || {}).length > 0 ? (
-              Object.entries(catCount).map(([category, count]) => (
-                <tr key={category} className='border'>
-                  <th className='categorie-title'>{category}</th>
-                  <td className='text-right categorie-result'>{count || 0}</td>
-                </tr>
-              ))
-            ) : (
-              <tr className='border'>
-                <td className='categorie-title'>No categories found</td>
-                <td className='text-right categorie-result'>0</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <div className='sticky-section'>
-        <h3 className='featured mt-5 mb-5'><span className='backgroundColor'>&nbsp;Website&nbsp;</span>&nbsp;Update</h3>
-        <div className='update-section'>
-          <div className='updates-card'><h4 className='updates-no'>{totalViews}</h4><p className='updates-des'>Total Blog Views</p></div>
-        </div>
-      </div>
-    </div>
-  )
-})
-
-function Home() {
-  const [allBlogs, setAllBlogs] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [catCount, setCatCount] = useState({})
+const Home = () => {
   const { setLoginData } = useContext(LoginContext)
+  const [allBlogs, setAllBlogs] = useState([])
+  const [catCount, setCatCount] = useState({})
+  const [siteStats, setSiteStats] = useState({ totalVisits: 0, totalViews: 0 })
+  const [loading, setLoading] = useState(true)
   const settings = useSiteSettings()
 
-  const homeSchema = useMemo(() => ({
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "AITECHACADEMY",
-    url: process.env.REACT_APP_SITE_URL || "http://localhost:3000",
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${process.env.REACT_APP_SITE_URL || "http://localhost:3000"}/search?q={search_term_string}`,
-      "query-input": "required name=search_term_string"
-    }
-  }), [])
-
   useEffect(() => {
-    const loadInitial = async () => {
-      // 1. Instant Load from Cache
-      const cachedBlogs = localStorage.getItem('CACHE_BLOGS');
-      const cachedCats = localStorage.getItem('CACHE_CATS');
-      if (cachedBlogs) setAllBlogs(JSON.parse(cachedBlogs));
-      if (cachedCats) setCatCount(JSON.parse(cachedCats));
-      
-      // If we have cache, don't show loading spinner
-      if (cachedBlogs) setLoading(false);
-      else setLoading(true);
+    const loadData = async () => {
+      setLoading(true)
+      try {
+        const [blogsRes, catsRes, statsRes] = await Promise.all([
+          getAllBlogs().catch(() => ({ data: [] })),
+          categoryCount().catch(() => ({ data: {} })),
+          getSiteStats().catch(() => ({}))
+        ])
 
-      // 2. STAGE 1: Fetch Content
-      getAllBlogs().then((res) => {
-        const blogs = Array.isArray(res?.data) ? res.data : [];
-        setAllBlogs(blogs);
-        localStorage.setItem('CACHE_BLOGS', JSON.stringify(blogs));
-        setLoading(false);
-      }).catch(() => setLoading(false));
-
-      // 3. Background Data
-      categoryCount().then((res) => {
-        const data = res?.data || {};
-        setCatCount(data);
-        localStorage.setItem('CACHE_CATS', JSON.stringify(data));
-      }).catch(() => {});
-
-      getSiteStats().then((res) => {
-        if (res?.data) {
-          localStorage.setItem('CACHE_STATS', JSON.stringify(res.data));
-          window.dispatchEvent(new CustomEvent('site-visit-updated', { detail: res.data }));
+        setAllBlogs(Array.isArray(blogsRes?.data) ? blogsRes.data : [])
+        setCatCount(catsRes?.data || {})
+        
+        if (statsRes?.data) {
+          setSiteStats(statsRes.data)
+          window.dispatchEvent(new CustomEvent('site-visit-updated', { detail: statsRes.data }));
         }
-      }).catch(() => {});
 
-      // 4. Auth Check
-      const token = localStorage.getItem("JWTFINALTOKEN");
-      if (token) {
-        axios.get(`${url}/validuser`, { headers: { Authorization: token } })
-          .then((res) => {
-            if (res?.data?.status === 201) setLoginData(res.data.userValid);
-          })
-          .catch(() => {
-            localStorage.removeItem("JWTFINALTOKEN");
-            setLoginData({});
-          });
+        const token = localStorage.getItem("JWTFINALTOKEN")
+        if (token && token.split('.').length === 3) {
+          axios.get(`${url}/validuser`, { headers: { Authorization: token } })
+            .then(res => { if (res.data.status === 201) setLoginData(res.data.userValid) })
+            .catch(() => { localStorage.removeItem("JWTFINALTOKEN"); setLoginData({}) });
+        } else if (token) {
+          // Token is malformed
+          localStorage.removeItem("JWTFINALTOKEN");
+          setLoginData({});
+        }
+      } finally {
+        setLoading(false)
       }
-    };
-
-    loadInitial();
-  }, [setLoginData]);
+    }
+    loadData()
+  }, [setLoginData])
 
   return (
     <>
-      <Seo
-        title='AITECHACADEMY - Latest AI Tools, Education & Technology Updates'
-        description='Get daily updates about AI tools, education, technology, coding, startups, inventions, and future innovations on AITECHACADEMY.'
-        path='/'
-        keywords='AITECHACADEMY, AI tools, education updates, technology news, coding tutorials, startup trends, future innovations'
-      />
-      <StructuredData data={homeSchema} />
+      <Seo title='AITECHACADEMY - AI Tools, Education & Technology' />
       <Navbar />
-
-      <div className='container-fluid homepage'>
+      
+      <div className='homepage'>
         <section className='left-section'>
-          <AdBanner className='ads-banner-slot' />
-          <h1 className='featured main-h1'><span className='backgroundColor'>&nbsp;Featured </span>&nbsp;This Week</h1>
-
+          <h3 className='featured'><span className='backgroundColor'>&nbsp;Featured </span>&nbsp;This Week</h3>
           {loading ? (
-            <div className="featured-blogs">
-              <SkeletonBlogCard />
-              <SkeletonBlogCard />
-            </div>
+            <SkeletonBlogCard count={2} />
           ) : (
             <FeaturedBlogs blogs={allBlogs} />
           )}
-
-          <AdSenseSlot
-            className='ads-infeed-slot'
-            slot={settings.adsenseInfeedSlot}
-            fallbackText='In-feed Ad Slot'
-            minHeight="250px"
-          />
         </section>
 
         <section className='right-section'>
-          <AdSenseSlot
-            className='ads-side-slot'
-            slot={settings.adsenseSidebarSlot}
-            fallbackText='Sidebar Ad Slot (Google AdSense)'
-            minHeight="300px"
-          />
           <div className='right-blog'>
             <h3 className='featured'><span className='backgroundColor'>&nbsp;Popular </span>&nbsp;Posted</h3>
             <div className='scroll'>
-              {loading ? <SkeletonBlogList count={4} /> : <ShortBlogs blogs={allBlogs} />}
+              {loading ? (
+                <SkeletonBlogList count={4} />
+              ) : (
+                <ShortBlogs blogs={allBlogs} />
+              )}
             </div>
           </div>
         </section>
@@ -382,56 +209,30 @@ function Home() {
             {loading ? (
               <SkeletonBlogList count={6} />
             ) : (
-              allBlogs.slice(0, 10).map((e, index) => (
-                <React.Fragment key={e._id}>
-                  <article className='blog-card'>
-                    <Link to={`/blog/${e.slug}`} className='recent-blog-img-link'>
-                      <LazyBlogImage blogId={e._id} title={e.title} url={url} />
+              allBlogs.slice(0, 10).map((e) => (
+                <article key={e._id} className='blog-card'>
+                  <Link to={`/blog/${e.slug || e._id}`} style={{ display: 'block' }} className='recent-blog-img-link'>
+                    <SimpleImage src={e.image} alt={e.title} className='recent-blog-img' />
+                  </Link>
+                  <div className='blogInfo'>
+                    <Link to={`/tag/${e.category}`} className='category'>{e.category}</Link>
+                    <Link to={`/blog/${e.slug || e._id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                      <h1 className='single-blog-title'>{e.title}</h1>
                     </Link>
-                    <div className='blogInfo'>
-                      <Link to={`/tag/${e.category}`} className='category'>{e.category}</Link>
-                      <Link to={`/blog/${e.slug}`} style={{ textDecoration: 'none' }}>
-                        <h1 className='single-blog-title'>{e.title}</h1>
-                      </Link>
-                      <div className='minor-info'>
-                        <Link style={{ textDecoration: 'none' }} to={`/profile/${e.authorid}`}>
-                          <div className='author-details'>
-                            <img
-                              className='author-image'
-                              src={e.authorImage || FALLBACK_BLOG_IMAGE}
-                              alt={e.authorName}
-                              loading="lazy"
-                            />
-                            <span className='author-name'>{e.authorName}</span>
-                          </div>
-                        </Link>
-                        <span className='publishdate'>| {e.publishDate}</span>
-                        <span className='publishdate'>| {e.readtime}</span>
-                      </div>
+                    <div className='minor-info'>
+                      <SimpleImage src={e.authorImage} alt='Author' className='author-image' />
+                      <span className='publishdate'>{e.authorName}</span>
+                      <span className='publishdate'>| {e.publishDate}</span>
                     </div>
-                  </article>
-                  {index === 1 && (
-                    <AdSenseSlot
-                      className='ads-in-article-slot'
-                      slot={settings.adsenseInArticleSlot}
-                      fallbackText='In-article Ad'
-                      minHeight="250px"
-                    />
-                  )}
-                </React.Fragment>
+                  </div>
+                </article>
               ))
             )}
           </div>
         </div>
-
-        <RightSection catCount={catCount} loading={loading} />
+        <RightSection catCount={catCount} loading={loading} siteStats={siteStats} />
       </section>
-      <AdSenseSlot
-        className='ads-footer-slot'
-        slot={settings.adsenseFooterSlot}
-        fallbackText='Footer Ad Slot (Google AdSense)'
-        minHeight="250px"
-      />
+      <AdBanner />
     </>
   )
 }
