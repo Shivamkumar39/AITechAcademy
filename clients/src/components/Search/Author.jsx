@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { searchAuthor } from '../../apis/Blogs'
 import defaultprofile from '../../assets/defaultprofile.png'
+import LazyImage from '../Common/LazyImage'
 
 function Author({ search }) {
   const [authors, setAuthors] = useState([])
@@ -64,11 +65,11 @@ function Author({ search }) {
       {authors.map((e) => (
         <div key={e._id} className="search-author-card">
           <div className="search-author-left">
-            <img
+            <LazyImage
               className="search-author-avatar"
               src={e.profilePic || defaultprofile}
               alt={e.username}
-              onError={(ev) => { ev.currentTarget.src = defaultprofile }}
+              fallbackSrc={defaultprofile}
             />
             <div className="search-author-info">
               <p className="search-author-username">{e.username}</p>

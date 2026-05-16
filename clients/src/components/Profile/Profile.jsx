@@ -14,6 +14,7 @@ import axios from 'axios';
 import { Link } from "react-router-dom"
 import Navbar from '../Navbar/Navbar';
 import { SkeletonBlogCard } from '../Common/Skeletons'
+import LazyImage from '../Common/LazyImage'
 
 const modalStyle = {
   position: 'absolute',
@@ -36,7 +37,7 @@ const ProfileBlogCard = memo(({ e }) => (
     <div className='blog my-blog-single'>
       <div className="profile-blog-image-wrapper">
         {e.image ? (
-          <img className='blog-image' src={e.image} alt={e.title} loading="lazy" />
+          <LazyImage className='blog-image' src={e.image} alt={e.title} />
         ) : (
           <div className="blog-image-placeholder">
             <span className="placeholder-title">{e.title}</span>
@@ -48,7 +49,7 @@ const ProfileBlogCard = memo(({ e }) => (
         <h2 className='profile-blog-title'>{e.title}</h2>
         <div className='blog-meta-footer'>
           <div className='author-small'>
-            <img className='author-image-small' src={e.authorImage} alt={e.authorName} />
+            <LazyImage className='author-image-small' src={e.authorImage} alt={e.authorName} fallbackSrc="https://via.placeholder.com/80?text=User" />
             <span>{e.authorName}</span>
           </div>
           <div className='read-time-small'>
@@ -244,7 +245,7 @@ function Profile() {
                   {loading ? (
                     <div className="skeleton-avatar-large"></div>
                   ) : (
-                    <img className='profile-avatar-img' src={user.profilePic || defaultprofile} alt={user.username} />
+                    <LazyImage className='profile-avatar-img' src={user.profilePic || defaultprofile} alt={user.username} fallbackSrc={defaultprofile} />
                   )}
                 </div>
               </div>

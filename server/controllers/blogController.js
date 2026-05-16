@@ -8,15 +8,56 @@ const slugify = require("slugify");
 const BASE_VISITS = 1010;
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const MAX_INLINE_IMAGE_LENGTH = 120000;
+const LIST_CACHE_TTL_MS = 30000;
+const BLOG_CACHE_TTL_MS = 30000;
+const cache = {
+  blogs: { at: 0, data: null },
+  blogBySlug: new Map(),
+  blogImage: new Map(),
+};
+const BLOG_IMAGE_CACHE_TTL_MS = 5 * 60 * 1000;
+
+const normalizeStoredImage = (image) => {
+  if (typeof image !== "string") return "";
+  const src = image.trim().replace(/\\/g, "/");
+  if (!src) return "";
+
+  if (src.startsWith("data:")) return src;
+  if (/^[A-Za-z0-9+/=]+$/.test(src.slice(0, 200)) && src.length > 5000) {
+    return `data:image/jpeg;base64,${src}`;
+  }
+  if (src.startsWith("/uploads/") || src.startsWith("/blog-image/")) return src;
+  if (src.startsWith("uploads/")) return `/${src}`;
+  if (src.startsWith("blog-image/")) return `/${src}`;
+
+  try {
+    const parsed = new URL(src);
+    if (parsed.pathname.startsWith("/uploads/") || parsed.pathname.startsWith("/blog-image/")) {
+      return parsed.pathname;
+    }
+  } catch (_) {
+    // Keep as-is if not a valid URL
+  }
+
+  return src;
+};
+
+const getImageUrl = (req, blogId, image) => {
+  const normalized = normalizeStoredImage(image);
+  if (!normalized) return "";
+  if (normalized.startsWith("/uploads/")) return normalized;
+  if (normalized.startsWith("data:")) {
+    return `/blog-image/${blogId}`;
+  }
+  return normalized;
+};
 
 const withAbsoluteImage = (req, blog) => {
   if (!blog) return blog;
   const data = { ...blog };
-  if (typeof data.image === "string" && data.image.startsWith("/uploads/")) {
-    data.image = `${req.protocol}://${req.get("host")}${data.image}`;
-  }
-  if (typeof data.authorImage === "string" && data.authorImage.startsWith("/uploads/")) {
-    data.authorImage = `${req.protocol}://${req.get("host")}${data.authorImage}`;
+  data.image = getImageUrl(req, data._id, data.image);
+  if (typeof data.authorImage === "string") {
+    data.authorImage = normalizeStoredImage(data.authorImage);
   }
   return data;
 };
@@ -42,8 +83,8 @@ const toListBlog = (req, blog) => {
   };
 
   // Large inline base64 images make list payload huge and cause frontend timeout.
-  if (typeof trimmed.image === "string" && trimmed.image.startsWith("data:") && trimmed.image.length > MAX_INLINE_IMAGE_LENGTH) {
-    trimmed.image = "";
+  if (typeof blog?.image === "string" && blog.image.startsWith("data:") && blog.image.length > MAX_INLINE_IMAGE_LENGTH) {
+    trimmed.image = `/blog-image/${blog._id}`;
   }
 
   return trimmed;
@@ -72,9 +113,9 @@ exports.addBlog = async (req, res) => {
     title: String(title || '').trim(),
     slug: finalSlug,
     authorid: authorid || req.userId || null,
-    authorImage: authorImage || "https://www.kindpng.com/picc/m/21-214439_free-high-quality-person-icon-default-profile-picture.png",
+    authorImage: normalizeStoredImage(authorImage) || "https://www.kindpng.com/picc/m/21-214439_free-high-quality-person-icon-default-profile-picture.png",
     authorName: authorName || (req.rootUser ? req.rootUser.name : "Admin"),
-    image: String(image || '').trim(),
+    image: normalizeStoredImage(image),
     description: String(description || '').trim(),
     category: String(category || '').trim(),
     readtime: String(readtime || '').trim(),
@@ -95,6 +136,9 @@ exports.addBlog = async (req, res) => {
 
 exports.getAllBlogs = async (req, res) => {
   try {
+    if (cache.blogs.data && (Date.now() - cache.blogs.at) < LIST_CACHE_TTL_MS) {
+      return res.json(cache.blogs.data);
+    }
     const blogs = await Blog.find(
       {},
       {
@@ -103,6 +147,7 @@ exports.getAllBlogs = async (req, res) => {
         authorid: 1,
         authorImage: 1,
         authorName: 1,
+        image: 1,
         category: 1,
         tags: 1,
         readtime: 1,
@@ -110,11 +155,16 @@ exports.getAllBlogs = async (req, res) => {
         views: 1,
         likes: 1,
       }
-    ).sort({ _id: -1 }).limit(10).lean();
-    res.json(blogs.map((blog) => toListBlog(req, blog)));
+    ).sort({ _id: -1 }).limit(10).maxTimeMS(5000).lean();
+    const payload = blogs.map((blog) => toListBlog(req, blog));
+    cache.blogs = { at: Date.now(), data: payload };
+    res.json(payload);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to fetch blogs" });
+    if (cache.blogs.data) {
+      return res.json(cache.blogs.data);
+    }
+    res.status(200).json([]);
   }
 };
 
@@ -144,14 +194,14 @@ exports.updateBlog = async (req, res) => {
   const data = {
     title: String(title || '').trim(),
     authorid: authorid,
-    image: String(image || '').trim(),
+    image: normalizeStoredImage(image),
     description: String(description || '').trim(),
     category: String(category || '').trim(),
     readtime: String(readtime || '').trim(),
     tags: Array.isArray(tags) ? tags.map(tag => String(tag || '').trim()).filter(Boolean) : [],
     pdfLinks: Array.isArray(pdfLinks) ? pdfLinks : [],
     authorName: "shivam_kushwaha",
-    authorImage: authorImage,
+    authorImage: normalizeStoredImage(authorImage),
     publishDate: "Edited " + date,
   };
 
@@ -528,6 +578,11 @@ exports.addComment = async (req, res) => {
 exports.getBlogBySlug = async (req, res) => {
   const { slug } = req.params;
   try {
+    const cached = cache.blogBySlug.get(slug);
+    if (cached && (Date.now() - cached.at) < BLOG_CACHE_TTL_MS) {
+      return res.json({ message: cached.data });
+    }
+
     // Try to find by slug first
     let blog = await Blog.findOne({ slug: slug }).lean();
 
@@ -541,7 +596,9 @@ exports.getBlogBySlug = async (req, res) => {
     // Increment views in background to avoid blocking the response
     Blog.findByIdAndUpdate(blog._id, { $inc: { views: 1 } }).exec().catch(err => console.error("View count error:", err));
 
-    res.json({ message: withAbsoluteImage(req, blog) });
+    const payload = withAbsoluteImage(req, blog);
+    cache.blogBySlug.set(slug, { at: Date.now(), data: payload });
+    res.json({ message: payload });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch blog" });
@@ -585,9 +642,34 @@ exports.generateSitemap = async (req, res) => {
 
 exports.getBlogImage = async (req, res) => {
   try {
+    const cachedImage = cache.blogImage.get(req.params.id);
+    if (cachedImage && (Date.now() - cachedImage.at) < BLOG_IMAGE_CACHE_TTL_MS) {
+      res.set("Content-Type", cachedImage.mimeType);
+      res.set("Cache-Control", "public, max-age=86400");
+      return res.send(cachedImage.buffer);
+    }
+
     const blog = await Blog.findById(req.params.id, { image: 1 }).lean();
-    if (!blog || !blog.image) return res.status(404).json({ error: "Image not found" });
-    res.json({ image: blog.image });
+    const normalizedImage = normalizeStoredImage(blog?.image);
+    if (!normalizedImage) return res.status(404).json({ error: "Image not found" });
+    if (typeof normalizedImage === "string" && normalizedImage.startsWith("data:")) {
+      const match = normalizedImage.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+      if (!match) return res.status(400).json({ error: "Invalid image format" });
+      const mimeType = match[1];
+      const base64Data = match[2];
+      const imageBuffer = Buffer.from(base64Data, "base64");
+      cache.blogImage.set(req.params.id, { at: Date.now(), mimeType, buffer: imageBuffer });
+      res.set("Content-Type", mimeType);
+      res.set("Cache-Control", "public, max-age=86400");
+      return res.send(imageBuffer);
+    }
+    if (typeof normalizedImage === "string" && (normalizedImage.startsWith("http://") || normalizedImage.startsWith("https://"))) {
+      return res.redirect(normalizedImage);
+    }
+    if (typeof normalizedImage === "string" && normalizedImage.startsWith("/uploads/")) {
+      return res.redirect(`${req.protocol}://${req.get("host")}${normalizedImage}`);
+    }
+    return res.status(400).json({ error: "Unsupported image source" });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch image" });
   }

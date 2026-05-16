@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { searchCategory } from '../../apis/Blogs'
+import LazyImage from '../Common/LazyImage'
 
 function Category({ search }) {
   const [blogs, setBlogs] = useState([])
@@ -64,11 +65,10 @@ function Category({ search }) {
         <Link key={e._id} to={`/blog/${e.slug}`} className="search-blog-card">
           <div className="search-blog-img-wrap">
             {e.image ? (
-              <img
+              <LazyImage
                 src={e.image}
                 alt={e.title || 'Blog post'}
-                loading="lazy"
-                onError={(ev) => { ev.currentTarget.src = 'https://via.placeholder.com/400x250?text=Blog' }}
+                fallbackSrc='https://via.placeholder.com/400x250?text=Blog'
               />
             ) : (
               <div className="search-blog-placeholder">
@@ -81,10 +81,10 @@ function Category({ search }) {
             <h3 className="search-blog-title">{e.title}</h3>
             <div className="search-blog-meta">
               {e.authorImage && (
-                <img
+                <LazyImage
                   src={e.authorImage}
                   alt={e.authorName || 'Author'}
-                  onError={(ev) => { ev.currentTarget.src = 'https://via.placeholder.com/80?text=User' }}
+                  fallbackSrc='https://via.placeholder.com/80?text=User'
                 />
               )}
               <span>{e.authorName || 'Anonymous'}</span>

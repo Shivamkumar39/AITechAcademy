@@ -28,6 +28,8 @@ const corsConfig = {
 // const jwtSecret = 'secret123';
 const PORT = Number(process.env.PORT) || 8000
 const isProd = process.env.NODE_ENV === "production"
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000"
+const apiUrl = process.env.API_URL || `http://localhost:${PORT}`
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -37,7 +39,7 @@ const limiter = rateLimit({
 })
 
 app.use(cookieParser())
-app.use(helmet())
+app.use(helmet({ crossOriginResourcePolicy: false }))
 app.use(compression())
 app.use(morgan(isProd ? 'combined' : 'dev'))
 app.use(limiter)
@@ -50,7 +52,11 @@ app.use(cors(corsConfig))
 
 // Serve static images from the uploads folder
 const path = require('path');
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  maxAge: '7d',
+  etag: true,
+  immutable: false
+}));
 
 // Update Helmet to allow local images (fixes the broken icon issue)
 app.use(
@@ -58,7 +64,7 @@ app.use(
     useDefaults: true,
     directives: {
       "img-src": ["'self'", "data:", "https:", "http:"],
-      "connect-src": ["'self'", "http://127.0.0.1:5500", "http://localhost:5500", "https:"],
+      "connect-src": ["'self'", frontendUrl, apiUrl, "http://localhost:3000", "http://localhost:5600", "https:"],
     },
   })
 );

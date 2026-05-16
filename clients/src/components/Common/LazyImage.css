@@ -1,0 +1,41 @@
+.lazy-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.aspect-ratio-box > .lazy-image-wrap {
+  position: absolute;
+  inset: 0;
+}
+
+.aspect-ratio-box > .lazy-image-wrap img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lazy-image-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, #e9eef2 20%, #f7fafc 40%, #e9eef2 60%);
+  background-size: 200% 100%;
+  animation: lazyShimmer 1.2s ease-in-out infinite;
+}
+
+.lazy-image-hidden {
+  opacity: 0;
+}
+
+.lazy-image-loaded {
+  opacity: 1;
+  transition: opacity 0.28s ease;
+}
+
+@keyframes lazyShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

@@ -25,20 +25,30 @@ import AdSenseSlot from '../Ads/AdSenseSlot'
 import AdBanner from '../Ads/AdBanner'
 import { getGuestId, useSiteSettings } from '../../utils/siteSettings'
 import { SkeletonBlogDetail, SkeletonBlogCard } from '../Common/Skeletons'
+import LazyImage from '../Common/LazyImage'
+import { resolveImageUrl } from '../../utils/imageUrl'
+const BLOG_LIST_CACHE_KEY = "CACHE_BLOGS_V2"
+const blogDetailCacheKey = (slug) => `BLOG_CACHE_V2_${slug}`
+const preloadImage = (src) => new Promise((resolve) => {
+  if (!src) return resolve()
+  const img = new Image()
+  img.onload = () => resolve()
+  img.onerror = () => resolve()
+  img.src = resolveImageUrl(src)
+})
 
 const RelatedPost = memo(({ e, FALLBACK_BLOG_IMAGE }) => (
   <Link style={{ textDecoration: "none" }} to={`/blog/${e.slug}`} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
     <div className='blog-card related-blog-card'>
       <div className="aspect-ratio-box" style={{ borderRadius: '8px', height: '180px', background: '#f1f5f9', overflow: 'hidden' }}>
         {e.image ? (
-          <img 
-            className='recent-blog-img' 
-            src={e.image} 
-            alt={e.title || 'Related blog post'} 
+          <LazyImage
+            className='recent-blog-img'
+            src={e.image}
+            alt={e.title || 'Related blog post'}
             width="400"
             height="250"
-            loading="lazy"
-            onError={(ev) => { ev.currentTarget.src = FALLBACK_BLOG_IMAGE; ev.currentTarget.alt = e.title || 'Blog post' }} 
+            fallbackSrc={FALLBACK_BLOG_IMAGE}
           />
         ) : (
           <div className="blog-placeholder-mini" style={{ height: '100%' }}>
@@ -86,26 +96,27 @@ function Blog() {
   }, []);
 
   const getRecent = async () => {
-    const cachedBlogs = localStorage.getItem('CACHE_BLOGS');
+    const cachedBlogs = localStorage.getItem(BLOG_LIST_CACHE_KEY);
     if (cachedBlogs) {
       setRecentBlog(JSON.parse(cachedBlogs));
     }
     const res = await getAllBlogs().catch(() => ({ data: [] }))
     const allBlogs = Array.isArray(res?.data) ? res.data : []
     const sortedBlogs = [...allBlogs].sort((a, b) => (a._id < b._id ? 1 : -1))
+    await Promise.all(sortedBlogs.slice(0, 10).map((b) => preloadImage(b.image)))
     setRecentBlog(sortedBlogs)
-    localStorage.setItem('CACHE_BLOGS', JSON.stringify(sortedBlogs));
+    localStorage.setItem(BLOG_LIST_CACHE_KEY, JSON.stringify(sortedBlogs));
   }
 
   const getBlog = async (isInitialLoad = false) => {
     if (isInitialLoad) {
       setLoading(true)
       // 1. Try to find in global cache first (from home page)
-      const cachedList = JSON.parse(localStorage.getItem('CACHE_BLOGS') || '[]');
+      const cachedList = JSON.parse(localStorage.getItem(BLOG_LIST_CACHE_KEY) || '[]');
       const foundInList = cachedList.find(b => b.slug === slug);
       
       // 2. Try to find in specific blog cache
-      const specificCache = JSON.parse(localStorage.getItem(`BLOG_CACHE_${slug}`) || 'null');
+      const specificCache = JSON.parse(localStorage.getItem(blogDetailCacheKey(slug)) || 'null');
       
       if (specificCache) {
         setBlog(specificCache);
@@ -125,9 +136,10 @@ function Blog() {
 
       const data = blogRes?.data?.message
       if (data) {
+        await Promise.all([preloadImage(data.image), preloadImage(data.authorImage)])
         setBlog(data)
         setLikes(data.likes || [])
-        localStorage.setItem(`BLOG_CACHE_${slug}`, JSON.stringify(data));
+        localStorage.setItem(blogDetailCacheKey(slug), JSON.stringify(data));
       }
 
       if (statsRes?.data) {
@@ -264,7 +276,7 @@ function Blog() {
           <link rel="canonical" href={`https://aitechacademy.online/blog/${blog.slug}`} />
           <meta property="og:title" content={blog.title} />
           <meta property="og:description" content={blog.description?.replace(/<[^>]+>/g, '').slice(0, 160)} />
-          <meta property="og:image" content={blog.image} />
+          <meta property="og:image" content={resolveImageUrl(blog.image)} />
           <meta property="og:url" content={`https://aitechacademy.online/blog/${blog.slug}`} />
           <meta property="og:type" content="article" />
           <script type="application/ld+json">
@@ -272,7 +284,7 @@ function Blog() {
               "@context": "https://schema.org",
               "@type": "BlogPosting",
               headline: blog.title,
-              image: blog.image,
+              image: resolveImageUrl(blog.image),
               author: {
                 "@type": "Person",
                 name: blog.authorName || "AITECHACADEMY"
@@ -298,13 +310,13 @@ function Blog() {
               <div className='topBlogFlex'>
                 <div className='minor-info single-info'>
                   <a href={`/profile/${blog.authorid}`}>
-                    <img 
-                      className='author-image single-blog-author' 
-                      src={blog.authorImage} 
-                      alt={blog.authorName || 'Author image'} 
+                    <LazyImage
+                      className='author-image single-blog-author'
+                      src={blog.authorImage}
+                      alt={blog.authorName || 'Author image'}
                       width="60"
                       height="60"
-                      onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/80?text=User"; e.currentTarget.alt = blog.authorName || 'Author image' }} 
+                      fallbackSrc="https://via.placeholder.com/80?text=User"
                     />
                   </a>
 
@@ -340,14 +352,15 @@ function Blog() {
               <div className='single-blog-container'>
                 <h1 className='single-blog-title'>{blog.title}</h1>
                 <div className="aspect-ratio-box" style={{ borderRadius: '12px', marginBottom: '30px' }}>
-                  <img 
-                    className='single-blog-image' 
-                    src={blog.image} 
-                    alt={blog.title || 'Blog image'} 
+                  <LazyImage
+                    className='single-blog-image'
+                    src={blog.image}
+                    alt={blog.title || 'Blog image'}
                     width="1200"
                     height="700"
+                    loading="eager"
                     fetchpriority="high"
-                    onError={(e) => { e.currentTarget.src = FALLBACK_BLOG_IMAGE; e.currentTarget.alt = blog.title || 'Blog image' }} 
+                    fallbackSrc={FALLBACK_BLOG_IMAGE}
                   />
                 </div>
                 <div className='description-area' dangerouslySetInnerHTML={{ __html: blog.description }}></div>

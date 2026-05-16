@@ -11,24 +11,30 @@ import AdSenseSlot from '../Ads/AdSenseSlot'
 import AdBanner from '../Ads/AdBanner'
 import { useSiteSettings } from '../../utils/siteSettings'
 import { SkeletonBlogCard, SkeletonBlogList } from '../Common/Skeletons'
+import LazyImage from '../Common/LazyImage'
+import { resolveImageUrl } from '../../utils/imageUrl'
 
 const url = process.env.REACT_APP_API_URL || "http://localhost:8000"
+const BLOG_CACHE_KEY = "CACHE_BLOGS_V2"
+const BLOG_FALLBACK = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='700' viewBox='0 0 1200 700'><rect width='1200' height='700' fill='%23e5e7eb'/></svg>"
+const AVATAR_FALLBACK = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 24 24' fill='none'><rect width='24' height='24' rx='6' fill='%23e8edf2'/><circle cx='12' cy='9' r='4' fill='%2390a4b4'/><path d='M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6' fill='%2390a4b4'/></svg>"
+const preloadImage = (src) => new Promise((resolve) => {
+  if (!src) return resolve()
+  const img = new Image()
+  img.onload = () => resolve()
+  img.onerror = () => resolve()
+  img.src = resolveImageUrl(src)
+})
 
 // SIMPLE IMAGE COMPONENT - NO LOGIC, JUST DISPLAY
 const SimpleImage = memo(({ src, alt, className }) => {
-  if (!src) return <div className="image-placeholder" style={{ height: '200px', background: '#eee' }}></div>;
+  const isAvatar = className?.includes("author-image");
   return (
-    <img
+    <LazyImage
       src={src}
       alt={alt}
       className={className}
-      loading="lazy"
-      onError={(e) => {
-        // If image fails, try adding data prefix just in case
-        if (!src.startsWith('data:') && !src.startsWith('http')) {
-          e.target.src = `data:image/png;base64,${src}`;
-        }
-      }}
+      fallbackSrc={isAvatar ? AVATAR_FALLBACK : BLOG_FALLBACK}
     />
   );
 });
@@ -152,13 +158,23 @@ const Home = () => {
     const loadData = async () => {
       setLoading(true)
       try {
+        const cachedBlogs = JSON.parse(localStorage.getItem(BLOG_CACHE_KEY) || '[]')
+        if (Array.isArray(cachedBlogs) && cachedBlogs.length) {
+          setAllBlogs(cachedBlogs)
+        }
+
         const [blogsRes, catsRes, statsRes] = await Promise.all([
           getAllBlogs().catch(() => ({ data: [] })),
           categoryCount().catch(() => ({ data: {} })),
           getSiteStats().catch(() => ({}))
         ])
 
-        setAllBlogs(Array.isArray(blogsRes?.data) ? blogsRes.data : [])
+        const blogs = Array.isArray(blogsRes?.data) ? blogsRes.data : []
+        await Promise.all(
+          blogs.slice(0, 12).flatMap((b) => [preloadImage(b.image), preloadImage(b.authorImage)])
+        )
+        setAllBlogs(blogs)
+        localStorage.setItem(BLOG_CACHE_KEY, JSON.stringify(blogs))
         setCatCount(catsRes?.data || {})
         
         if (statsRes?.data) {

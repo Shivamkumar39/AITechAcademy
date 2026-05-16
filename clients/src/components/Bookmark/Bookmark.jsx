@@ -7,6 +7,7 @@ import noResults from "../../assets/no-results.svg"
 import { SkeletonBlogList } from '../Common/Skeletons'
 import Seo from '../SEO/Seo'
 import "./Bookmark.css"
+import LazyImage from '../Common/LazyImage'
 
 function Bookmark() {
   const { loginData } = useContext(LoginContext)
@@ -78,7 +79,7 @@ function Bookmark() {
             {bookmarks.map((blog) => (
               <article className='blog-card bookmark-card' key={blog._id}>
                 <Link to={`/blog/${blog.slug}`} className='bookmark-img-link'>
-                  <img className='recent-blog-img' src={blog.image} alt={blog.title} />
+                  <LazyImage className='recent-blog-img' src={blog.image} alt={blog.title} />
                 </Link>
                 <div className='blogInfo'>
                   <Link to={`/tag/${blog.category}`} className='category'>{blog.category}</Link>
@@ -87,7 +88,7 @@ function Bookmark() {
                   </Link>
                   <div className='minor-info'>
                     <Link to={`/profile/${blog.authorid}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-                      <img className='author-image' src={blog.authorImage} alt={blog.authorName} />
+                      <LazyImage className='author-image' src={blog.authorImage} alt={blog.authorName} fallbackSrc="https://via.placeholder.com/80?text=User" />
                       <span className='publishdate'>&nbsp;&nbsp;{blog.authorName}</span>
                     </Link>
                     <span className='publishdate'>| {blog.publishDate}</span>

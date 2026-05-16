@@ -1,7 +1,7 @@
 import axios from "axios"
 const url = process.env.REACT_APP_API_URL || "http://localhost:8000"
 
-axios.defaults.timeout = 5000;
+axios.defaults.timeout = 60000;
 
 export const postBlog=async(body, token)=>{
   try {

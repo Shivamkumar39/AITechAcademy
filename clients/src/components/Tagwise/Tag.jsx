@@ -7,6 +7,7 @@ import noResults from "../../assets/no-results.svg"
 import Navbar from '../Navbar/Navbar'
 import { SkeletonBlogList } from '../Common/Skeletons'
 import Seo from '../SEO/Seo'
+import LazyImage from '../Common/LazyImage'
 
 function Tag() {
   const [blogs, setBlogs] = useState([])
@@ -65,7 +66,7 @@ function Tag() {
                     <Link to={`/blog/${e.slug}`} className='recent-blog-img-link'>
                       <div className="aspect-ratio-box" style={{ borderRadius: '8px', background: '#f1f5f9', overflow: 'hidden', minHeight: '180px' }}>
                         {e.image ? (
-                          <img className='recent-blog-img' src={e.image} alt={e.title} loading="lazy" />
+                          <LazyImage className='recent-blog-img' src={e.image} alt={e.title} />
                         ) : (
                           <div className="blog-placeholder-mini"><span className="placeholder-text-small">Loading...</span></div>
                         )}
@@ -77,7 +78,7 @@ function Tag() {
                         <h3 className='right-blog-title mt-2'>{e.title}</h3>
                       </Link>
                       <div className='minor-info'>
-                        <img className='author-image' src={e.authorImage} alt={e.authorName} loading="lazy" />
+                        <LazyImage className='author-image' src={e.authorImage} alt={e.authorName} fallbackSrc="https://via.placeholder.com/80?text=User" />
                         <span className='publishdate'>&nbsp;&nbsp;{e.authorName}</span>
                         <span className='publishdate'>&nbsp;&nbsp;| {e.publishDate}</span>
                         <span className='publishdate'>&nbsp;&nbsp;| {e.readtime}</span>
