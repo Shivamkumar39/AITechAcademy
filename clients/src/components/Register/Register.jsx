@@ -2,8 +2,6 @@ import React from 'react'
 import "./Register.css"
 import { registerUser } from '../../apis/users';
 import { Link, useNavigate } from "react-router-dom";
-import Stack from '@mui/material/Stack';
-import LinearProgress from '@mui/material/LinearProgress';
 import { useState } from 'react';
 import Navbar from '../Navbar/Navbar'
 const defaultValue = {
@@ -19,8 +17,7 @@ function Register() {
   const [errorExist, setErrorExits] = useState(false)
   const [loading, setLoading] = useState(false)
   const [response, setResponse] = useState("")
-  const [inputValue, setInputValue] = useState("")
-  const [clientsRespone, setclientsRespone] = useState(false)
+  const [clientsRespone, setclientsRespone] = useState("")
 
   const pageRoute = useNavigate()
   const changeValue = (e) => {
@@ -44,17 +41,23 @@ function Register() {
       setShowCpass(true)
     }
   }
-  const submit = async () => {
-    setData(defaultValue)
+  const submit = async (e) => {
+    e.preventDefault()
     setLoading(true)
-    const res = await registerUser(data)
-    setLoading(false)
-    if (res.data.error) {
+    try {
+      const res = await registerUser(data)
+      if (res.data.error) {
+        setErrorExits(true)
+        setResponse(res.data.error)
+      } else if (res.data.message === "Registered") {
+        setData(defaultValue)
+        pageRoute('/login')
+      }
+    } catch (error) {
       setErrorExits(true)
-      setResponse(res.data.error)
-    }
-    else if (res.data.message === "Registered") {
-      pageRoute('/login')
+      setResponse(error?.response?.data?.error || "Registration failed. Please try again.")
+    } finally {
+      setLoading(false)
     }
   }
   const registerpageClick = () => {
@@ -67,7 +70,7 @@ function Register() {
 
       <div className='register-page' style={{ transition: "0.6s", display: loading ? "none" : "block" }} onClick={registerpageClick}>
 
-        <form className='container register-card' method='post'>
+        <form className='container register-card' method='post' onSubmit={submit}>
           <h2 className='welcome text-center'>Sign Up</h2>
           <p className='text-center welcome-info mt-2'>You will undoubtedly have a good time here.</p>
           <div className="mb-3">
@@ -101,9 +104,7 @@ function Register() {
           <div className="alert alert-danger" style={{ display: errorExist ? "block" : "none" }} role="alert">
             {response || clientsRespone}
           </div>
-          <Link style={{ display: loading ? "none" : "" }} to="/register">
-            <button onClick={submit} className="login-btn ">Register</button>
-          </Link>
+          <button type="submit" className="login-btn" style={{ display: loading ? "none" : "" }}>Register</button>
           <div style={{ display: loading ? "" : "none" }}>
             <button className='login-btn register-btn'><div className='register-spinner'><lottie-player src="https://assets8.lottiefiles.com/packages/lf20_pwszksuv.json" className="text-center" background="transparent" speed="1" style={{ width: "50px", height: "40px" }} loop autoplay></lottie-player>
             </div></button>

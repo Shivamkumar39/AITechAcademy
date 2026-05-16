@@ -12,7 +12,7 @@ import AdBanner from '../Ads/AdBanner'
 import { useSiteSettings } from '../../utils/siteSettings'
 import { SkeletonBlogCard, SkeletonBlogList } from '../Common/Skeletons'
 
-const url = process.env.REACT_APP_API_URL || "http://localhost:5500"
+const url = process.env.REACT_APP_API_URL || "http://localhost:8000"
 
 // SIMPLE IMAGE COMPONENT - NO LOGIC, JUST DISPLAY
 const SimpleImage = memo(({ src, alt, className }) => {

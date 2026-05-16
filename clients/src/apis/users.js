@@ -1,19 +1,11 @@
 import axios from "axios";
 const url = process.env.REACT_APP_API_URL || "http://localhost:8000";
 export const registerUser = async (body) => {
-  try {
-    return await axios.post(`${url}/register`, body);
-  } catch (error) {
-    // Error in registerUser api
-  }
+  return axios.post(`${url}/register`, body);
 };
 
 export const loginUser = async (data) => {
-  try {
-    return await axios.post(`${url}/login`, data, { withCredentials: true });
-  } catch (error) {
-    // Error
-  }
+  return axios.post(`${url}/login`, data, { withCredentials: true });
 };
 export const getUserById = async (id) => {
   try {

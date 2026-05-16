@@ -7,6 +7,47 @@ const slugify = require("slugify");
 
 const BASE_VISITS = 1010;
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MAX_INLINE_IMAGE_LENGTH = 120000;
+
+const withAbsoluteImage = (req, blog) => {
+  if (!blog) return blog;
+  const data = { ...blog };
+  if (typeof data.image === "string" && data.image.startsWith("/uploads/")) {
+    data.image = `${req.protocol}://${req.get("host")}${data.image}`;
+  }
+  if (typeof data.authorImage === "string" && data.authorImage.startsWith("/uploads/")) {
+    data.authorImage = `${req.protocol}://${req.get("host")}${data.authorImage}`;
+  }
+  return data;
+};
+
+const toListBlog = (req, blog) => {
+  const data = withAbsoluteImage(req, blog);
+  const trimmed = {
+    _id: data._id,
+    title: data.title,
+    slug: data.slug,
+    authorid: data.authorid,
+    authorImage: data.authorImage,
+    authorName: data.authorName,
+    image: data.image,
+    description: String(data.description || "").slice(0, 300),
+    category: data.category,
+    tags: data.tags,
+    readtime: data.readtime,
+    publishDate: data.publishDate,
+    views: data.views || 0,
+    likes: Array.isArray(data.likes) ? data.likes : [],
+    comments: Array.isArray(data.comments) ? data.comments : [],
+  };
+
+  // Large inline base64 images make list payload huge and cause frontend timeout.
+  if (typeof trimmed.image === "string" && trimmed.image.startsWith("data:") && trimmed.image.length > MAX_INLINE_IMAGE_LENGTH) {
+    trimmed.image = "";
+  }
+
+  return trimmed;
+};
 
 exports.addBlog = async (req, res) => {
   if (!req.rootUser || req.rootUser.role !== "admin") {
@@ -54,9 +95,23 @@ exports.addBlog = async (req, res) => {
 
 exports.getAllBlogs = async (req, res) => {
   try {
-    // Complete Restoration: Fetching all fields to ensure original UI is perfect.
-    const blogs = await Blog.find({}).sort({ _id: -1 }).limit(10).lean();
-    res.json(blogs);
+    const blogs = await Blog.find(
+      {},
+      {
+        title: 1,
+        slug: 1,
+        authorid: 1,
+        authorImage: 1,
+        authorName: 1,
+        category: 1,
+        tags: 1,
+        readtime: 1,
+        publishDate: 1,
+        views: 1,
+        likes: 1,
+      }
+    ).sort({ _id: -1 }).limit(10).lean();
+    res.json(blogs.map((blog) => toListBlog(req, blog)));
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch blogs" });
@@ -72,7 +127,7 @@ exports.getBlogById = async (req, res) => {
     // Increment views in background to avoid blocking the response
     Blog.findByIdAndUpdate(id, { $inc: { views: 1 } }).exec().catch(err => console.error("View count error:", err));
 
-    res.json({ message: blog });
+    res.json({ message: withAbsoluteImage(req, blog) });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch blog" });
@@ -267,7 +322,7 @@ exports.getBlogsByAuthorId = async (req, res) => {
   const { id } = req.params;
   try {
     const blogs = await Blog.find({ authorid: id }).lean();
-    res.json({ Blogs: blogs });
+    res.json({ Blogs: blogs.map((blog) => toListBlog(req, blog)) });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch blogs by author" });
@@ -331,14 +386,13 @@ exports.getBlogsByTag = async (req, res) => {
     const safeId = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     
     // Optimization: Exclude description to speed up results
-    const blogs = await Blog.find({ 
+    const blogs = await Blog.find({
       $or: [
         { category: { $regex: new RegExp(`^${safeId}$`, "i") } }, 
         { tags: { $regex: new RegExp(`^${safeId}$`, "i") } }
       ] 
     }, { description: 0 }).lean();
-    
-    res.json({ blogs: blogs || [] });
+    res.json({ blogs: (blogs || []).map((blog) => toListBlog(req, blog)) });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch blogs by tag" });
@@ -359,7 +413,7 @@ exports.searchBlogsByTitle = async (req, res) => {
   const { q } = req.query;
   try {
     const data = await Blog.find({ title: { $regex: q || "", $options: "i" } }, { description: 0 }).lean();
-    res.json(data);
+    res.json(data.map((blog) => toListBlog(req, blog)));
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Search failed" });
@@ -370,7 +424,7 @@ exports.searchBlogsByCategory = async (req, res) => {
   const { q } = req.query;
   try {
     const data = await Blog.find({ category: { $regex: q || "", $options: "i" } }, { description: 0 }).lean();
-    res.json(data);
+    res.json(data.map((blog) => toListBlog(req, blog)));
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Search failed" });
@@ -487,7 +541,7 @@ exports.getBlogBySlug = async (req, res) => {
     // Increment views in background to avoid blocking the response
     Blog.findByIdAndUpdate(blog._id, { $inc: { views: 1 } }).exec().catch(err => console.error("View count error:", err));
 
-    res.json({ message: blog });
+    res.json({ message: withAbsoluteImage(req, blog) });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch blog" });

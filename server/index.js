@@ -73,19 +73,14 @@ app.use((err, req, res, next) => {
   return res.status(500).json({ error: "Something went wrong. Please try again later." })
 })
 
-const startServer = async (port, retries = 10) => {
+const startServer = async (port) => {
   await mongoConnection()
   const server = app.listen(port, () => {
     console.log(`Listening at Port ${port}`)
   })
   server.on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
-      if (retries > 0) {
-        const nextPort = port + 1
-        console.warn(`Port ${port} is already in use. Trying ${nextPort}...`)
-        return startServer(nextPort, retries - 1)
-      }
-      console.error(`Port ${port} is already in use. Tried multiple ports and failed.`)
+      console.error(`Port ${port} is already in use. Please free this port or set PORT in server/.env and update REACT_APP_API_URL in clients/.env to the same value.`)
     } else {
       console.error(error)
     }
