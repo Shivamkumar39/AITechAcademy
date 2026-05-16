@@ -78,6 +78,11 @@ function App() {
   const settings = useSiteSettings();
 
   useEffect(() => {
+    // Disable AdSense during build/pre-rendering to avoid timeouts
+    if (typeof window !== 'undefined' && window.navigator.userAgent.includes('ReactSnap')) {
+      return;
+    }
+
     if (settings.adsenseEnabled && settings.adsensePublisherId?.trim()) {
       if (!document.getElementById("adsense-script")) {
         const script = document.createElement("script");

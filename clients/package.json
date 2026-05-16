@@ -54,7 +54,12 @@
   "reactSnap": {
     "puppeteerArgs": [
       "--no-sandbox",
-      "--disable-setuid-sandbox"
-    ]
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage"
+    ],
+    "concurrency": 1,
+    "maxNavigationTime": 90000,
+    "waitFor": 5000,
+    "port": 56789
   }
 }

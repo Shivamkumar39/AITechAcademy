@@ -31,6 +31,10 @@ import { resolveImageUrl } from '../../utils/imageUrl'
 const BLOG_LIST_CACHE_KEY = "CACHE_BLOGS_V2"
 const blogDetailCacheKey = (slug) => `BLOG_CACHE_V2_${slug}`
 const preloadImage = (src) => new Promise((resolve) => {
+  // Skip preloading during react-snap build to avoid timeouts
+  if (typeof window !== 'undefined' && window.navigator.userAgent.includes('ReactSnap')) {
+    return resolve();
+  }
   if (!src) return resolve()
   const img = new Image()
   img.onload = () => resolve()

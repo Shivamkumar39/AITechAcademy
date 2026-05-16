@@ -19,6 +19,10 @@ const BLOG_CACHE_KEY = "CACHE_BLOGS_V2"
 const BLOG_FALLBACK = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='700' viewBox='0 0 1200 700'><rect width='1200' height='700' fill='%23e5e7eb'/></svg>"
 const AVATAR_FALLBACK = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 24 24' fill='none'><rect width='24' height='24' rx='6' fill='%23e8edf2'/><circle cx='12' cy='9' r='4' fill='%2390a4b4'/><path d='M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6' fill='%2390a4b4'/></svg>"
 const preloadImage = (src) => new Promise((resolve) => {
+  // Skip preloading during react-snap build to avoid timeouts
+  if (typeof window !== 'undefined' && window.navigator.userAgent.includes('ReactSnap')) {
+    return resolve();
+  }
   if (!src) return resolve()
   const img = new Image()
   img.onload = () => resolve()
