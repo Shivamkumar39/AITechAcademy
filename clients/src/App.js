@@ -1,6 +1,8 @@
 import './App.css';
 import React, { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import Home from './components/Homepage/Home';
+import Blog from './components/Blog/Blog';
 import { trackSiteVisit } from './apis/Blogs';
 import { useSiteSettings } from './utils/siteSettings';
 import Footer from './components/Footer/Footer';
@@ -10,8 +12,6 @@ import ScrollToTop from './components/Common/ScrollToTop';
 // Lazy loading components for better performance
 const Login = lazy(() => import('./components/Login/Login'));
 const Register = lazy(() => import('./components/Register/Register.jsx'));
-const Home = lazy(() => import('./components/Homepage/Home'));
-const Blog = lazy(() => import('./components/Blog/Blog'));
 const Navbar = lazy(() => import('./components/Navbar/Navbar'));
 const Profile = lazy(() => import('./components/Profile/Profile'));
 const EditProfile = lazy(() => import('./components/Editprofile/EditProfile'));

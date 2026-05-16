@@ -26,6 +26,7 @@ import AdBanner from '../Ads/AdBanner'
 import { getGuestId, useSiteSettings } from '../../utils/siteSettings'
 import { SkeletonBlogDetail, SkeletonBlogCard } from '../Common/Skeletons'
 import LazyImage from '../Common/LazyImage'
+import Seo from '../SEO/Seo'
 import { resolveImageUrl } from '../../utils/imageUrl'
 const BLOG_LIST_CACHE_KEY = "CACHE_BLOGS_V2"
 const blogDetailCacheKey = (slug) => `BLOG_CACHE_V2_${slug}`
@@ -269,35 +270,72 @@ function Blog() {
   return (
     <>
       {blog && (
-        <Helmet>
-          <title>{blog.title} | AITECHACADEMY</title>
-          <meta name="description" content={blog.description?.replace(/<[^>]+>/g, '').slice(0, 160)} />
-          <meta name="keywords" content={blog.tags?.join(",")} />
-          <link rel="canonical" href={`https://aitechacademy.online/blog/${blog.slug}`} />
-          <meta property="og:title" content={blog.title} />
-          <meta property="og:description" content={blog.description?.replace(/<[^>]+>/g, '').slice(0, 160)} />
-          <meta property="og:image" content={resolveImageUrl(blog.image)} />
-          <meta property="og:url" content={`https://aitechacademy.online/blog/${blog.slug}`} />
-          <meta property="og:type" content="article" />
-          <script type="application/ld+json">
-            {JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "BlogPosting",
-              headline: blog.title,
-              image: resolveImageUrl(blog.image),
-              author: {
-                "@type": "Person",
-                name: blog.authorName || "AITECHACADEMY"
-              },
-              publisher: {
-                "@type": "Organization",
-                name: "AITECHACADEMY"
-              },
-              datePublished: blog.publishDate,
-              description: blog.description?.replace(/<[^>]+>/g, '').slice(0, 160)
-            })}
-          </script>
-        </Helmet>
+        <>
+          <Seo 
+            title={`${blog.title} | AITECHACADEMY`}
+            description={blog.description?.replace(/<[^>]+>/g, '').slice(0, 165)}
+            keywords={blog.tags?.join(", ")}
+            path={`/blog/${blog.slug}`}
+            type="article"
+            image={resolveImageUrl(blog.image)}
+          />
+          <Helmet>
+            <script type="application/ld+json">
+              {JSON.stringify([
+                {
+                  "@context": "https://schema.org",
+                  "@type": "BlogPosting",
+                  "mainEntityOfPage": {
+                    "@type": "WebPage",
+                    "@id": `https://aitechacademy.online/blog/${blog.slug}`
+                  },
+                  "headline": blog.title,
+                  "image": resolveImageUrl(blog.image),
+                  "author": {
+                    "@type": "Person",
+                    "name": blog.authorName || "AITECHACADEMY",
+                    "url": `https://aitechacademy.online/profile/${blog.authorid}`
+                  },
+                  "publisher": {
+                    "@type": "Organization",
+                    "name": "AITECHACADEMY",
+                    "logo": {
+                      "@type": "ImageObject",
+                      "url": "https://aitechacademy.online/image.png"
+                    }
+                  },
+                  "datePublished": blog.publishDate || new Date().toISOString(),
+                  "dateModified": blog.updatedAt || new Date().toISOString(),
+                  "description": blog.description?.replace(/<[^>]+>/g, '').slice(0, 160)
+                },
+                {
+                  "@context": "https://schema.org",
+                  "@type": "BreadcrumbList",
+                  "itemListElement": [
+                    {
+                      "@type": "ListItem",
+                      "position": 1,
+                      "name": "Home",
+                      "item": "https://aitechacademy.online/"
+                    },
+                    {
+                      "@type": "ListItem",
+                      "position": 2,
+                      "name": "Blog",
+                      "item": "https://aitechacademy.online/"
+                    },
+                    {
+                      "@type": "ListItem",
+                      "position": 3,
+                      "name": blog.title,
+                      "item": `https://aitechacademy.online/blog/${blog.slug}`
+                    }
+                  ]
+                }
+              ])}
+            </script>
+          </Helmet>
+        </>
       )}
       <Navbar />
       <div className='blog-container'>

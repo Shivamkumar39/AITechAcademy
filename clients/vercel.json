@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "https://aitechacademy-o2oo.onrender.com/sitemap.xml"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/200.html"
+    }
+  ]
+}

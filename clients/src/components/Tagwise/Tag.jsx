@@ -43,7 +43,11 @@ function Tag() {
 
   return (
     <>
-      <Seo title={`Articles about ${id} | AITECHACADEMY`} />
+      <Seo 
+        title={`Articles about ${id} | AITECHACADEMY`} 
+        description={`Read the latest articles, news, and study materials about ${id} on AITECHACADEMY. Daily updates on AI, coding, and technology.`}
+        path={`/tag/${id}`}
+      />
       <Navbar />
       <div className='container mt-5'>
         {loading ? (

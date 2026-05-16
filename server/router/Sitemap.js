@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const Blog = require('../models/Blog');
+const Users = require('../models/User');
 
 router.get('/sitemap.xml', async (req, res) => {
   try {
-    const blogs = await Blog.find({}, { slug: 1, updatedAt: 1 }).lean();
+    const blogs = await Blog.find({}, { slug: 1, updatedAt: 1, category: 1, tags: 1, authorid: 1 }).lean();
+    const users = await Users.find({}, { _id: 1 }).lean();
     
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -22,14 +24,64 @@ router.get('/sitemap.xml', async (req, res) => {
     <loc>https://aitechacademy.online/contact-us</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://aitechacademy.online/privacy-policy</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://aitechacademy.online/terms-and-conditions</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://aitechacademy.online/disclaimer</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>`;
 
+    const categories = new Set();
+    const tags = new Set();
+
     blogs.forEach(blog => {
+      if (blog.category) categories.add(blog.category);
+      if (blog.tags && Array.isArray(blog.tags)) {
+        blog.tags.forEach(tag => tags.add(tag));
+      }
+
       const date = blog.updatedAt ? new Date(blog.updatedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
       sitemap += `
   <url>
     <loc>https://aitechacademy.online/blog/${blog.slug}</loc>
     <lastmod>${date}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>`;
+    });
+
+    categories.forEach(category => {
+      sitemap += `
+  <url>
+    <loc>https://aitechacademy.online/tag/${encodeURIComponent(category)}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+    });
+
+    tags.forEach(tag => {
+      sitemap += `
+  <url>
+    <loc>https://aitechacademy.online/tag/${encodeURIComponent(tag)}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+    });
+
+    users.forEach(user => {
+      sitemap += `
+  <url>
+    <loc>https://aitechacademy.online/profile/${user._id}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`;
