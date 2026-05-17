@@ -418,9 +418,9 @@ function Blog() {
                     <h5 className='tags-heading' style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '10px' }}>Related Tags:</h5>
                     <div className='tags-container' style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                       {blog.tags.map((tag, index) => (
-                        <Link 
-                          key={`${tag}-${index}`} 
-                          to={`/tag/${tag}`} 
+                        <Link
+                          key={`${tag}-${index}`}
+                          to={`/tag/${tag}`}
                           className='meta-tag-pill'
                           style={{
                             background: '#f1f5f9',

@@ -136,9 +136,12 @@ exports.addBlog = async (req, res) => {
 
 exports.getAllBlogs = async (req, res) => {
   try {
+    console.log("=== getAllBlogs called ===");
     if (cache.blogs.data && (Date.now() - cache.blogs.at) < LIST_CACHE_TTL_MS) {
+      console.log("Returning cached blogs");
       return res.json(cache.blogs.data);
     }
+    console.log("Fetching blogs from DB...");
     const blogs = await Blog.find(
       {},
       {
@@ -156,11 +159,14 @@ exports.getAllBlogs = async (req, res) => {
         likes: 1,
       }
     ).sort({ _id: -1 }).limit(10).maxTimeMS(5000).lean();
+    console.log(`Found ${blogs.length} blogs. Processing payload...`);
     const payload = blogs.map((blog) => toListBlog(req, blog));
     cache.blogs = { at: Date.now(), data: payload };
+    console.log("Sending JSON response...");
     res.json(payload);
+    console.log("Response sent successfully!");
   } catch (error) {
-    console.error(error);
+    console.error("Error in getAllBlogs:", error);
     if (cache.blogs.data) {
       return res.json(cache.blogs.data);
     }
@@ -382,12 +388,12 @@ exports.getBlogsByAuthorId = async (req, res) => {
 exports.getCategoryCount = async (req, res) => {
   try {
     const requested = [
-      "Educational", "News", "Latest AI News", "Innovation", 
+      "Educational", "News", "Latest AI News", "Innovation",
       "Study Material", "Technology", "Btech CSE Material"
     ];
 
     const counts = {};
-    
+
     // We fetch counts for each requested category individually to check both category and tags fields
     await Promise.all(requested.map(async (cat) => {
       const count = await Blog.countDocuments({
@@ -409,19 +415,19 @@ exports.getCategoryCount = async (req, res) => {
 exports.getCategories = async (req, res) => {
   try {
     const requested = [
-      "Educational", "News", "Latest AI News", "Innovation", 
+      "Educational", "News", "Latest AI News", "Innovation",
       "Study Material", "Technology", "Btech CSE Material"
     ];
     const categories = await Blog.distinct("category");
     const tags = await Blog.distinct("tags");
-    
+
     // Combine existing categories, tags, and our requested default list
     const suggestions = Array.from(new Set([
       ...requested,
-      ...(categories || []), 
+      ...(categories || []),
       ...(tags || [])
     ]));
-    
+
     res.json({ categories, tags, suggestions });
   } catch (error) {
     console.error(error);
@@ -434,13 +440,13 @@ exports.getBlogsByTag = async (req, res) => {
   try {
     // Escape string for regex to avoid ReDoS or matching errors
     const safeId = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    
+
     // Optimization: Exclude description to speed up results
     const blogs = await Blog.find({
       $or: [
-        { category: { $regex: new RegExp(`^${safeId}$`, "i") } }, 
+        { category: { $regex: new RegExp(`^${safeId}$`, "i") } },
         { tags: { $regex: new RegExp(`^${safeId}$`, "i") } }
-      ] 
+      ]
     }, { description: 0 }).lean();
     res.json({ blogs: (blogs || []).map((blog) => toListBlog(req, blog)) });
   } catch (error) {

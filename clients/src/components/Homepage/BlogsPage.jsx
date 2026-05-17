@@ -141,7 +141,7 @@ const ShortBlogs = memo(({ blogs }) => {
   )
 })
 
-const Home = () => {
+const BlogsPage = () => {
   const { setLoginData } = useContext(LoginContext)
   const [allBlogs, setAllBlogs] = useState([])
   const [catCount, setCatCount] = useState({})
@@ -213,9 +213,9 @@ const Home = () => {
     <>
       <Navbar />
       <Seo
-        title="AITECHACADEMY - Home"
+        title="All Blogs - AITECHACADEMY"
         description="AITECHACADEMY provides CSE notes, PYQs, assignments, AI tools, coding tutorials, and latest technology blogs for students and developers."
-        path="/"
+        path="/blog"
         image="https://aitechacademy.online/image.png"
         keywords="AI tools,Latest News, Breaking News, BTech CSE, Study Material, Tech News, Technology, News, AI, Innovation, AI News, PYQ, tutorials coding, CSE notes, PYQ, assignments, tech blogs, programming,  education"
         type="website"
@@ -279,4 +279,4 @@ const Home = () => {
   )
 }
 
-export default Home
+export default BlogsPage

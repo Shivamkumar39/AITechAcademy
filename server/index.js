@@ -38,17 +38,17 @@ const limiter = rateLimit({
   legacyHeaders: false
 })
 
+app.use(cors(corsConfig))
 app.use(cookieParser())
 app.use(helmet({ crossOriginResourcePolicy: false }))
 app.use(compression())
-app.use(morgan(isProd ? 'combined' : 'dev'))
+app.use(morgan(process.env.NODE_ENV === "production" ? 'combined' : 'dev'))
 app.use(limiter)
 app.use(mongoSanitize())
 app.use(xssClean())
 app.use(hpp())
 app.use(express.json({ limit: '50mb' }))
 app.use(express.urlencoded({ extended: true, limit: '50mb', parameterLimit: 50000 }))
-app.use(cors(corsConfig))
 
 // Serve static images from the uploads folder
 const path = require('path');

@@ -28,6 +28,7 @@ const TermsAndConditions = lazy(() => import('./components/Legal/TermsAndConditi
 const About = lazy(() => import('./components/Legal/About'));
 const ContactUs = lazy(() => import('./components/Legal/ContactUs'));
 const Disclaimer = lazy(() => import('./components/Legal/Disclaimer'));
+const BlogsPage = lazy(() => import('./components/Homepage/BlogsPage'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -56,7 +57,8 @@ function AppRoutes() {
         <Route exact path='/profile/:id' element={<Profile/>}/>
         <Route exact path='/tag/:id' element={<Tag/>}/>
         <Route path='/search' element={<Search/>}/>
-        <Route path='/blog' element={<Home/>}/>
+        <Route exact path='/blog' element={<BlogsPage/>}/>
+        <Route exact path='/blogs' element={<BlogsPage/>}/>
         <Route path='/notifications' element={<Pending/>}/>
         <Route exact path='/bookmarks' element={<Bookmark/>}/>
         <Route exact path='/write' element={<Write/>}/>
