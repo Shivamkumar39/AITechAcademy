@@ -413,6 +413,36 @@ function Blog() {
                   minHeight="250px"
                 />
 
+                {blog.tags && blog.tags.length > 0 && (
+                  <div className='blog-meta-tags mt-4 mb-3'>
+                    <h5 className='tags-heading' style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '10px' }}>Related Tags:</h5>
+                    <div className='tags-container' style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {blog.tags.map((tag, index) => (
+                        <Link 
+                          key={`${tag}-${index}`} 
+                          to={`/tag/${tag}`} 
+                          className='meta-tag-pill'
+                          style={{
+                            background: '#f1f5f9',
+                            color: '#334155',
+                            padding: '4px 12px',
+                            borderRadius: '20px',
+                            textDecoration: 'none',
+                            fontSize: '0.85rem',
+                            fontWeight: '500',
+                            transition: 'all 0.2s ease',
+                            border: '1px solid #e2e8f0'
+                          }}
+                          onMouseOver={(e) => { e.target.style.background = '#e2e8f0'; e.target.style.color = '#00aaa1'; }}
+                          onMouseOut={(e) => { e.target.style.background = '#f1f5f9'; e.target.style.color = '#334155'; }}
+                        >
+                          #{tag}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className='appreciation'>
                   <div className='like-comment'>
                     <div>

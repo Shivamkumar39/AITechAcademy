@@ -214,18 +214,30 @@ function Write() {
                     name="category" 
                     placeholder='Type custom category' 
                     required 
+                    onBlur={(e) => {
+                      const val = e.target.value.trim();
+                      if (val && !availableCategories.includes(val)) {
+                        setAvailableCategories((prev) => [...prev, val]);
+                      }
+                    }}
                   />
                 ) : null}
               </div>
-              <small className="form-text text-muted thumbnailMessage mb-3">Choose a category or type a new one</small>
+              <small className="form-text text-muted thumbnailMessage mb-3">Choose a category or type a new one (it will be added to the list)</small>
             </div>
           </div>
 
           <div className='tag-section'>
-            <div className='tag-label'>Available tags</div>
+            <div className='tag-label'>Meta Tags (Max 20)</div>
             <div className='available-tags'>
               {availableTags.length > 0 ? availableTags.map((tag, index) => (
-                <button key={`${tag}-${index}`} type='button' className='tag-suggestion' onClick={() => selectSuggestedTag(tag)}>
+                <button key={`${tag}-${index}`} type='button' className='tag-suggestion' onClick={() => {
+                  if (post.tags.length >= 20) {
+                    setTagMessage("Maximum 20 tags allowed.");
+                    return;
+                  }
+                  selectSuggestedTag(tag);
+                }}>
                   {tag}
                 </button>
               )) : <span className='tag-empty'>No tags available yet.</span>}
@@ -237,9 +249,16 @@ function Write() {
                 className='tag-input'
                 type='text'
                 name='tagInput'
-                placeholder='Add extra tag'
+                placeholder='Add Meta Tag'
+                disabled={post.tags.length >= 20}
               />
-              <button type='button' className='tag-add-btn' onClick={addTag}>
+              <button type='button' className='tag-add-btn' disabled={post.tags.length >= 20} onClick={() => {
+                if (post.tags.length >= 20) {
+                  setTagMessage("Maximum 20 tags allowed.");
+                  return;
+                }
+                addTag();
+              }}>
                 Add Tag
               </button>
             </div>
