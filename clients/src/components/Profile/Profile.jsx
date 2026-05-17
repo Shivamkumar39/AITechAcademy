@@ -15,6 +15,8 @@ import { Link } from "react-router-dom"
 import Navbar from '../Navbar/Navbar';
 import { SkeletonBlogCard } from '../Common/Skeletons'
 import LazyImage from '../Common/LazyImage'
+import Seo from '../SEO/Seo';
+import StructuredData from '../SEO/StructuredData';
 
 const modalStyle = {
   position: 'absolute',
@@ -89,7 +91,7 @@ function Profile() {
     try {
       const res = await getUserById(id)
       setUser(res.data.success || {})
-      
+
       const blogRes = await getAuthorBlogs(id)
       if (blogRes.data.Blogs && blogRes.data.Blogs.length > 0) {
         setUserBlogsExist(true)
@@ -167,7 +169,27 @@ function Profile() {
   return (
     <div className="profile-page-root">
       <Navbar />
-      
+
+      <Seo
+        title={user.fullname || user.username}
+        description={user.bio || "Author profile on AITECHACADEMY"}
+        path={`/profile/${id}`}
+        type="profile"
+        image={user.profilePic}
+        keywords={`${user.username}, author, blogs, AI content`}
+        noIndex={false}
+      />
+      <StructuredData
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Person",
+          "name": user.fullname || user.username,
+          "url": `https://aitechacademy.online/profile/${id}`,
+          "image": user.profilePic,
+          "description": user.bio
+        }}
+      />
+
       {/* Modals for Followers/Following */}
       <Modal open={open} onClose={() => setOpen(false)}>
         <Box sx={modalStyle}>
@@ -237,7 +259,7 @@ function Profile() {
           <div className='profile-cover-v2'>
             <div className='cover-gradient-overlay'></div>
           </div>
-          
+
           <div className='profile-content-container'>
             <div className='profile-identity-card'>
               <div className='profile-avatar-container'>
@@ -249,22 +271,22 @@ function Profile() {
                   )}
                 </div>
               </div>
-              
+
               <div className='profile-text-content'>
                 <div className='profile-header-actions'>
                   <div className='name-handle-group'>
                     <h1 className='profile-full-name'>{loading ? "Loading Author..." : user.fullname || user.username}</h1>
                     <span className='profile-username-tag'>@{user.username}</span>
                   </div>
-                  
+
                   <div className='profile-primary-actions'>
                     {user._id === userId ? (
                       <Link to={`/edit/${user._id}`}>
                         <button className='btn-premium-outline'>Edit Profile</button>
                       </Link>
                     ) : (
-                      <button 
-                        onClick={followers.includes(userId) ? unfollowBtn : followBtn} 
+                      <button
+                        onClick={followers.includes(userId) ? unfollowBtn : followBtn}
                         className={`btn-premium ${followers.includes(userId) ? 'btn-unfollow' : 'btn-follow'}`}
                         disabled={spinner}
                       >
@@ -273,9 +295,9 @@ function Profile() {
                     )}
                   </div>
                 </div>
-                
+
                 <p className='profile-biography'>{user.bio || "Crafting stories and sharing knowledge with the community."}</p>
-                
+
                 <div className='profile-metrics-bar'>
                   <div className='metric-pill' onClick={() => { setFollowersOpen(true); fetchFollowers(); }}>
                     <span className='metric-count'>{followers.length}</span>

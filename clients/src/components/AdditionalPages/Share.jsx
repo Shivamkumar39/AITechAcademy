@@ -3,7 +3,7 @@ import { AiOutlineShareAlt } from "react-icons/ai"
 import "./Additional.css"
 import {
   FacebookIcon, LinkedinIcon, TwitterIcon, InstapaperIcon, RedditIcon,
-  TelegramIcon, FacebookShareCount, FacebookShareButton, InstapaperShareButton, LineShareButton, TwitterShareButton, RedditShareButton, LinkedinShareButton,
+  TelegramIcon, WhatsappIcon, WhatsappShareButton, FacebookShareCount, FacebookShareButton, InstapaperShareButton, LineShareButton, TwitterShareButton, RedditShareButton, LinkedinShareButton,
 } from "react-share"
 import { useState } from 'react'
 function Share(props) {
@@ -13,6 +13,9 @@ function Share(props) {
   return (
     <div className='sharing-apps'>
 
+      <WhatsappShareButton url={shareUrl}>
+        <WhatsappIcon className='shareIcons' size="25" />
+      </WhatsappShareButton>
       <FacebookShareButton url={shareUrl}>
         <FacebookIcon className='shareIcons' size="25" />
       </FacebookShareButton>

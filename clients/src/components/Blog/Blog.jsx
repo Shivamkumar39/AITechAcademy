@@ -6,16 +6,16 @@ import { AiOutlineShareAlt, AiOutlineLike, AiFillLike } from 'react-icons/ai';
 import { VscComment } from "react-icons/vsc"
 import { MdOutlineBookmarkAdd, MdOutlineBookmark } from "react-icons/md"
 import { Link, useParams } from "react-router-dom"
-import { 
-  bookmark, 
-  getAllBlogs, 
-  getBlogBySlug, 
-  likeBlog, 
-  unbookmark, 
-  unlikeBlog, 
-  addComment, 
-  getSiteStats, 
-  categoryCount 
+import {
+  bookmark,
+  getAllBlogs,
+  getBlogBySlug,
+  likeBlog,
+  unbookmark,
+  unlikeBlog,
+  addComment,
+  getSiteStats,
+  categoryCount
 } from "../../apis/Blogs.js"
 import { LoginContext } from '../../contextProvider/Context';
 import { RightSection } from "../Homepage/Home.jsx"
@@ -27,6 +27,7 @@ import { getGuestId, useSiteSettings } from '../../utils/siteSettings'
 import { SkeletonBlogDetail, SkeletonBlogCard } from '../Common/Skeletons'
 import LazyImage from '../Common/LazyImage'
 import Seo from '../SEO/Seo'
+import StructuredData from "../SEO/StructuredData";
 import { resolveImageUrl } from '../../utils/imageUrl'
 const BLOG_LIST_CACHE_KEY = "CACHE_BLOGS_V2"
 const blogDetailCacheKey = (slug) => `BLOG_CACHE_V2_${slug}`
@@ -119,10 +120,10 @@ function Blog() {
       // 1. Try to find in global cache first (from home page)
       const cachedList = JSON.parse(localStorage.getItem(BLOG_LIST_CACHE_KEY) || '[]');
       const foundInList = cachedList.find(b => b.slug === slug);
-      
+
       // 2. Try to find in specific blog cache
       const specificCache = JSON.parse(localStorage.getItem(blogDetailCacheKey(slug)) || 'null');
-      
+
       if (specificCache) {
         setBlog(specificCache);
         setLikes(specificCache.likes || []);
@@ -150,7 +151,7 @@ function Blog() {
       if (statsRes?.data) {
         setSiteStats(statsRes.data)
       }
-      
+
       if (catsRes?.data) {
         setCatCount(catsRes.data)
       }
@@ -197,7 +198,7 @@ function Blog() {
     // Optimistic update
     setLiked(true)
     setLikes(prev => prev.includes(currentUserId) ? prev : [...prev, currentUserId])
-    
+
     await likeBlog(blog._id, { userId: currentUserId })
     getBlog(false) // Silent sync
   }
@@ -206,7 +207,7 @@ function Blog() {
     // Optimistic update
     setLiked(false)
     setLikes(prev => prev.filter(userId => userId !== currentUserId))
-    
+
     await unlikeBlog(blog._id, { userId: currentUserId })
     getBlog(false) // Silent sync
   }
@@ -223,13 +224,13 @@ function Blog() {
         blogId: blog._id,
       }
       await addComment(blog._id, { userId: newComment.userId, info: newComment.info })
-      
+
       // Optimistic update
       setBlog((prevBlog) => ({
         ...prevBlog,
         comments: [...(prevBlog.comments || []), newComment],
       }))
-      
+
       setCommentText("")
       setCommentSuccess(true)
       setTimeout(() => setCommentSuccess(false), 3000)
@@ -275,70 +276,47 @@ function Blog() {
     <>
       {blog && (
         <>
-          <Seo 
-            title={`${blog.title} | AITECHACADEMY`}
-            description={blog.description?.replace(/<[^>]+>/g, '').slice(0, 165)}
-            keywords={blog.tags?.join(", ")}
+          <Seo
+            title={blog.title}
+            description={blog.description?.replace(/<[^>]+>/g, "").slice(0, 155)}
             path={`/blog/${blog.slug}`}
             type="article"
-            image={resolveImageUrl(blog.image)}
+            image={blog.image}
+            keywords={`${blog.category}, coding, CSE, BTech CSE, Study Material, Tech News,Technology, News, AI, Innovation, AI News, PYQ, tutorials`}
+            publishedTime={blog.publishDate}
+            updatedTime={blog.updatedAt}
+            author={blog.authorName}
           />
-          <Helmet>
-            <script type="application/ld+json">
-              {JSON.stringify([
-                {
-                  "@context": "https://schema.org",
-                  "@type": "BlogPosting",
-                  "mainEntityOfPage": {
-                    "@type": "WebPage",
-                    "@id": `https://aitechacademy.online/blog/${blog.slug}`
-                  },
-                  "headline": blog.title,
-                  "image": resolveImageUrl(blog.image),
-                  "author": {
-                    "@type": "Person",
-                    "name": blog.authorName || "AITECHACADEMY",
-                    "url": `https://aitechacademy.online/profile/${blog.authorid}`
-                  },
-                  "publisher": {
-                    "@type": "Organization",
-                    "name": "AITECHACADEMY",
-                    "logo": {
-                      "@type": "ImageObject",
-                      "url": "https://aitechacademy.online/image.png"
-                    }
-                  },
-                  "datePublished": blog.publishDate || new Date().toISOString(),
-                  "dateModified": blog.updatedAt || new Date().toISOString(),
-                  "description": blog.description?.replace(/<[^>]+>/g, '').slice(0, 160)
-                },
-                {
-                  "@context": "https://schema.org",
-                  "@type": "BreadcrumbList",
-                  "itemListElement": [
-                    {
-                      "@type": "ListItem",
-                      "position": 1,
-                      "name": "Home",
-                      "item": "https://aitechacademy.online/"
-                    },
-                    {
-                      "@type": "ListItem",
-                      "position": 2,
-                      "name": "Blog",
-                      "item": "https://aitechacademy.online/"
-                    },
-                    {
-                      "@type": "ListItem",
-                      "position": 3,
-                      "name": blog.title,
-                      "item": `https://aitechacademy.online/blog/${blog.slug}`
-                    }
-                  ]
+
+          {/* 🔥 ADD STRUCTURED DATA HERE (THIS IS CORRECT PLACE) */}
+          <StructuredData
+            data={{
+              "@context": "https://schema.org",
+              "@type": "BlogPosting",
+              "mainEntityOfPage": {
+                "@type": "WebPage",
+                "@id": `https://aitechacademy.online/blog/${blog.slug}`
+              },
+              "headline": blog.title,
+              "description": blog.description?.replace(/<[^>]+>/g, "").slice(0, 160),
+              "image": resolveImageUrl(blog.image),
+              "author": {
+                "@type": "Person",
+                "name": blog.authorName || "AITECHACADEMY"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "AITECHACADEMY",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": "https://aitechacademy.online/image.png"
                 }
-              ])}
-            </script>
-          </Helmet>
+              },
+              "datePublished": blog.publishDate,
+              "dateModified": blog.updatedAt
+            }}
+          />
+
         </>
       )}
       <Navbar />
@@ -406,7 +384,7 @@ function Blog() {
                   />
                 </div>
                 <div className='description-area' dangerouslySetInnerHTML={{ __html: blog.description }}></div>
-                
+
                 {blog.pdfLinks && blog.pdfLinks.length > 0 && (
                   <div className='pdf-downloads-container'>
                     <h4 className='pdf-downloads-title'>

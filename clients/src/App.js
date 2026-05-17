@@ -56,6 +56,7 @@ function AppRoutes() {
         <Route exact path='/profile/:id' element={<Profile/>}/>
         <Route exact path='/tag/:id' element={<Tag/>}/>
         <Route path='/search' element={<Search/>}/>
+        <Route path='/blog' element={<Home/>}/>
         <Route path='/notifications' element={<Pending/>}/>
         <Route exact path='/bookmarks' element={<Bookmark/>}/>
         <Route exact path='/write' element={<Write/>}/>

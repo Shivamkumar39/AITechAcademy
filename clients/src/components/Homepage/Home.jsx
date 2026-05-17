@@ -7,6 +7,7 @@ import { categoryCount, getAllBlogs, getSiteStats } from '../../apis/Blogs'
 import { LoginContext } from '../../contextProvider/Context'
 import Navbar from '../Navbar/Navbar'
 import Seo from '../SEO/Seo'
+import { Helmet } from "react-helmet-async";
 import AdSenseSlot from '../Ads/AdSenseSlot'
 import AdBanner from '../Ads/AdBanner'
 import { useSiteSettings } from '../../utils/siteSettings'
@@ -48,46 +49,46 @@ export const RightSection = memo(({ catCount, loading, siteStats }) => {
   const settings = useSiteSettings();
   return (
     <div className='sec-2-right'>
-       <div className='right-blog sticky-sidebar'>
-          <h3 className='featured'><span className='backgroundColor'>&nbsp;Categories </span></h3>
-          <div className='category-list mt-4'>
-            {[
-              "Educational", "News", "Latest AI News", "Innovation", 
-              "Study Material", "Technology", "Btech CSE Material"
-            ].map((name) => {
-              // Find case-insensitive match in catCount
-              const countKey = Object.keys(catCount || {}).find(k => k.toLowerCase() === name.toLowerCase());
-              const count = countKey ? catCount[countKey] : 0;
-              return (
-                <Link key={name} to={`/tag/${name}`} className='category-item'>
-                  <span className="cat-name">{name}</span>
-                  <span className='count'>{count}</span>
-                </Link>
-              );
-            })}
-          </div>
+      <div className='right-blog sticky-sidebar'>
+        <h3 className='featured'><span className='backgroundColor'>&nbsp;Categories </span></h3>
+        <div className='category-list mt-4'>
+          {[
+            "Educational", "News", "Latest AI News", "Innovation",
+            "Study Material", "Technology", "Btech CSE Material"
+          ].map((name) => {
+            // Find case-insensitive match in catCount
+            const countKey = Object.keys(catCount || {}).find(k => k.toLowerCase() === name.toLowerCase());
+            const count = countKey ? catCount[countKey] : 0;
+            return (
+              <Link key={name} to={`/tag/${name}`} className='category-item'>
+                <span className="cat-name">{name}</span>
+                <span className='count'>{count}</span>
+              </Link>
+            );
+          })}
+        </div>
 
-          <div className="visitor-stats-card mt-4">
-            <div className="visitor-info">
-              <div className="visitor-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" style={{ width: '24px', height: '24px' }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                </svg>
-              </div>
-              <div className="visitor-details">
-                <p className="visitor-label">Total Visits</p>
-                <h4 className="visitor-count-number">{loading ? "..." : (siteStats?.totalVisits || "1,024")}</h4>
-              </div>
+        <div className="visitor-stats-card mt-4">
+          <div className="visitor-info">
+            <div className="visitor-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" style={{ width: '24px', height: '24px' }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+              </svg>
+            </div>
+            <div className="visitor-details">
+              <p className="visitor-label">Total Visits</p>
+              <h4 className="visitor-count-number">{loading ? "..." : (siteStats?.totalVisits || "1,024")}</h4>
             </div>
           </div>
+        </div>
 
-          <AdSenseSlot
-            className='ads-sidebar-slot mt-4'
-            slot={settings.adsenseSidebarSlot}
-            fallbackText='Advertisement'
-            minHeight="300px"
-          />
-       </div>
+        <AdSenseSlot
+          className='ads-sidebar-slot mt-4'
+          slot={settings.adsenseSidebarSlot}
+          fallbackText='Advertisement'
+          minHeight="300px"
+        />
+      </div>
     </div>
   )
 })
@@ -180,7 +181,7 @@ const Home = () => {
         setAllBlogs(blogs)
         localStorage.setItem(BLOG_CACHE_KEY, JSON.stringify(blogs))
         setCatCount(catsRes?.data || {})
-        
+
         if (statsRes?.data) {
           setSiteStats(statsRes.data)
           window.dispatchEvent(new CustomEvent('site-visit-updated', { detail: statsRes.data }));
@@ -205,9 +206,19 @@ const Home = () => {
 
   return (
     <>
-      <Seo title='AITECHACADEMY - AI Tools, Education & Technology' />
+      <Seo
+        title="AITECHACADEMY - AI Tools, Education, Coding Notes & Study Material"
+        description="AITECHACADEMY provides CSE notes, PYQs, assignments, AI tools, coding tutorials, and latest technology blogs for students and developers."
+        path="/"
+        image="https://aitechacademy.online/image.png"
+        keywords="AI tools,Latest News, Breaking News, BTech CSE, Study Material, Tech News, Technology, News, AI, Innovation, AI News, PYQ, tutorials coding, CSE notes, PYQ, assignments, tech blogs, programming,  education"
+        type="website"
+      />
+
+
+
       <Navbar />
-      
+
       <div className='homepage'>
         <section className='left-section'>
           <h3 className='featured'><span className='backgroundColor'>&nbsp;Featured </span>&nbsp;This Week</h3>

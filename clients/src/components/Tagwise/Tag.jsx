@@ -43,17 +43,19 @@ function Tag() {
 
   return (
     <>
-      <Seo 
-        title={`Articles about ${id} | AITECHACADEMY`} 
-        description={`Read the latest articles, news, and study materials about ${id} on AITECHACADEMY. Daily updates on AI, coding, and technology.`}
+      <Seo
+        title={`${id} Blogs, Notes, PYQs & Tutorials`}
+        description={`Find latest ${id} blogs, coding tutorials, CSE notes, PYQs and study material on AITECHACADEMY.`}
         path={`/tag/${id}`}
+        type="website"
+        keywords={`${id}, ${id} blogs, ${id} notes, ${id} tutorials, coding, AI tools, CSE`}
       />
       <Navbar />
       <div className='container mt-5'>
         {loading ? (
           <div className='mt-5'>
-             <h3 className='featured mt-5 tagHeader'>&nbsp;Searching for&nbsp;<span className='backgroundColor'>&nbsp;{id}&nbsp;</span>...</h3>
-             <SkeletonBlogList count={4} />
+            <h3 className='featured mt-5 tagHeader'>&nbsp;Searching for&nbsp;<span className='backgroundColor'>&nbsp;{id}&nbsp;</span>...</h3>
+            <SkeletonBlogList count={4} />
           </div>
         ) : (
           <>

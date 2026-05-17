@@ -7,7 +7,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/200.html"
+      "destination": "/index.html"
     }
   ]
 }
