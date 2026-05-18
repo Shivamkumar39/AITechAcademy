@@ -136,41 +136,15 @@ exports.addBlog = async (req, res) => {
 
 exports.getAllBlogs = async (req, res) => {
   try {
-    console.log("=== getAllBlogs called ===");
-    if (cache.blogs.data && (Date.now() - cache.blogs.at) < LIST_CACHE_TTL_MS) {
-      console.log("Returning cached blogs");
-      return res.json(cache.blogs.data);
-    }
-    console.log("Fetching blogs from DB...");
-    const blogs = await Blog.find(
-      {},
-      {
-        title: 1,
-        slug: 1,
-        authorid: 1,
-        authorImage: 1,
-        authorName: 1,
-        image: 1,
-        category: 1,
-        tags: 1,
-        readtime: 1,
-        publishDate: 1,
-        views: 1,
-        likes: 1,
-      }
-    ).sort({ _id: -1 }).limit(10).maxTimeMS(5000).lean();
-    console.log(`Found ${blogs.length} blogs. Processing payload...`);
-    const payload = blogs.map((blog) => toListBlog(req, blog));
-    cache.blogs = { at: Date.now(), data: payload };
-    console.log("Sending JSON response...");
-    res.json(payload);
-    console.log("Response sent successfully!");
+    const blogs = await Blog.find({}, { image: 0 }).lean();
+    const updatedBlogs = blogs.map(blog => ({
+      ...blog,
+      image: `/blog-image/${blog._id}`
+    }));
+    res.json(updatedBlogs);
   } catch (error) {
-    console.error("Error in getAllBlogs:", error);
-    if (cache.blogs.data) {
-      return res.json(cache.blogs.data);
-    }
-    res.status(200).json([]);
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch blogs" });
   }
 };
 
@@ -259,8 +233,12 @@ exports.getAdminBlogs = async (req, res) => {
     return res.status(403).json({ error: "Admin only" });
   }
   try {
-    const blogs = await Blog.find({}).sort({ publishDate: -1 }).lean();
-    res.json({ blogs });
+    const blogs = await Blog.find({}, { image: 0 }).lean();
+    const updatedBlogs = blogs.map(blog => ({
+      ...blog,
+      image: `/blog-image/${blog._id}`
+    }));
+    res.json({ blogs: updatedBlogs });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch admin blogs" });

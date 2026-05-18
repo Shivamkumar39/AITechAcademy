@@ -29,6 +29,7 @@ const About = lazy(() => import('./components/Legal/About'));
 const ContactUs = lazy(() => import('./components/Legal/ContactUs'));
 const Disclaimer = lazy(() => import('./components/Legal/Disclaimer'));
 const BlogsPage = lazy(() => import('./components/Homepage/BlogsPage'));
+const Categories = lazy(() => import('./components/Categories/Categories'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -59,6 +60,7 @@ function AppRoutes() {
         <Route path='/search' element={<Search/>}/>
         <Route exact path='/blog' element={<BlogsPage/>}/>
         <Route exact path='/blogs' element={<BlogsPage/>}/>
+        <Route exact path='/categories' element={<Categories/>}/>
         <Route path='/notifications' element={<Pending/>}/>
         <Route exact path='/bookmarks' element={<Bookmark/>}/>
         <Route exact path='/write' element={<Write/>}/>

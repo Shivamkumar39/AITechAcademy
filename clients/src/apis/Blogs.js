@@ -2,35 +2,24 @@ import axios from "axios"
 const url = process.env.REACT_APP_API_URL || "http://localhost:8000"
 
 axios.defaults.timeout = 60000;
+axios.defaults.withCredentials = true;
 
-export const postBlog=async(body, token)=>{
-  try {
-    return await axios.post(`${url}/addBlog`, body, { headers: { Authorization: token } })
-  } catch (error) {
-    // Error in post blog api
-  }
+export const postBlog = async (body, token) => {
+  return await axios.post(`${url}/addBlog`, body, { headers: { Authorization: token } })
 }
+
 export const getAdminBlogs = async (token) => {
-  try {
-    return await axios.get(`${url}/admin/blogs`, { headers: { Authorization: token } })
-  } catch (error) {
-    // Error in admin blogs api
-  }
+  return await axios.get(`${url}/admin/blogs`, { headers: { Authorization: token } })
 }
+
 export const getAdminStats = async (token) => {
-  try {
-    return await axios.get(`${url}/admin/stats`, { headers: { Authorization: token } })
-  } catch (error) {
-    // Error in admin stats api
-  }
+  return await axios.get(`${url}/admin/stats`, { headers: { Authorization: token } })
 }
+
 export const getSiteStats = async () => {
-  try {
-    return await axios.get(`${url}/site-stats`)
-  } catch (error) {
-    // Error in site stats api
-  }
+  return await axios.get(`${url}/site-stats`)
 }
+
 export const trackSiteVisit = async () => {
   // Prevent tracking during build/pre-rendering
   if (typeof window !== 'undefined' && window.navigator.userAgent.includes('ReactSnap')) {
@@ -54,139 +43,79 @@ export const trackSiteVisit = async () => {
     // Error in site visit api
   }
 }
+
 export const deleteBlogById = async (id, token) => {
-  try {
-    return await axios.delete(`${url}/delete/blog/${id}`, { headers: { Authorization: token } })
-  } catch (error) {
-    // Error in delete blog api
-  }
+  return await axios.delete(`${url}/delete/blog/${id}`, { headers: { Authorization: token } })
 }
+
 export const updateBlogById = async (id, body, token) => {
-  try {
-    return await axios.patch(`${url}/update/blog/${id}`, body, { headers: { Authorization: token } })
-  } catch (error) {
-    // Error in update blog api
-  }
+  return await axios.patch(`${url}/update/blog/${id}`, body, { headers: { Authorization: token } })
 }
-export const getAllBlogs=async()=>{
-  try {
+
+export const getAllBlogs = async () => {
   return await axios.get(`${url}/blogs`)
-  } catch (error) {
-    // Error
-  }
 }
-export const getBlogById=async(id)=>{
-  try {
-    return await axios.get(`${url}/blog/${id}`)
-  } catch (error) {
-    // Error
-  }
+
+export const getBlogById = async (id) => {
+  return await axios.get(`${url}/blog/${id}`)
 }
-export const getBlogBySlug=async(slug)=>{
-  try {
-    return await axios.get(`${url}/post/${slug}`)
-  } catch (error) {
-    // Error
-  }
+
+export const getBlogBySlug = async (slug) => {
+  return await axios.get(`${url}/post/${slug}`)
 }
-export const getAuthorBlogs=async(id)=>{
-  try {
-    return await axios.get(`${url}/blogsByAuthorId/${id}`)
-  } catch (error) {
-    // Error
-  }
+
+export const getAuthorBlogs = async (id) => {
+  return await axios.get(`${url}/blogsByAuthorId/${id}`)
 }
-export const blogByTag=async(id)=>{
-  try {
-    return await axios.get(`${url}/tag/${id}`)
-  } catch (error) {
-    // Error in blog by tag api
-  }
+
+export const blogByTag = async (id) => {
+  return await axios.get(`${url}/tag/${id}`)
 }
-export const categoryCount=async()=>{
-  try {
-    return await axios.get(`${url}/categorycount`)
-  } catch (error) {
-    // Error in categorycount api
-  }
+
+export const categoryCount = async () => {
+  return await axios.get(`${url}/categorycount`)
 }
-export const searchBlog=async(value)=>{
-  try {
-    return await axios.get(`${url}/search/title?q=${value}`)
-  } catch (error) {
-    console.log(error)
-  }
+
+export const searchBlog = async (value) => {
+  return await axios.get(`${url}/search/title?q=${value}`)
 }
-export const searchAuthor=async(value)=>{
-  try {
-    return await axios.get(`${url}/search/author?q=${value}`)
-  } catch (error) {
-    console.log(error)
-  }
+
+export const searchAuthor = async (value) => {
+  return await axios.get(`${url}/search/author?q=${value}`)
 }
-export const searchCategory=async(value)=>{
-  try {
-    return await axios.get(`${url}/search/category?q=${value}`)
-  } catch (error) {
-    console.log(error)
-  }
+
+export const searchCategory = async (value) => {
+  return await axios.get(`${url}/search/category?q=${value}`)
 }
-export const getCategories=async()=>{
-  try {
-    return await axios.get(`${url}/categories`)
-  } catch (error) {
-    console.log("error in categories api", error)
-  }
+
+export const getCategories = async () => {
+  return await axios.get(`${url}/categories`)
 }
-export const bookmark=async(id,body)=>{
-  try {
-    return await axios.patch(`${url}/bookmark/${id}`,body)
-  } catch (error) {
-    console.log("error in bookmark api")
-  }
+
+export const bookmark = async (id, body) => {
+  return await axios.patch(`${url}/bookmark/${id}`, body)
 }
-export const unbookmark=async(id,body)=>{
-  try {
-    return await axios.patch(`${url}/unbookmark/${id}`,body)
-  } catch (error) {
-    console.log("error in unbookmark api")
-  }
+
+export const unbookmark = async (id, body) => {
+  return await axios.patch(`${url}/unbookmark/${id}`, body)
 }
-export const likeBlog=async(id,body)=>{
-try {
-  return await axios.patch(`${url}/like/${id}`,body)
-} catch (error) {
-  console.log("error in like api "+error)
+
+export const likeBlog = async (id, body) => {
+  return await axios.patch(`${url}/like/${id}`, body)
 }
-}
-export const unlikeBlog=async(id,body)=>{
-  try {
-    return await axios.patch(`${url}/unlike/${id}`,body)
-  } catch (error) {
-    console.log("error in like api "+error)
-  }
+
+export const unlikeBlog = async (id, body) => {
+  return await axios.patch(`${url}/unlike/${id}`, body)
 }
 
 export const addComment = async (id, body) => {
-  try {
-    return await axios.patch(`${url}/comment/${id}`, body)
-  } catch (error) {
-    console.log("error in add comment api", error)
-  }
+  return await axios.patch(`${url}/comment/${id}`, body)
 }
 
 export const getSiteSettings = async () => {
-  try {
-    return await axios.get(`${url}/site-settings`)
-  } catch (error) {
-    console.log("error in get site settings api", error)
-  }
+  return await axios.get(`${url}/site-settings`)
 }
 
 export const updateSiteSettings = async (body, token) => {
-  try {
-    return await axios.patch(`${url}/site-settings`, body, { headers: { Authorization: token } })
-  } catch (error) {
-    console.log("error in update site settings api", error)
-  }
+  return await axios.patch(`${url}/site-settings`, body, { headers: { Authorization: token } })
 }

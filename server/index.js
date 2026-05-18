@@ -69,6 +69,7 @@ app.use(
   })
 );
 
+app.get('/test', (req, res) => res.send('ok'));
 app.use("/", authRouter)
 app.use("/", userRouter)
 app.use("/", blogRoutes)
