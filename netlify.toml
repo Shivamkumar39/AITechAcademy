@@ -1,0 +1,19 @@
+# ============================================================
+# netlify.toml — Netlify configuration for AITECHACADEMY
+# ============================================================
+
+[build]
+  base    = "clients"
+  command = "npm run build"
+  publish = "build"
+
+# Edge function: intercepts /blog/* for bots and returns server-rendered HTML
+[[edge_functions]]
+  path     = "/blog/*"
+  function = "bot-renderer"
+
+# SPA catch-all: all routes fall back to index.html for React Router
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200

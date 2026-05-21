@@ -15,6 +15,7 @@ export default function Footer() {
           <div className="footer-tagline">Fresh AI, technology and lifestyle ideas — built for readers who want clean, fast, modern content.</div>
         </div>
         <div className="footer-links">
+          <Link to="/study-material">Study Material</Link>
           <Link to="/privacy-policy">Privacy Policy</Link>
           <Link to="/terms-and-conditions">Terms & Conditions</Link>
           <Link to="/about">About</Link>

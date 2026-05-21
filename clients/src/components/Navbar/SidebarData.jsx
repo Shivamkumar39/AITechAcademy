@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaSearch } from "react-icons/fa"
+import { FaSearch, FaBook } from "react-icons/fa"
 import { GoHome } from "react-icons/go"
 
 export const SidebarData = [
@@ -13,6 +13,12 @@ export const SidebarData = [
     title: 'Home',
     path: '/',
     icon: <GoHome />,
+    cName: 'nav-text'
+  },
+  {
+    title: 'Study Material',
+    path: '/study-material',
+    icon: <FaBook />,
     cName: 'nav-text'
   }
 ];

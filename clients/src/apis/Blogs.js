@@ -52,6 +52,17 @@ export const updateBlogById = async (id, body, token) => {
   return await axios.patch(`${url}/update/blog/${id}`, body, { headers: { Authorization: token } })
 }
 
+export const getStudyMaterials = async (q = "", tag = "") => {
+  let endpoint = `${url}/api/study-material`
+  const params = []
+  if (q) params.push(`q=${encodeURIComponent(q)}`)
+  if (tag) params.push(`tag=${encodeURIComponent(tag)}`)
+  if (params.length > 0) {
+    endpoint += `?${params.join("&")}`
+  }
+  return await axios.get(endpoint)
+}
+
 export const getAllBlogs = async () => {
   return await axios.get(`${url}/blogs`)
 }

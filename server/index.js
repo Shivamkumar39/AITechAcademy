@@ -11,6 +11,8 @@ const authRouter = require("./router/Auth.js")
 const userRouter = require("./router/Users.js")
 const blogRoutes = require("./router/Blogs.js")
 const sitemapRouter = require("./router/Sitemap.js")
+const renderRouter = require("./router/Render.js")
+const studyMaterialRoutes = require("./routes/studyMaterialRoutes.js")
 require('dotenv').config()
 
 const cookieParser = require('cookie-parser')
@@ -74,6 +76,8 @@ app.use("/", authRouter)
 app.use("/", userRouter)
 app.use("/", blogRoutes)
 app.use("/", sitemapRouter)
+app.use("/", renderRouter)
+app.use("/api", studyMaterialRoutes)
 
 app.use((err, req, res, next) => {
   console.error(err?.message || err)
