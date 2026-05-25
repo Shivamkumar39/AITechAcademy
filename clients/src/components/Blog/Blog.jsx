@@ -320,6 +320,11 @@ function Blog() {
         </>
       )}
       <Navbar />
+      {recentBlog && recentBlog.length > 0 && (
+        <div style={{ backgroundColor: '#fff3cd', color: '#856404', padding: '10px 20px', textAlign: 'center', fontWeight: 'bold', fontSize: '15px', borderBottom: '1px solid #ffeeba' }}>
+          Check out our latest article: <Link to={`/blog/${recentBlog[0].slug || recentBlog[0]._id}`} style={{ color: '#0056b3', textDecoration: 'underline' }}>{recentBlog[0].title}</Link> here
+        </div>
+      )}
       <div className='blog-container'>
         <section className='blog-section'>
           {loading || !blog ? (

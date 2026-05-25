@@ -136,7 +136,7 @@ exports.addBlog = async (req, res) => {
 
 exports.getAllBlogs = async (req, res) => {
   try {
-    const blogs = await Blog.find({}, { image: 0 }).lean();
+    const blogs = await Blog.find({}, { image: 0 }).sort({ _id: -1 }).lean();
     const updatedBlogs = blogs.map(blog => ({
       ...blog,
       image: `/blog-image/${blog._id}`
@@ -233,7 +233,7 @@ exports.getAdminBlogs = async (req, res) => {
     return res.status(403).json({ error: "Admin only" });
   }
   try {
-    const blogs = await Blog.find({}, { image: 0 }).lean();
+    const blogs = await Blog.find({}, { image: 0 }).sort({ _id: -1 }).lean();
     const updatedBlogs = blogs.map(blog => ({
       ...blog,
       image: `/blog-image/${blog._id}`
@@ -355,7 +355,7 @@ exports.trackSiteVisit = async (req, res) => {
 exports.getBlogsByAuthorId = async (req, res) => {
   const { id } = req.params;
   try {
-    const blogs = await Blog.find({ authorid: id }).lean();
+    const blogs = await Blog.find({ authorid: id }).sort({ _id: -1 }).lean();
     res.json({ Blogs: blogs.map((blog) => toListBlog(req, blog)) });
   } catch (error) {
     console.error(error);
@@ -425,7 +425,7 @@ exports.getBlogsByTag = async (req, res) => {
         { category: { $regex: new RegExp(`^${safeId}$`, "i") } },
         { tags: { $regex: new RegExp(`^${safeId}$`, "i") } }
       ]
-    }, { description: 0 }).lean();
+    }, { description: 0 }).sort({ _id: -1 }).lean();
     res.json({ blogs: (blogs || []).map((blog) => toListBlog(req, blog)) });
   } catch (error) {
     console.error(error);
@@ -446,7 +446,7 @@ exports.getBlogsCount = async (req, res) => {
 exports.searchBlogsByTitle = async (req, res) => {
   const { q } = req.query;
   try {
-    const data = await Blog.find({ title: { $regex: q || "", $options: "i" } }, { description: 0 }).lean();
+    const data = await Blog.find({ title: { $regex: q || "", $options: "i" } }, { description: 0 }).sort({ _id: -1 }).lean();
     res.json(data.map((blog) => toListBlog(req, blog)));
   } catch (error) {
     console.error(error);
@@ -457,7 +457,7 @@ exports.searchBlogsByTitle = async (req, res) => {
 exports.searchBlogsByCategory = async (req, res) => {
   const { q } = req.query;
   try {
-    const data = await Blog.find({ category: { $regex: q || "", $options: "i" } }, { description: 0 }).lean();
+    const data = await Blog.find({ category: { $regex: q || "", $options: "i" } }, { description: 0 }).sort({ _id: -1 }).lean();
     res.json(data.map((blog) => toListBlog(req, blog)));
   } catch (error) {
     console.error(error);

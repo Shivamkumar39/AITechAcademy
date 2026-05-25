@@ -212,6 +212,11 @@ const Home = () => {
   return (
     <>
       <Navbar />
+      {allBlogs && allBlogs.length > 0 && (
+        <div style={{ backgroundColor: '#fff3cd', color: '#856404', padding: '10px 20px', textAlign: 'center', fontWeight: 'bold', fontSize: '15px' }}>
+          Check out our latest article: <Link to={`/blog/${allBlogs[0].slug || allBlogs[0]._id}`} style={{ color: '#0056b3', textDecoration: 'underline' }}>{allBlogs[0].title}</Link> here
+        </div>
+      )}
       <Seo
         title="AITECHACADEMY - Home"
         description="AITECHACADEMY provides CSE notes, PYQs, assignments, AI tools, coding tutorials, and latest technology blogs for students and developers."
