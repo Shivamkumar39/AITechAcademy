@@ -32,6 +32,7 @@ router.get('/sitemap.xml', async (req, res) => {
       { loc: `${SITE_URL}/categories`,            changefreq: 'weekly',  priority: '0.8' },
       { loc: `${SITE_URL}/study-material`,        changefreq: 'weekly',  priority: '0.8' },
       { loc: `${SITE_URL}/about`,                 changefreq: 'monthly', priority: '0.7' },
+      { loc: `${SITE_URL}/resume`,                changefreq: 'monthly', priority: '0.7' },
       { loc: `${SITE_URL}/contact-us`,            changefreq: 'monthly', priority: '0.7' },
       { loc: `${SITE_URL}/privacy-policy`,        changefreq: 'monthly', priority: '0.6' },
       { loc: `${SITE_URL}/terms-and-conditions`,  changefreq: 'monthly', priority: '0.6' },

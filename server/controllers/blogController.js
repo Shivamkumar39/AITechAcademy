@@ -325,6 +325,7 @@ exports.updateSiteSettings = async (req, res) => {
       adsenseInfeedSlot: String(req.body.adsenseInfeedSlot || "").trim(),
       adsenseInArticleSlot: String(req.body.adsenseInArticleSlot || "").trim(),
       adsenseFooterSlot: String(req.body.adsenseFooterSlot || "").trim(),
+      resumePdf: String(req.body.resumePdf || "").trim(),
     };
     const settings = await SiteSettings.findOneAndUpdate(
       { key: "global" },

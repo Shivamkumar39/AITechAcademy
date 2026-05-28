@@ -108,6 +108,7 @@ function Navbar() {
           </div>
           <div className='top-links'>
             <Link to='/study-material'>Study Material</Link>
+            <Link to='/resume'>Resume</Link>
             <Link to='/privacy-policy'>Policy</Link>
             <Link to='/terms-and-conditions'>Terms</Link>
             <Link to='/about'>About</Link>

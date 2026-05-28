@@ -6,6 +6,7 @@ import { getAdminBlogs, getAdminStats, deleteBlogById, getSiteSettings as fetchS
 import Navbar from '../Navbar/Navbar'
 import './AdminDashboard.css'
 import { getSiteSettings, saveSiteSettings } from '../../utils/siteSettings'
+import FileBase64 from 'react-file-base64'
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000'
 
@@ -192,6 +193,27 @@ function AdminDashboard() {
           </div>
           <button className='admin-add-btn' onClick={() => saveSocial("AdSense Settings")}>Save AdSense Settings</button>
         </div>
+        
+        <div className='admin-blog-list' style={{ marginBottom: '20px' }}>
+          <h2>Resume PDF Settings</h2>
+          <p className='admin-ad-note'>Upload your resume PDF to display on the "My Resume" page.</p>
+          <div className='admin-field-group' style={{ marginBottom: '15px' }}>
+            <label className='admin-label'>Upload Resume (PDF)</label>
+            <div style={{ marginTop: '10px' }}>
+              <FileBase64
+                multiple={false}
+                onDone={({ base64 }) => setSocial({ ...social, resumePdf: base64 })}
+              />
+            </div>
+            {social.resumePdf && <div style={{ color: 'green', marginTop: '10px', fontSize: '14px' }}>PDF is uploaded and ready to save.</div>}
+            <div className='admin-ad-description' style={{ marginTop: '10px' }}>Or you can paste an external PDF URL directly below:</div>
+          </div>
+          <div className='admin-field-group'>
+            <input className='admin-input' placeholder='Resume PDF URL (e.g. Google Drive Link or Base64)' value={social.resumePdf || ''} onChange={(e) => setSocial({ ...social, resumePdf: e.target.value })} />
+          </div>
+          <button className='admin-add-btn' onClick={() => saveSocial("Resume Settings")}>Save Resume</button>
+        </div>
+
         <div className='admin-blog-list'>
           <h2>All Articles</h2>
           <table className='admin-table'>

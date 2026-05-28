@@ -20,7 +20,8 @@ const defaults = {
   adsenseInfeedSlot: "",
   adsenseInArticleSlot: "",
   adsenseFooterSlot: "",
-  adsenseTestMode: false
+  adsenseTestMode: false,
+  resumePdf: ""
 };
 
 export function getSiteSettings() {
