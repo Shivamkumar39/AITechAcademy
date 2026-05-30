@@ -277,13 +277,13 @@ function Blog() {
       {blog && (
         <>
           <Seo
-            title={blog.title}
-            description={blog.description?.replace(/<[^>]+>/g, "").slice(0, 155)}
+            title={blog.metaTitle || blog.title}
+            description={blog.metaDescription || blog.description?.replace(/<[^>]+>/g, "").slice(0, 155)}
             path={`/blog/${blog.slug}`}
             type="article"
             image={blog.image}
             keywords={`${blog.category}, coding, CSE, BTech CSE, Study Material, Tech News,Technology, News, AI, Innovation, AI News, PYQ, tutorials`}
-            publishedTime={blog.publishDate}
+            publishedTime={blog.createdAt}
             updatedTime={blog.updatedAt}
             author={blog.authorName}
           />
@@ -297,8 +297,8 @@ function Blog() {
                 "@type": "WebPage",
                 "@id": `https://aitechacademy.online/blog/${blog.slug}`
               },
-              "headline": blog.title,
-              "description": blog.description?.replace(/<[^>]+>/g, "").slice(0, 160),
+              "headline": blog.metaTitle || blog.title,
+              "description": blog.metaDescription || blog.description?.replace(/<[^>]+>/g, "").slice(0, 160),
               "image": resolveImageUrl(blog.image),
               "author": {
                 "@type": "Person",
@@ -312,7 +312,7 @@ function Blog() {
                   "url": "https://aitechacademy.online/image.png"
                 }
               },
-              "datePublished": blog.publishDate,
+              "datePublished": blog.createdAt,
               "dateModified": blog.updatedAt
             }}
           />

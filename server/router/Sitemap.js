@@ -21,7 +21,7 @@ function xmlEsc(str) {
 router.get('/sitemap.xml', async (req, res) => {
   try {
     const [blogs, users] = await Promise.all([
-      Blog.find({}, { slug: 1, title: 1, image: 1, updatedAt: 1, category: 1, tags: 1, authorid: 1, authorName: 1 }).lean(),
+      Blog.find({}, { slug: 1, title: 1, updatedAt: 1, category: 1, tags: 1, authorid: 1 }).lean(),
       Users.find({}, { _id: 1 }).lean()
     ]);
 
@@ -69,7 +69,8 @@ router.get('/sitemap.xml', async (req, res) => {
         ? new Date(blog.updatedAt).toISOString().split('T')[0]
         : today;
 
-      const imgUrl = resolveImageUrl(blog.image);
+      // Use the dedicated image endpoint — avoids base64 memory issues
+      const imgUrl = `${API_BASE}/blog-image/${blog._id}`;
 
       xml += `  <url>
     <loc>${SITE_URL}/blog/${xmlEsc(blog.slug)}</loc>

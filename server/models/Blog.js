@@ -75,6 +75,12 @@ const blogSchema=new mongoose.Schema({
     type: String,
     unique: true,
     sparse: true
+  },
+  metaTitle: {
+    type: String
+  },
+  metaDescription: {
+    type: String
   }
 }, { timestamps: true })
 module.exports=mongoose.model("Blog",blogSchema)

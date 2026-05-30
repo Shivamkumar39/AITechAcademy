@@ -60,6 +60,9 @@ function Seo({
       <meta property="og:description" content={finalDescription} />
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:image" content={finalImage} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content={finalTitle} />
 
       {/* Article extra tags */}
       {isArticle && (

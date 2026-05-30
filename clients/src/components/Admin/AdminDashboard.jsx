@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { LoginContext } from '../../contextProvider/Context'
 import { getAdminBlogs, getAdminStats, deleteBlogById, getSiteSettings as fetchSiteSettings, updateSiteSettings } from '../../apis/Blogs'
 import Navbar from '../Navbar/Navbar'
+import Seo from '../SEO/Seo'
 import './AdminDashboard.css'
 import { getSiteSettings, saveSiteSettings } from '../../utils/siteSettings'
 import FileBase64 from 'react-file-base64'
@@ -96,6 +97,7 @@ function AdminDashboard() {
 
   return (
     <>
+      <Seo title="Admin Dashboard" noIndex={true} />
       <Navbar />
       <div className='admin-page'>
         <div className='admin-header'>

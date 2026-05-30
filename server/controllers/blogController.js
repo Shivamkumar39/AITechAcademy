@@ -97,7 +97,7 @@ exports.addBlog = async (req, res) => {
   const d = new Date();
   const date = d.getDate() + " " + monthNames[d.getMonth()] + " " + d.getFullYear();
 
-  const { title, authorid, authorName, authorImage, image, description, category, readtime, tags, pdfLinks, slug: customSlug } = req.body;
+  const { title, authorid, authorName, authorImage, image, description, category, readtime, tags, pdfLinks, slug: customSlug, metaTitle, metaDescription } = req.body;
 
   let slug = customSlug ? slugify(customSlug, { lower: true, strict: true }) : slugify(title || '', { lower: true, strict: true });
   if (!slug) slug = Date.now().toString();
@@ -122,10 +122,14 @@ exports.addBlog = async (req, res) => {
     tags: Array.isArray(tags) ? tags.map(tag => String(tag || '').trim()).filter(Boolean) : [],
     pdfLinks: Array.isArray(pdfLinks) ? pdfLinks : [],
     publishDate: date,
+    metaTitle: String(metaTitle || '').trim(),
+    metaDescription: String(metaDescription || '').trim()
   };
 
   try {
+    // Use strict: false to ensure metaTitle/metaDescription always save
     const blog = new Blog(data);
+    blog.$__.strictMode = false;
     await blog.save();
     res.json({ message: "blog added" });
   } catch (error) {
@@ -169,12 +173,11 @@ exports.updateBlog = async (req, res) => {
   const d = new Date();
   const date = monthNames[d.getMonth()] + " " + d.getDate();
 
-  const { title, authorid, image, description, category, readtime, authorImage, tags, pdfLinks, slug } = req.body;
+  const { title, authorid, image, description, category, readtime, authorImage, tags, pdfLinks, slug, metaTitle, metaDescription } = req.body;
 
   const data = {
     title: String(title || '').trim(),
     authorid: authorid,
-    image: normalizeStoredImage(image),
     description: String(description || '').trim(),
     category: String(category || '').trim(),
     readtime: String(readtime || '').trim(),
@@ -183,7 +186,17 @@ exports.updateBlog = async (req, res) => {
     authorName: "shivam_kushwaha",
     authorImage: normalizeStoredImage(authorImage),
     publishDate: "Edited " + date,
+    metaTitle: String(metaTitle || '').trim(),
+    metaDescription: String(metaDescription || '').trim()
   };
+
+  if (image === "" || (image && !image.startsWith('/blog-image/'))) {
+    const normalized = normalizeStoredImage(image);
+    // NEVER save the internal api route as the image itself, this corrupts the database
+    if (!(normalized && normalized.startsWith('/blog-image/'))) {
+      data.image = normalized;
+    }
+  }
 
   if (slug) {
     data.slug = slugify(slug, { lower: true, strict: true });
@@ -194,7 +207,13 @@ exports.updateBlog = async (req, res) => {
     if (!blog) return res.status(404).json({ error: "Blog not found" });
 
     if (blog.authorid == req.userId || req.rootUser.role === "admin") {
-      await Blog.findByIdAndUpdate(id, { $set: data });
+      // Use strict: false to ensure metaTitle/metaDescription are always saved
+      // even if server was not restarted after schema update
+      await Blog.findByIdAndUpdate(
+        id,
+        { $set: data },
+        { strict: false }
+      );
       res.json({ success: "Updated" });
     } else {
       res.status(403).json({ message: "Cannot update others blog" });
@@ -401,11 +420,15 @@ exports.getCategories = async (req, res) => {
     const tags = await Blog.distinct("tags");
 
     // Combine existing categories, tags, and our requested default list
-    const suggestions = Array.from(new Set([
-      ...requested,
-      ...(categories || []),
-      ...(tags || [])
-    ]));
+    // Also limit the tags to the most recent ones.
+    const recentBlogs = await Blog.find({}, { tags: 1 }).sort({ _id: -1 }).limit(30).lean();
+    const recentTagsSet = new Set();
+    recentBlogs.forEach(blog => {
+      (blog.tags || []).forEach(tag => recentTagsSet.add(tag));
+    });
+    const recentTags = Array.from(recentTagsSet);
+
+    const suggestions = Array.from(new Set([...recentTags]));
 
     res.json({ categories, tags, suggestions });
   } catch (error) {
@@ -592,25 +615,45 @@ exports.getBlogBySlug = async (req, res) => {
 
 exports.generateSitemap = async (req, res) => {
   try {
-    const blogs = await Blog.find({}).sort({ publishDate: -1 });
+    const blogs = await Blog.find({}, { slug: 1, updatedAt: 1 }).sort({ createdAt: -1 });
 
     let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
     sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
-    // Add static pages
-    const staticPages = ['', 'about', 'contact-us', 'privacy-policy', 'terms-and-conditions'];
-    staticPages.forEach((page) => {
+    // Static pages with priority and change frequency
+    const today = new Date().toISOString().split('T')[0];
+    const staticPages = [
+      { path: '', priority: '1.0', changefreq: 'daily' },
+      { path: 'blog', priority: '0.9', changefreq: 'daily' },
+      { path: 'blogs', priority: '0.9', changefreq: 'daily' },
+      { path: 'study-material', priority: '0.9', changefreq: 'weekly' },
+      { path: 'categories', priority: '0.8', changefreq: 'weekly' },
+      { path: 'resume', priority: '0.7', changefreq: 'monthly' },
+      { path: 'about', priority: '0.7', changefreq: 'monthly' },
+      { path: 'contact-us', priority: '0.6', changefreq: 'monthly' },
+      { path: 'disclaimer', priority: '0.4', changefreq: 'yearly' },
+      { path: 'privacy-policy', priority: '0.4', changefreq: 'yearly' },
+      { path: 'terms-and-conditions', priority: '0.4', changefreq: 'yearly' },
+    ];
+    staticPages.forEach(function(p) {
       sitemap += '  <url>\n';
-      sitemap += `    <loc>https://aitechacademy.online/${page}</loc>\n`;
-      sitemap += `    <lastmod>${new Date().toISOString()}</lastmod>\n`;
+      sitemap += '    <loc>https://aitechacademy.online/' + p.path + '</loc>\n';
+      sitemap += '    <lastmod>' + today + '</lastmod>\n';
+      sitemap += '    <changefreq>' + p.changefreq + '</changefreq>\n';
+      sitemap += '    <priority>' + p.priority + '</priority>\n';
       sitemap += '  </url>\n';
     });
 
-    blogs.forEach((blog) => {
+    blogs.forEach(function(blog) {
       if (blog.slug) {
+        var lastmod = blog.updatedAt
+          ? new Date(blog.updatedAt).toISOString().split('T')[0]
+          : today;
         sitemap += '  <url>\n';
-        sitemap += `    <loc>https://aitechacademy.online/${blog.slug}</loc>\n`;
-        sitemap += `    <lastmod>${new Date().toISOString()}</lastmod>\n`;
+        sitemap += '    <loc>https://aitechacademy.online/blog/' + blog.slug + '</loc>\n';
+        sitemap += '    <lastmod>' + lastmod + '</lastmod>\n';
+        sitemap += '    <changefreq>monthly</changefreq>\n';
+        sitemap += '    <priority>0.8</priority>\n';
         sitemap += '  </url>\n';
       }
     });
@@ -618,6 +661,7 @@ exports.generateSitemap = async (req, res) => {
     sitemap += '</urlset>';
 
     res.header('Content-Type', 'application/xml');
+    res.header('Cache-Control', 'public, max-age=3600');
     res.send(sitemap);
   } catch (error) {
     console.error(error);

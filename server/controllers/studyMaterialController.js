@@ -9,12 +9,12 @@ exports.getStudyMaterials = async (req, res) => {
       $and: [
         {
           $or: [
-            { category: { $regex: /study material/i } },
-            { category: { $regex: /study matterial/i } },
-            { category: { $regex: /btech cse/i } },
-            { tags: { $regex: /study material/i } },
-            { tags: { $regex: /study matterial/i } },
-            { tags: { $regex: /btech cse/i } }
+            { category: /study material/i },
+            { category: /study matterial/i },
+            { category: /btech cse/i },
+            { tags: /study material/i },
+            { tags: /study matterial/i },
+            { tags: /btech cse/i }
           ]
         }
       ]
@@ -22,7 +22,7 @@ exports.getStudyMaterials = async (req, res) => {
 
     // Filter by tag if provided
     if (tag) {
-      query.$and.push({ tags: { $regex: new RegExp(`^${tag.trim()}$`, "i") } });
+      query.$and.push({ tags: new RegExp(`^${tag.trim()}$`, "i") });
     }
 
     // Filter by search query if provided
@@ -35,23 +35,15 @@ exports.getStudyMaterials = async (req, res) => {
       });
     }
 
-    const materials = await Blog.find(query)
+    const materials = await Blog.find(query, { image: 0 })
       .sort({ createdAt: -1 })
       .lean();
 
     // Map through materials to ensure image paths are correctly resolved
     const updatedMaterials = materials.map(blog => {
-      let img = blog.image || "";
-      if (typeof img === "string") {
-        if (img.startsWith("data:") || img.length > 120000) {
-          img = `/blog-image/${blog._id}`;
-        } else if (img.startsWith("uploads/")) {
-          img = `/${img}`;
-        }
-      }
       return {
         ...blog,
-        image: img
+        image: `/blog-image/${blog._id}`
       };
     });
 

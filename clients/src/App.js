@@ -52,32 +52,32 @@ function AppRoutes() {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
-        <Route exact path='/login' element={<Login/>}/>
-        <Route exact path='/register' element={<Register/>}/>
-        <Route exact path='/' element={<Home/>}/>
-        <Route exact path='/navbar' element={<Navbar/>}/>
-        <Route exact path='/edit/:id' element={<EditProfile/>}/>
-        <Route exact path='/profile/:id' element={<Profile/>}/>
-        <Route exact path='/tag/:id' element={<Tag/>}/>
-        <Route path='/search' element={<Search/>}/>
-        <Route exact path='/blog' element={<BlogsPage/>}/>
-        <Route exact path='/blogs' element={<BlogsPage/>}/>
-        <Route exact path='/categories' element={<Categories/>}/>
-        <Route exact path='/study-material' element={<StudyMaterial/>}/>
-        <Route path='/notifications' element={<Pending/>}/>
-        <Route exact path='/bookmarks' element={<Bookmark/>}/>
-        <Route exact path='/write' element={<Write/>}/>
-        <Route exact path='/write/:id' element={<Write/>}/>
-        <Route exact path='/admin/dashboard' element={<AdminDashboard/>}/>
-        <Route exact path='/share' element={<Share/>}/>
-        <Route exact path='/privacy-policy' element={<PrivacyPolicy/>}/>
-        <Route exact path='/terms-and-conditions' element={<TermsAndConditions/>}/>
-        <Route exact path='/about' element={<About/>}/>
-        <Route exact path='/contact-us' element={<ContactUs/>}/>
-        <Route exact path='/disclaimer' element={<Disclaimer/>}/>
-        <Route exact path='/resume' element={<Resume/>}/>
-        <Route path='/blog/:slug' element={<Blog/>}/>
-        <Route path='*' element={<Error/>}/>
+        <Route exact path='/login' element={<Login />} />
+        <Route exact path='/register' element={<Register />} />
+        <Route exact path='/' element={<Home />} />
+        <Route exact path='/navbar' element={<Navbar />} />
+        <Route exact path='/edit/:id' element={<EditProfile />} />
+        <Route exact path='/profile/:id' element={<Profile />} />
+        <Route exact path='/tag/:id' element={<Tag />} />
+        <Route path='/search' element={<Search />} />
+        <Route exact path='/blog' element={<BlogsPage />} />
+        <Route exact path='/blogs' element={<BlogsPage />} />
+        <Route exact path='/categories' element={<Categories />} />
+        <Route exact path='/study-material' element={<StudyMaterial />} />
+        <Route path='/notifications' element={<Pending />} />
+        <Route exact path='/bookmarks' element={<Bookmark />} />
+        <Route exact path='/write' element={<Write />} />
+        <Route exact path='/write/:id' element={<Write />} />
+        <Route exact path='/admin/dashboard' element={<AdminDashboard />} />
+        <Route exact path='/share' element={<Share />} />
+        <Route exact path='/privacy-policy' element={<PrivacyPolicy />} />
+        <Route exact path='/terms-and-conditions' element={<TermsAndConditions />} />
+        <Route exact path='/about' element={<About />} />
+        <Route exact path='/contact-us' element={<ContactUs />} />
+        <Route exact path='/disclaimer' element={<Disclaimer />} />
+        <Route exact path='/resume' element={<Resume />} />
+        <Route path='/blog/:slug' element={<Blog />} />
+        <Route path='*' element={<Error />} />
       </Routes>
     </Suspense>
   )
@@ -106,11 +106,11 @@ function App() {
       }
     }
   }, [settings.adsenseEnabled, settings.adsensePublisherId]);
- 
+
   return (
     <Router>
       <AppRoutes />
-      <Footer/>
+      <Footer />
       <CookieConsent />
       <ScrollToTop />
     </Router>

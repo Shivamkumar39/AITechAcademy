@@ -1,4 +1,30 @@
 User-agent: *
 Allow: /
 
+# Block admin and private pages from being indexed
+Disallow: /admin/
+Disallow: /admin/dashboard
+Disallow: /write
+Disallow: /write/
+Disallow: /edit/
+Disallow: /login
+Disallow: /register
+Disallow: /bookmarks
+Disallow: /notifications
+Disallow: /share
+
+# Allow all public content
+Allow: /blog/
+Allow: /tag/
+Allow: /study-material
+Allow: /categories
+Allow: /about
+Allow: /contact-us
+Allow: /privacy-policy
+Allow: /terms-and-conditions
+Allow: /disclaimer
+Allow: /resume
+Allow: /search
+
+# Sitemap location
 Sitemap: https://aitechacademy.online/sitemap.xml
