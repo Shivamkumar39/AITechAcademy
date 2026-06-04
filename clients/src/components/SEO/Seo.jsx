@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 const SITE_NAME = "AITECHACADEMY";
 
 const DEFAULT_IMAGE =
-  "https://img.freepik.com/premium-vector/funny-brain-like-lamp-vector-illustration-cartoon-brain-has-idea_562381-56.jpg?w=2000";
+  "https://aitechacademy.online/image.png";
 
 const DEFAULT_DESCRIPTION =
   "AITECHACADEMY provides AI tools, coding tutorials, CSE notes, PYQs, assignments, and latest technology updates for students and developers.";

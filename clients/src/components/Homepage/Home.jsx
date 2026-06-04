@@ -264,7 +264,7 @@ const Home = () => {
                   <div className='blogInfo'>
                     <Link to={`/tag/${e.category}`} className='category'>{e.category}</Link>
                     <Link to={`/blog/${e.slug || e._id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                      <h1 className='single-blog-title'>{e.title}</h1>
+                      <h3 className='single-blog-title'>{e.title}</h3>
                     </Link>
                     <div className='minor-info'>
                       <SimpleImage src={e.authorImage} alt='Author' className='author-image' />

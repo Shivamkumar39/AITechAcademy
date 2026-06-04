@@ -40,6 +40,7 @@
   <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
   <link rel="dns-prefetch" href="https://www.google-analytics.com">
   <link rel="dns-prefetch" href="https://unpkg.com">
+  <link rel="dns-prefetch" href="https://cdn.ampproject.org">
 
   <!-- Consolidate Google Fonts -->
   <link
@@ -52,7 +53,11 @@
     integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
   <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
-  <!-- Google AdSense for AMP -->
+  <!-- Google AdSense: Standard script (required on every page) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2745849307475457"
+       crossorigin="anonymous"></script>
+
+  <!-- Google AdSense for AMP: loads amp-auto-ads component library -->
   <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
   </script>
 </head>

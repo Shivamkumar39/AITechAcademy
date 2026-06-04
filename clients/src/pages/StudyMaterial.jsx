@@ -178,6 +178,27 @@ function StudyMaterial() {
           </p>
         </section>
 
+        {/* Copyright Disclaimer Notice */}
+        <div className="study-material-disclaimer" style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '10px',
+          background: '#fffbeb',
+          border: '1px solid #fde68a',
+          borderRadius: '8px',
+          padding: '12px 18px',
+          margin: '0 auto 24px auto',
+          maxWidth: '1100px',
+          fontSize: '0.85rem',
+          color: '#92400e',
+          lineHeight: '1.6'
+        }}>
+          <FaInfoCircle style={{ marginTop: '2px', flexShrink: 0, color: '#d97706' }} />
+          <span>
+            <strong>Educational Use Disclaimer:</strong> Study materials, notes, and reference resources shared on this page are intended solely for educational and academic reference purposes. Copyright of all examination papers, syllabi, and institutional documents belongs to the respective universities, boards, and authors. AITECHACADEMY does not claim ownership of any copyrighted third-party material.
+          </span>
+        </div>
+
         {/* Search & Tag Controls */}
         <section className="study-material-controls">
           <div className="search-wrapper">
