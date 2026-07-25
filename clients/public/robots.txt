@@ -9,9 +9,8 @@ Disallow: /write/
 Disallow: /edit/
 Disallow: /login
 Disallow: /register
-Disallow: /bookmarks
 Disallow: /notifications
-Disallow: /share
+
 
 # Allow all public content
 Allow: /blog/
@@ -25,8 +24,9 @@ Allow: /terms-and-conditions
 Allow: /disclaimer
 Allow: /resume
 Allow: /search
+Allow: /share
+Allow: /bookmarks
 
-# Sitemap location
-Sitemap: https://aitechacademy.online/sitemap.xml
+
 # Sitemap location — served directly from the API backend
 Sitemap: https://aitechacademy-o2oo.onrender.com/sitemap.xml
