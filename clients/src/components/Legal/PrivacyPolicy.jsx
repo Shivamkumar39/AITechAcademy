@@ -31,17 +31,14 @@ export default function PrivacyPolicy() {
           </section>
 
           <section className="legal-section">
-            <h2>Google DoubleClick DART Cookie</h2>
-            <p>Google is one of a third-party vendor on our site. It also uses cookies, known as DART cookies, to serve ads to our site visitors based upon their visit to aitechacademy.online and other sites on the internet. However, visitors may choose to decline the use of DART cookies by visiting the Google ad and content network Privacy Policy at the following URL – <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer">https://policies.google.com/technologies/ads</a></p>
-          </section>
-
-          <section className="legal-section">
-            <h2>Our Advertising Partners</h2>
-            <p>Some of advertisers on our site may use cookies and web beacons. Our advertising partners include:</p>
+            <h2>Google AdSense and DoubleClick Cookie</h2>
+            <p>Google, as a third-party vendor, uses cookies to serve ads on our site. Specifically:</p>
             <ul>
-              <li>Google</li>
+              <li>Third party vendors, including Google, use cookies to serve ads based on a user's prior visits to your website or other websites.</li>
+              <li>Google's use of advertising cookies enables it and its partners to serve ads to your users based on their visit to your sites and/or other sites on the Internet.</li>
+              <li>Users may opt out of personalized advertising by visiting <a href="https://myadcenter.google.com/" target="_blank" rel="noopener noreferrer">Ads Settings</a>.</li>
+              <li>Alternatively, you can opt out of a third-party vendor's use of cookies for personalized advertising by visiting <a href="https://www.aboutads.info" target="_blank" rel="noopener noreferrer">www.aboutads.info</a>.</li>
             </ul>
-            <p>Each of our advertising partners has their own Privacy Policy for their policies on user data. For easier access, we hyperlinked to their Privacy Policies below.</p>
           </section>
 
           <section className="legal-section">
