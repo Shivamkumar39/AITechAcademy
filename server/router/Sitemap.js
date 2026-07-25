@@ -15,14 +15,59 @@ function resolveImageUrl(img) {
 }
 
 function xmlEsc(str) {
-  return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return (str || '')
+    .replace(/[\r\n\t]/g, ' ')   // strip newlines / tabs that break XML formatting
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/\s+/g, ' ')        // collapse multiple spaces into one
+    .trim();
 }
 
+// Serve robots.txt directly from the API so crawlers that hit the API domain also get correct rules
+router.get('/robots.txt', (req, res) => {
+  res.setHeader('Content-Type', 'text/plain; charset=UTF-8');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.send(
+`User-agent: *
+Allow: /
+
+# Block private/admin paths
+Disallow: /admin/
+Disallow: /write
+Disallow: /write/
+Disallow: /edit/
+Disallow: /login
+Disallow: /register
+Disallow: /bookmarks
+Disallow: /notifications
+Disallow: /share
+
+# Sitemap
+Sitemap: https://aitechacademy-o2oo.onrender.com/sitemap.xml
+`
+  );
+});
+
 router.get('/sitemap.xml', async (req, res) => {
+  // Allow any origin so Google Search Console / crawlers on any domain can fetch this
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('X-Robots-Tag', 'noindex'); // don't index the sitemap URL as a page
+
   try {
-    const [blogs, users] = await Promise.all([
-      Blog.find({}, { slug: 1, title: 1, updatedAt: 1, category: 1, tags: 1, authorid: 1 }).lean(),
-      Users.find({}, { _id: 1 }).lean()
+    // 10-second timeout guard — Render free tier can be slow
+    const DB_TIMEOUT = 10000;
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('DB timeout')), DB_TIMEOUT)
+    );
+
+    const [blogs, users] = await Promise.race([
+      Promise.all([
+        Blog.find({}, { slug: 1, title: 1, updatedAt: 1, category: 1, tags: 1, authorid: 1 }).lean(),
+        Users.find({}, { _id: 1 }).lean()
+      ]),
+      timeoutPromise
     ]);
 
     // Static pages
@@ -128,8 +173,16 @@ router.get('/sitemap.xml', async (req, res) => {
     res.setHeader('Cache-Control', 'public, max-age=3600');
     res.send(xml);
   } catch (error) {
-    console.error('Sitemap error:', error);
-    res.status(500).send('Error generating sitemap');
+    console.error('Sitemap error:', error.message || error);
+    // Return a minimal valid sitemap so crawlers don't get a hard error
+    const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>${SITE_URL}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>${SITE_URL}/blog</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+</urlset>`;
+    res.setHeader('Content-Type', 'application/xml; charset=UTF-8');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.status(200).send(fallbackXml);
   }
 });
 

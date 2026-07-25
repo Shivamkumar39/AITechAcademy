@@ -4,7 +4,7 @@ import Seo from "../SEO/Seo";
 import "./Legal.css";
 
 export default function TermsAndConditions() {
-  const lastUpdated = "May 13, 2026";
+  const lastUpdated = "July 18, 2026";
 
   return (
     <>

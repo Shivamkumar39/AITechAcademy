@@ -42,7 +42,7 @@ const limiter = rateLimit({
 
 app.use(cors(corsConfig))
 app.use(cookieParser())
-app.use(helmet({ crossOriginResourcePolicy: false }))
+app.use(helmet({ crossOriginResourcePolicy: false, frameguard: false }))
 app.use(compression())
 app.use(morgan(process.env.NODE_ENV === "production" ? 'combined' : 'dev'))
 app.use(limiter)
@@ -67,6 +67,8 @@ app.use(
     directives: {
       "img-src": ["'self'", "data:", "https:", "http:"],
       "connect-src": ["'self'", frontendUrl, apiUrl, "http://localhost:3000", "http://localhost:5600", "https:"],
+      // Allow Google AdSense and similar tools to embed the site in iframes
+      "frame-ancestors": ["'self'", "https://googleads.g.doubleclick.net", "https://tpc.googlesyndication.com", "https://*.google.com"],
     },
   })
 );

@@ -28,3 +28,5 @@ Allow: /search
 
 # Sitemap location
 Sitemap: https://aitechacademy.online/sitemap.xml
+# Sitemap location — served directly from the API backend
+Sitemap: https://aitechacademy-o2oo.onrender.com/sitemap.xml

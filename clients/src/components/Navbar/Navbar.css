@@ -106,22 +106,41 @@
 
 .nav-menu {
   background-color: rgba(232, 243, 243, 1);
-  min-width: 260px;
-  width: 100%;
-  max-width: 320px;
+  width: 280px;
   height: 100vh;
   display: flex;
   justify-content: center;
-  z-index: 50;
+  z-index: 200;
   position: fixed;
   top: 0;
   left: -100%;
-  transition: 350ms;
+  transition: left 350ms ease;
   box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .nav-menu.active {
   left: 0;
+}
+
+/* Overlay backdrop when sidebar is open */
+.nav-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 199;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.nav-overlay.active {
+  display: block;
+  opacity: 1;
 }
 
 .nav-text {
@@ -130,13 +149,18 @@
   align-items: center;
   padding: 8px 0px 8px 16px;
   list-style: none;
-  height: 60px;
+  min-height: 56px;
+  height: auto;
 }
 
 .sidebar-social-section {
   padding: 16px;
   border-top: 1px solid rgba(0, 170, 161, 0.1);
   margin-top: 1rem;
+  height: auto !important;
+  min-height: auto !important;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .sidebar-social-header {
@@ -199,14 +223,18 @@
 }
 .nav-menu-items {
   width: 100%;
+  padding-bottom: 2rem;
 }
 .navbar-toggle {
   background-color: rgba(232, 243, 243, 1);
   width: 100%;
-  height: 80px;
+  height: 70px;
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 .nav-icons {
   margin-left: 16px;
@@ -220,21 +248,27 @@
 }
 .profileSection {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  row-gap: 12px;
+  gap: 12px;
+  padding: 10px 16px;
+  width: 100%;
 }
 .user-name {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: rgba(51, 51, 51, 1);
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
 }
 .user-bio {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  row-gap: -15px;
+  align-items: flex-start;
+  gap: 2px;
 }
 .profile-link {
   width: 100%;
@@ -390,5 +424,63 @@
     width: 28px;
     height: 28px;
     font-size: 0.85rem;
+  }
+}
+
+/* ── Sidebar responsive ── */
+@media screen and (max-width: 480px) {
+  .nav-menu {
+    width: 100vw;
+    max-width: 320px;
+  }
+
+  .nav-link,
+  .nav-link-button {
+    font-size: 15px;
+    padding: 0 12px;
+  }
+
+  .nav-text {
+    min-height: 50px;
+    padding: 6px 0 6px 12px;
+  }
+
+  .navbar-toggle {
+    height: 60px;
+  }
+
+  .close-menu {
+    font-size: 1.6rem;
+  }
+
+  .nav-icons {
+    margin-left: 12px;
+  }
+
+  .userProfile {
+    width: 44px;
+    height: 44px;
+  }
+
+  .user-name {
+    font-size: 14px;
+    max-width: 130px;
+  }
+
+  .sidebar-social-link {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+  }
+
+  .sidebar-social-header {
+    font-size: 0.95rem;
+  }
+}
+
+@media screen and (max-width: 360px) {
+  .nav-menu {
+    width: 100vw;
+    max-width: 100vw;
   }
 }

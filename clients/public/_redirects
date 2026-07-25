@@ -1,0 +1,8 @@
+# Cloudflare Pages _redirects
+# Proxy sitemap and robots to the backend API so Google/Bing can fetch real XML
+/sitemap.xml  https://aitechacademy-o2oo.onrender.com/sitemap.xml  200
+/sitemap-index.xml  https://aitechacademy-o2oo.onrender.com/sitemap.xml  200
+/robots.txt   https://aitechacademy-o2oo.onrender.com/robots.txt  200
+
+# SPA fallback — all other routes serve index.html
+/*  /index.html  200

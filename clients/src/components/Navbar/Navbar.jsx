@@ -22,6 +22,14 @@ function Navbar() {
   const navigate = useNavigate();
 
   const showSidebar = () => setSidebar(!sidebar);
+  const closeSidebar = () => setSidebar(false);
+
+  // Close sidebar on Escape key
+  useEffect(() => {
+    const handleKey = (e) => { if (e.key === 'Escape') closeSidebar(); };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, []);
 
   const logout = async () => {
     const token = localStorage.getItem('JWTFINALTOKEN');
@@ -118,10 +126,20 @@ function Navbar() {
           </div>
         </header>
 
-        <nav onClick={showSidebar} className={sidebar ? 'nav-menu active' : 'nav-menu'}>
-          <ul className='nav-menu-items' onClick={showSidebar}>
+        {/* Overlay – click to close sidebar */}
+        <div
+          className={sidebar ? 'nav-overlay active' : 'nav-overlay'}
+          onClick={closeSidebar}
+          aria-hidden='true'
+        />
+
+        <nav className={sidebar ? 'nav-menu active' : 'nav-menu'}
+          role='navigation'
+          aria-label='Main navigation'
+        >
+          <ul className='nav-menu-items'>
             <li className='navbar-toggle'>
-              <button type='button' className='menu-bars close-menu' aria-label='Close menu'>
+              <button type='button' className='menu-bars close-menu' onClick={closeSidebar} aria-label='Close menu'>
                 <AiIcons.AiOutlineClose />
               </button>
             </li>
