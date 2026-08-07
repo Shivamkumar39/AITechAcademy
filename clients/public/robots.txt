@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
 
-# Block admin and private pages from being indexed
+# Block admin, private, and low-value pages from being indexed
 Disallow: /admin/
 Disallow: /admin/dashboard
 Disallow: /write
@@ -10,7 +10,8 @@ Disallow: /edit/
 Disallow: /login
 Disallow: /register
 Disallow: /notifications
-
+Disallow: /bookmarks
+Disallow: /share
 
 # Allow all public content
 Allow: /blog/
@@ -24,9 +25,6 @@ Allow: /terms-and-conditions
 Allow: /disclaimer
 Allow: /resume
 Allow: /search
-Allow: /share
-Allow: /bookmarks
 
-
-# Sitemap location — served directly from the API backend
-Sitemap: https://aitechacademy-o2oo.onrender.com/sitemap.xml
+# Sitemap location
+Sitemap: https://aitechacademy.online/sitemap.xml

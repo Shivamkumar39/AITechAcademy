@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import FileBase64 from 'react-file-base64';
@@ -9,7 +9,24 @@ import { LoginContext } from '../../contextProvider/Context';
 import { postBlog, getBlogById, updateBlogById, getCategories } from '../../apis/Blogs';
 import "./Write.css";
 
+// Register a custom BlockEmbed blot so Quill treats tables like images (not stripped)
+const BlockEmbed = ReactQuill.Quill.import('blots/block/embed');
+class TableBlot extends BlockEmbed {
+  static create(value) {
+    const node = super.create();
+    node.innerHTML = value;
+    return node;
+  }
+  static value(node) { return node.innerHTML; }
+}
+TableBlot.blotName = 'tableEmbed';
+TableBlot.tagName = 'div';
+TableBlot.className = 'ql-table-embed';
+ReactQuill.Quill.register(TableBlot);
+
 function Write() {
+  const quillRef = useRef(null);
+  const lastSelectionRef = useRef(null);
   const { id } = useParams();
   const isEditMode = Boolean(id);
   const { loginData } = useContext(LoginContext);
@@ -32,6 +49,9 @@ function Write() {
     metaDescription: ""
   });
   const [tagInput, setTagInput] = useState("");
+  const [showTableDialog, setShowTableDialog] = useState(false);
+  const [tableRows, setTableRows] = useState(3);
+  const [tableCols, setTableCols] = useState(3);
   const [availableTags, setAvailableTags] = useState([]);
   const [availableCategories, setAvailableCategories] = useState([]);
   const [tagMessage, setTagMessage] = useState("");
@@ -79,6 +99,33 @@ function Write() {
 
   const onChange = (e) => setPost({ ...post, [e.target.name]: e.target.value });
   const onEditorChange = (value) => setPost({ ...post, description: value });
+  const onEditorSelectionChange = (range) => { if (range) lastSelectionRef.current = range; };
+
+  const insertTable = () => {
+    let html = '<table style="width:100%;border-collapse:collapse;margin:12px 0;">';
+    for (let r = 0; r < tableRows; r++) {
+      html += '<tr>';
+      for (let c = 0; c < tableCols; c++) {
+        const tag = r === 0 ? 'th' : 'td';
+        const style = r === 0
+          ? 'border:1px solid #ccc;padding:8px 12px;background:#f3f4f6;font-weight:bold;text-align:left;'
+          : 'border:1px solid #ccc;padding:8px 12px;text-align:left;';
+        html += `<${tag} style="${style}">&nbsp;</${tag}>`;
+      }
+      html += '</tr>';
+    }
+    html += '</table>';
+    if (quillRef.current) {
+      const quill = quillRef.current.getEditor();
+      quill.focus();
+      const sel = quill.getSelection() || { index: quill.getLength(), length: 0 };
+      const insertIndex = Math.max(0, sel.index);
+      // insertEmbed treats the table like a Quill image — not stripped
+      quill.insertEmbed(insertIndex, 'tableEmbed', html, 'user');
+      quill.setSelection(insertIndex + 1, 0);
+    }
+    setShowTableDialog(false);
+  };
   const onTagInputChange = (e) => {
     setTagInput(e.target.value);
     if (tagMessage) setTagMessage("");
@@ -224,14 +271,38 @@ function Write() {
 
           <small className="form-text text-muted thumbnailMessage mb-3">Use original or license-safe images only.</small>
 
+          {/* Insert Table Button */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '8px 0 4px 0' }}>
+            <button
+              type="button"
+              onClick={() => setShowTableDialog(v => !v)}
+              style={{ padding: '6px 14px', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}
+            >
+              📊 Insert Table
+            </button>
+            {showTableDialog && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f8f9fa', border: '1px solid #dee2e6', borderRadius: '6px', padding: '6px 12px' }}>
+                <label style={{ fontSize: '13px', margin: 0 }}>Rows:</label>
+                <input type="number" min="1" max="20" value={tableRows} onChange={e => setTableRows(Number(e.target.value))} style={{ width: '50px', padding: '3px 6px', border: '1px solid #ccc', borderRadius: '4px' }} />
+                <label style={{ fontSize: '13px', margin: 0 }}>Cols:</label>
+                <input type="number" min="1" max="10" value={tableCols} onChange={e => setTableCols(Number(e.target.value))} style={{ width: '50px', padding: '3px 6px', border: '1px solid #ccc', borderRadius: '4px' }} />
+                <button type="button" onClick={insertTable} style={{ padding: '4px 12px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}>Insert</button>
+                <button type="button" onClick={() => setShowTableDialog(false)} style={{ padding: '4px 10px', background: '#6b7280', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}>✕</button>
+              </div>
+            )}
+          </div>
+
           <ReactQuill
             id='editor'
+            ref={quillRef}
             modules={Write.modules}
+            formats={Write.formats}
             theme="snow"
             value={post.description}
             onChange={onEditorChange}
+            onChangeSelection={onEditorSelectionChange}
             placeholder="Start writing from here"
-            style={{ marginTop: "-14px" }}
+            style={{ marginTop: "0" }}
           />
 
           <div className='write-flex'>

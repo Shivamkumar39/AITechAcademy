@@ -92,20 +92,20 @@ function App() {
       return;
     }
 
-    if (settings.adsenseEnabled && settings.adsensePublisherId?.trim()) {
-      if (!document.getElementById("adsense-script")) {
-        const script = document.createElement("script");
-        script.id = "adsense-script";
-        script.async = true;
-        script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${settings.adsensePublisherId.trim()}`;
-        script.crossOrigin = "anonymous";
-        document.head.appendChild(script);
-        script.addEventListener("error", () => {
-          console.log("Adsense script failed to load.");
-        });
-      }
+    // Always inject AdSense — use dynamic settings if available, fallback to hardcoded publisher ID
+    const publisherId = settings.adsensePublisherId?.trim() || 'ca-pub-2745849307475457';
+    if (!document.getElementById("adsense-script")) {
+      const script = document.createElement("script");
+      script.id = "adsense-script";
+      script.async = true;
+      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`;
+      script.crossOrigin = "anonymous";
+      document.head.appendChild(script);
+      script.addEventListener("error", () => {
+        console.log("Adsense script failed to load.");
+      });
     }
-  }, [settings.adsenseEnabled, settings.adsensePublisherId]);
+  }, [settings.adsensePublisherId]);
 
   return (
     <Router>

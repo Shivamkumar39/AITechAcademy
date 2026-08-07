@@ -221,6 +221,8 @@ const BlogsPage = () => {
         type="website"
       />
       <div className='homepage'>
+        {/* Hidden H1 for SEO — each page must have exactly one H1 for AdSense compliance */}
+        <h1 className='sr-only'>All Blog Posts — AI, Technology &amp; CSE Study Material | AITECHACADEMY</h1>
         <section className='left-section'>
           <h3 className='featured'><span className='backgroundColor'>&nbsp;Featured </span>&nbsp;This Week</h3>
           {loading ? (

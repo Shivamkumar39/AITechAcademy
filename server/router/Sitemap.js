@@ -45,7 +45,7 @@ Disallow: /notifications
 Disallow: /share
 
 # Sitemap
-Sitemap: https://aitechacademy-o2oo.onrender.com/sitemap.xml
+Sitemap: https://aitechacademy.online/sitemap.xml
 `
   );
 });

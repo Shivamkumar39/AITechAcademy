@@ -57,19 +57,55 @@
     integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
   <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
-  <!-- Google AdSense: Standard script (required on every page) -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2745849307475457"
-    crossorigin="anonymous"></script>
+  <!-- Google AdSense: script is injected dynamically by App.js to avoid duplicates -->
+  <!-- Organization structured data for Google publisher recognition -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "AITECHACADEMY",
+    "url": "https://aitechacademy.online",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://aitechacademy.online/image.png",
+      "width": 512,
+      "height": 512
+    },
+    "description": "AITECHACADEMY provides AI tools, coding tutorials, CSE notes, PYQs, and study material for students and developers.",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "codewithshivam9@gmail.com",
+      "contactType": "customer support"
+    },
+    "sameAs": [
+      "https://aitechacademy.online"
+    ]
+  }
+  </script>
+  <!-- WebSite structured data for Sitelinks Searchbox -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "AITECHACADEMY",
+    "url": "https://aitechacademy.online",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://aitechacademy.online/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
 
 
 
   <!-- Google AdSense for AMP: loads amp-auto-ads component library -->
-  <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"></script>
+  <!-- <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"></script> -->
 </head>
 
 <body>
   <!-- Google AMP Auto Ads -->
-  <amp-auto-ads type="adsense" data-ad-client="ca-pub-2745849307475457"></amp-auto-ads>
+  <!-- <amp-auto-ads type="adsense" data-ad-client="ca-pub-2745849307475457"></amp-auto-ads> -->
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
   <!--

@@ -18,6 +18,26 @@
   min-height: 340px;
 }
 
+/* Table styles inside the Quill editor */
+.ql-editor table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+}
+
+.ql-editor th,
+.ql-editor td {
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  text-align: left;
+  min-width: 60px;
+}
+
+.ql-editor th {
+  background-color: #f3f4f6;
+  font-weight: bold;
+}
+
 .ql-toolbar.ql-snow,
 .ql-container.ql-snow {
   border-color: #dbe8e7;

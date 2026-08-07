@@ -226,6 +226,8 @@ const Home = () => {
         type="website"
       />
       <div className='homepage'>
+        {/* Hidden H1 for SEO — each page must have exactly one H1 for AdSense compliance */}
+        <h1 className='sr-only'>AITECHACADEMY — AI Tools, Tech News &amp; CSE Study Material</h1>
         <section className='left-section'>
           <h3 className='featured'><span className='backgroundColor'>&nbsp;Featured </span>&nbsp;This Week</h3>
           {loading ? (
